@@ -1,0 +1,50 @@
+# macOS 系
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Swift Package Manager
+/.build
+/Packages
+Package.resolved
+
+# CocoaPods (使用する場合のみ)
+Pods/
+*.lock
+!.gitignore
+
+# Carthage (使用する場合のみ)
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Archive / IPA
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Playground
+timeline.xctimeline
+playground.xcworkspace
+
+# ログ / 一時ファイル
+*.log
+*.swp
+*.swo
+*.tmp
+
+# 環境依存ファイル
+*.env
+*.local

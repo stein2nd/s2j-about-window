@@ -1,0 +1,591 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B44158892E83DC7C00EE28E8 /* S2JAboutWindowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B44158882E83DC7C00EE28E8 /* S2JAboutWindowApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B467DF632E83AEBA00859D01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B467DF4D2E83AEB800859D01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B467DF542E83AEB800859D01;
+			remoteInfo = "s2j-about-window";
+		};
+		B467DF6D2E83AEBA00859D01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B467DF4D2E83AEB800859D01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B467DF542E83AEB800859D01;
+			remoteInfo = "s2j-about-window";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B4250ACD2E8611B70022B0B8 /* s2j-about-window.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "s2j-about-window.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4250ACE2E8611B70022B0B8 /* s2j-about-windowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "s2j-about-windowTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4250ACF2E8611B70022B0B8 /* s2j-about-windowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "s2j-about-windowUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4250AD82E865ACB0022B0B8 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		B44158772E83B02A00EE28E8 /* SPEC.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SPEC.md; sourceTree = "<group>"; };
+		B44158812E83DA1F00EE28E8 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		B44158882E83DC7C00EE28E8 /* S2JAboutWindowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = S2JAboutWindowApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B467DF572E83AEB800859D01 /* s2j-about-window */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "s2j-about-window";
+			sourceTree = "<group>";
+		};
+		B467DF652E83AEBA00859D01 /* s2j-about-windowTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "s2j-about-windowTests";
+			sourceTree = "<group>";
+		};
+		B467DF6F2E83AEBA00859D01 /* s2j-about-windowUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "s2j-about-windowUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B467DF522E83AEB800859D01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF5F2E83AEBA00859D01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF692E83AEBA00859D01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B467DF4C2E83AEB800859D01 = {
+			isa = PBXGroup;
+			children = (
+				B467DF572E83AEB800859D01 /* s2j-about-window */,
+				B467DF652E83AEBA00859D01 /* s2j-about-windowTests */,
+				B467DF6F2E83AEBA00859D01 /* s2j-about-windowUITests */,
+				B467DF562E83AEB800859D01 /* Products */,
+				B44158772E83B02A00EE28E8 /* SPEC.md */,
+				B44158812E83DA1F00EE28E8 /* LICENSE */,
+				B44158882E83DC7C00EE28E8 /* S2JAboutWindowApp.swift */,
+				B4250AD82E865ACB0022B0B8 /* .gitignore */,
+			);
+			sourceTree = "<group>";
+		};
+		B467DF562E83AEB800859D01 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B4250ACD2E8611B70022B0B8 /* s2j-about-window.app */,
+				B4250ACE2E8611B70022B0B8 /* s2j-about-windowTests.xctest */,
+				B4250ACF2E8611B70022B0B8 /* s2j-about-windowUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B467DF542E83AEB800859D01 /* s2j-about-window */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B467DF762E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-window" */;
+			buildPhases = (
+				B467DF512E83AEB800859D01 /* Sources */,
+				B467DF522E83AEB800859D01 /* Frameworks */,
+				B467DF532E83AEB800859D01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B467DF572E83AEB800859D01 /* s2j-about-window */,
+			);
+			name = "s2j-about-window";
+			packageProductDependencies = (
+			);
+			productName = "s2j-about-window";
+			productReference = B4250ACD2E8611B70022B0B8 /* s2j-about-window.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B467DF612E83AEBA00859D01 /* s2j-about-windowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B467DF792E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-windowTests" */;
+			buildPhases = (
+				B467DF5E2E83AEBA00859D01 /* Sources */,
+				B467DF5F2E83AEBA00859D01 /* Frameworks */,
+				B467DF602E83AEBA00859D01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B467DF642E83AEBA00859D01 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B467DF652E83AEBA00859D01 /* s2j-about-windowTests */,
+			);
+			name = "s2j-about-windowTests";
+			packageProductDependencies = (
+			);
+			productName = "s2j-about-windowTests";
+			productReference = B4250ACE2E8611B70022B0B8 /* s2j-about-windowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B467DF6B2E83AEBA00859D01 /* s2j-about-windowUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B467DF7C2E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-windowUITests" */;
+			buildPhases = (
+				B467DF682E83AEBA00859D01 /* Sources */,
+				B467DF692E83AEBA00859D01 /* Frameworks */,
+				B467DF6A2E83AEBA00859D01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B467DF6E2E83AEBA00859D01 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B467DF6F2E83AEBA00859D01 /* s2j-about-windowUITests */,
+			);
+			name = "s2j-about-windowUITests";
+			packageProductDependencies = (
+			);
+			productName = "s2j-about-windowUITests";
+			productReference = B4250ACF2E8611B70022B0B8 /* s2j-about-windowUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B467DF4D2E83AEB800859D01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					B467DF542E83AEB800859D01 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					B467DF612E83AEBA00859D01 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = B467DF542E83AEB800859D01;
+					};
+					B467DF6B2E83AEBA00859D01 = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = B467DF542E83AEB800859D01;
+					};
+				};
+			};
+			buildConfigurationList = B467DF502E83AEB800859D01 /* Build configuration list for PBXProject "s2j-about-window" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B467DF4C2E83AEB800859D01;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B467DF562E83AEB800859D01 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B467DF542E83AEB800859D01 /* s2j-about-window */,
+				B467DF612E83AEBA00859D01 /* s2j-about-windowTests */,
+				B467DF6B2E83AEBA00859D01 /* s2j-about-windowUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B467DF532E83AEB800859D01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF602E83AEBA00859D01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF6A2E83AEBA00859D01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B467DF512E83AEB800859D01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B44158892E83DC7C00EE28E8 /* S2JAboutWindowApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF5E2E83AEBA00859D01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B467DF682E83AEBA00859D01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B467DF642E83AEBA00859D01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B467DF542E83AEB800859D01 /* s2j-about-window */;
+			targetProxy = B467DF632E83AEBA00859D01 /* PBXContainerItemProxy */;
+		};
+		B467DF6E2E83AEBA00859D01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B467DF542E83AEB800859D01 /* s2j-about-window */;
+			targetProxy = B467DF6D2E83AEBA00859D01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B467DF742E83AEBA00859D01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B467DF752E83AEBA00859D01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		B467DF772E83AEBA00859D01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-window";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B467DF782E83AEBA00859D01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-window";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B467DF7A2E83AEBA00859D01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-windowTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/s2j-about-window.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/s2j-about-window";
+			};
+			name = Debug;
+		};
+		B467DF7B2E83AEBA00859D01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-windowTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/s2j-about-window.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/s2j-about-window";
+			};
+			name = Release;
+		};
+		B467DF7D2E83AEBA00859D01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-windowUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "s2j-about-window";
+			};
+			name = Debug;
+		};
+		B467DF7E2E83AEBA00859D01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PJWXCWS5U5;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.s2j.s2j-about-windowUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "s2j-about-window";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B467DF502E83AEB800859D01 /* Build configuration list for PBXProject "s2j-about-window" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B467DF742E83AEBA00859D01 /* Debug */,
+				B467DF752E83AEBA00859D01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B467DF762E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-window" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B467DF772E83AEBA00859D01 /* Debug */,
+				B467DF782E83AEBA00859D01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B467DF792E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-windowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B467DF7A2E83AEBA00859D01 /* Debug */,
+				B467DF7B2E83AEBA00859D01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B467DF7C2E83AEBA00859D01 /* Build configuration list for PBXNativeTarget "s2j-about-windowUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B467DF7D2E83AEBA00859D01 /* Debug */,
+				B467DF7E2E83AEBA00859D01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B467DF4D2E83AEB800859D01 /* Project object */;
+}
