@@ -80,7 +80,7 @@
 ├── LICENSE
 ├── README.md
 ├── SampleApp.swift  # エントリー・ポイント
-├── Package.swift  # Swift Package 定義
+├── Package.swift  # Swift Package 定義 (プロジェクト・ファイル兼用)
 ├┬─ Sources/
 │└┬─ S2JAboutWindow/  # メイン・ソースコード
 │　├─ AboutWindow.swift  # macOS: NSWindow 管理 + public API
