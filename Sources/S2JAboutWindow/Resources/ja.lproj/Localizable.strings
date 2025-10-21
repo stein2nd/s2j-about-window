@@ -1,0 +1,7 @@
+/* About Window Localization - Japanese */
+
+"About.Title" = "このアプリについて";
+"About.Close" = "閉じる";
+"About.NoDescription" = "説明が利用できません";
+"About.Copyright" = "著作権";
+"About.Version" = "バージョン";

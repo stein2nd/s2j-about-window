@@ -1,0 +1,7 @@
+/* About Window Localization - English */
+
+"About.Title" = "About";
+"About.Close" = "Close";
+"About.NoDescription" = "No description available";
+"About.Copyright" = "Copyright";
+"About.Version" = "Version";
