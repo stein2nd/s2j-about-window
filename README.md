@@ -295,9 +295,9 @@ This project is licensed under the GPL 2.0+ License. See the [LICENSE](LICENSE) 
 ## Acknowledgments
 
 <!-- 
-- Based on [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) by Danger Cove
-- Built with SwiftUI and Swift Package Manager
+* Based on [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) by Danger Cove
+* Built with SwiftUI and Swift Package Manager
  -->
 
-- Danger Cove 制作 [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) をもとに作成
-- SwiftUI および Swift Package Manager で構築
+* Danger Cove 制作 [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) をもとに作成
+* SwiftUI および Swift Package Manager で構築
