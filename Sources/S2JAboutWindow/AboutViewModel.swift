@@ -3,12 +3,40 @@ import SwiftUI
 
 #if canImport(SwiftUI)
 @available(macOS 12.0, iOS 15.0, *)
+/** 
+* @return AboutViewModel
+*/
 public class AboutViewModel: ObservableObject {
+    /**
+    * @var content: 表示するコンテンツ（Markdown、JSON、RTF）
+    */
     @Published public var content: String
+
+    /**
+    * @var appName: アプリ名
+    */
     @Published public var appName: String
+
+    /**
+    * @var version: バージョン
+    */
     @Published public var version: String?
+
+    /**
+    * @var copyright: 著作権情報
+    */
     @Published public var copyright: String?
-    
+
+    /**
+    * コンストラクタ
+    * 表示するコンテンツ（Markdown、JSON、RTF）、アプリ名、バージョン、著作権情報を指定してAboutViewModelを初期化
+    * デフォルトでは、Bundle.main.displayName、Bundle.main.version、Bundle.main.copyrightを使用します。
+    *
+    * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+    * @param appName: アプリ名
+    * @param version: バージョン
+    * @param copyright: 著作権情報
+    */
     public init(
         content: String,
         appName: String? = nil,
@@ -21,7 +49,10 @@ public class AboutViewModel: ObservableObject {
         self.copyright = copyright ?? Bundle.main.copyright
     }
     
-    /// デフォルトのAboutコンテンツを読み込む
+    /**
+    * デフォルトのAboutコンテンツを読み込む
+    * @return void
+    */
     public func loadDefaultContent() {
         guard let defaultContentPath = Bundle.module.path(forResource: "AboutDefault", ofType: "md"),
               let defaultContent = try? String(contentsOfFile: defaultContentPath) else {
@@ -34,15 +65,24 @@ public class AboutViewModel: ObservableObject {
 
 // MARK: - Bundle Extensions
 extension Bundle {
+    /** 
+    * @return アプリ名
+    */
     var displayName: String? {
         return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??
                object(forInfoDictionaryKey: "CFBundleName") as? String
     }
     
+    /**
+    * @return バージョン
+    */
     var version: String? {
         return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     }
-    
+
+    /** 
+    * @return 著作権情報
+    */
     var copyright: String? {
         return object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String
     }

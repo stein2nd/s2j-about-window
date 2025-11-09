@@ -2,9 +2,26 @@ import SwiftUI
 
 #if canImport(SwiftUI)
 @available(macOS 12.0, iOS 15.0, *)
+/**
+* AboutView
+* @return AboutView
+*/
 public struct AboutView: View {
+    /**
+    * AboutViewModel のインスタンス
+    */
     @StateObject private var viewModel: AboutViewModel
-    
+
+    /**
+    * コンストラクタ
+    * 表示するコンテンツ（Markdown、JSON、RTF）、アプリ名、バージョン、著作権情報を指定してAboutViewModelを初期化
+    * デフォルトでは、Bundle.main.displayName、Bundle.main.version、Bundle.main.copyrightを使用します。
+    *
+    * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+    * @param appName: アプリ名
+    * @param version: バージョン
+    * @param copyright: 著作権情報
+    */
     public init(
         content: String,
         appName: String? = nil,
@@ -18,7 +35,12 @@ public struct AboutView: View {
             copyright: copyright
         ))
     }
-    
+
+    /**
+    * AboutView の本体
+    * アプリアイコン、アプリ情報、コンテンツ表示、スペーサーを配置します。
+    * デフォルトでは、400x500のサイズで、ウィンドウ背景色を使用します。
+    */
     public var body: some View {
         VStack(spacing: 20) {
             // アプリアイコン
@@ -32,13 +54,18 @@ public struct AboutView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
             
+            // スペーサー
             Spacer()
         }
         .padding()
         .frame(minWidth: 400, minHeight: 500)
         .background(Color(NSColor.windowBackgroundColor))
     }
-    
+
+    /** 
+    * アプリアイコンを表示
+    * デフォルトでは、64x64のサイズで、角丸矩形で表示します。
+    */
     private var appIconView: some View {
         Group {
             if let icon = NSApplication.shared.applicationIconImage {
@@ -53,7 +80,13 @@ public struct AboutView: View {
             }
         }
     }
-    
+
+    /**
+    * アプリ情報を表示
+    * アプリ名、バージョン、著作権情報を表示します。
+    * デフォルトでは、フォントサイズがtitle2、フォントウェイトがbold、グレーで表示します。
+    * バージョン、著作権情報は、サブヘッダーで表示します。
+    */
     private var appInfoView: some View {
         VStack(spacing: 8) {
             Text(viewModel.appName)
@@ -77,7 +110,15 @@ public struct AboutView: View {
 
 #if DEBUG
 @available(macOS 12.0, iOS 15.0, *)
+/**
+* AboutView_Previews
+* @return AboutView_Previews
+*/
 struct AboutView_Previews: PreviewProvider {
+    /**
+    * AboutViewのプレビュー
+    * デフォルトでは、# About This App、Sample App、1.0.0、© 2024 Sample Companyを表示します。
+    */
     static var previews: some View {
         AboutView(
             content: "# About This App\n\nThis is a sample about content.",

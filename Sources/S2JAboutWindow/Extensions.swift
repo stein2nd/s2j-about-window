@@ -3,8 +3,21 @@ import Foundation
 
 #if canImport(SwiftUI)
 @available(macOS 12.0, iOS 15.0, *)
+/** 
+* iPadOS向けのExtensions
+* @return Extensions
+*/
 public extension View {
-    /// iPadOS向けのSheet表示用のAboutView
+
+    /** 
+    * iPadOS向けのSheet表示用のAboutView
+    * @param isPresented: 表示状態
+    * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+    * @param appName: アプリ名
+    * @param version: バージョン
+    * @param copyright: 著作権情報
+    * @return some View
+    */
     func aboutSheet(isPresented: Binding<Bool>, content: String, appName: String? = nil, version: String? = nil, copyright: String? = nil) -> some View {
         self.sheet(isPresented: isPresented) {
             NavigationView {
@@ -15,6 +28,7 @@ public extension View {
                     copyright: copyright
                 )
                 .navigationTitle(NSLocalizedString("About.Title", bundle: .module, comment: "About Window Title"))
+                #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -23,11 +37,20 @@ public extension View {
                         }
                     }
                 }
+                #endif
             }
         }
     }
     
-    /// iPadOS向けのPopover表示用のAboutView
+    /** 
+    * iPadOS向けのPopover表示用のAboutView
+    * @param isPresented: 表示状態
+    * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+    * @param appName: アプリ名
+    * @param version: バージョン
+    * @param copyright: 著作権情報
+    * @return some View
+    */
     func aboutPopover(isPresented: Binding<Bool>, content: String, appName: String? = nil, version: String? = nil, copyright: String? = nil) -> some View {
         self.popover(isPresented: isPresented) {
             AboutView(
