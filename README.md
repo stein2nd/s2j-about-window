@@ -1,10 +1,19 @@
 # S2J About Window
 
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![React](https://img.shields.io/badge/Swift-5.9-blue?logo=Swift&logoColor=white)](https://www.swift.org)
+
+## Description
+
 <!-- 
-A SwiftUI-based About Window library for macOS and iPadOS applications, ported from [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow).
+S2J About Window is a modern, SwiftUI-based library that provides a customizable About Window for macOS and iPadOS applications. This library was ported from the popular [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) project, bringing its functionality to the SwiftUI ecosystem.
+
+The library offers a flexible and easy-to-use API for displaying application information, credits, and other content in a native About Window. It supports multiple content formats including Markdown, JSON, and RTF, making it easy to create rich, formatted content for your application's About window.
  -->
 
-macOS および iPadOS アプリケーション向けの SwiftUI ベースの About Window ライブラリです。[DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) から移植しました。
+S2J About Window は、macOS および iPadOS アプリケーション向けのカスタマイズ可能な About ウィンドウを提供する、モダンな SwiftUI ベースのライブラリです。本ライブラリは、人気の [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow) プロジェクトから移植され、その機能を SwiftUI エコシステムにもたらしています。
+
+本ライブラリは、ネイティブな About ウィンドウでアプリケーション情報、クレジット、その他のコンテンツを表示するための柔軟で使いやすい API を提供します。Markdown、JSON、RTF など複数のコンテンツ形式をサポートしており、アプリケーションの About ウィンドウ用のリッチなフォーマット済みコンテンツを簡単に作成できます。
 
 ## Features
 
@@ -17,21 +26,39 @@ macOS および iPadOS アプリケーション向けの SwiftUI ベースの Ab
 * **Easy Integration**: Simple API for host applications
  -->
 
-* **クロスプラットフォーム**: macOS (v12以降) と iPadOS (v15以降) の両方で動作
+* **クロス・プラットフォーム**: macOS (v12以降) と iPadOS (v15以降) の両方で動作
 * **SwiftUI ネイティブ**: モダン UI を実現する SwiftUI 完全構築
 * **カスタマイズ可能なコンテンツ**: Markdown、JSON、RTF コンテンツに対応
 * **ローカライズ対応**: 複数言語 (英語、日本語) の組込みサポート
 * **ダークモード**: 完全なダークモード対応
 * **簡単な統合**: ホスト・アプリケーション向けのシンプルな API
 
-## Requirements
+## License
+
+<!-- 
+This project is licensed under the GPL 2.0+ License. See the [LICENSE](LICENSE) file for details.
+ -->
+
+本プロジェクトは GPL2.0以降ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
+
+## Support and Contact
+
+<!-- 
+For support, feature requests, or bug reports, please visit the [GitHub Issues](https://github.com/stein2nd/s2j-about-window/issues) page.
+ -->
+
+サポート、機能リクエスト、またはバグ報告については、[GitHub Issues](https://github.com/stein2nd/s2j-about-window/issues) ページをご覧ください。
+
+---
+
+## Installation
+
+### Requirements
 
 * macOS v12.0+
 * iPadOS v15.0+
 * Xcode v14.0+
 * Swift v5.9+
-
-## Installation
 
 ### Swift Package Manager
 
@@ -268,29 +295,161 @@ For UI testing with snapshots:
 swift test --enable-code-coverage
 ```
 
+## Development
+
+<!-- 
+### Project Structure
+ -->
+
+### プロジェクト構造
+
+<!-- 
+The project follows a standard Swift Package Manager structure:
+ -->
+
+このプロジェクトは標準的な Swift Package Manager の構造に従っています:
+
+<!-- 
+* `Sources/` - Source code
+* `Tests/` - Test files
+* `Package.swift` - Package configuration
+ -->
+
+* `Sources/` - ソースコード
+* `Tests/` - テストファイル
+* `Package.swift` - パッケージ設定
+
+<!-- 
+### Setting Up Development Environment
+ -->
+
+### 開発環境のセットアップ
+
+<!-- 
+To set up the development environment for this project:
+ -->
+
+このプロジェクトの開発環境をセットアップするには:
+
+<!-- 
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/stein2nd/s2j-about-window.git
+   cd s2j-about-window
+   ```
+
+2. Open the project in Xcode:
+
+   ```bash
+   open Package.swift
+   ```
+
+3. Build the project:
+
+   ```bash
+   swift build
+   ```
+
+4. Run tests:
+
+   ```bash
+   swift test
+   ```
+ -->
+
+1. リポジトリをクローンします:
+
+   ```bash
+   git clone https://github.com/stein2nd/s2j-about-window.git
+   cd s2j-about-window
+   ```
+
+2. Xcode でプロジェクトを開きます:
+
+   ```bash
+   open Package.swift
+   ```
+
+3. プロジェクトをビルドします:
+
+   ```bash
+   swift build
+   ```
+
+4. テストを実行します:
+
+   ```bash
+   swift test
+   ```
+
+<!-- 
+### Building and Testing
+ -->
+
+### ビルドとテスト
+
+<!-- 
+To build the project, use:
+ -->
+
+プロジェクトをビルドするには:
+
+```bash
+swift build
+```
+<!-- 
+To run tests with code coverage:
+ -->
+
+コードカバレッジ付きでテストを実行するには:
+
+```bash
+swift test --enable-code-coverage
+```
+
+
 ## Contributing
 
 <!-- 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+We welcome your contributions. Please follow these steps:
  -->
 
-1. リポジトリをフォークする
-2. 機能ブランチを作成する
-3. 変更を加える
-4. 新機能のテストを追加する
-5. プルリクエストを送信する
-
-## License
+貢献をお待ちしています。以下の手順に従ってください。
 
 <!-- 
-This project is licensed under the GPL 2.0+ License. See the [LICENSE](LICENSE) file for details.
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes (`git commit -m ‘Add some amazing feature’`).
+4. Push to the feature branch (`git push origin feature/amazing-feature`).
+5. Open a Pull Request.
  -->
 
-本プロジェクトは GPL2.0以降ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
+1. リポジトリをフォークしてください。
+2. 機能ブランチを作成してください (`git checkout -b feature/amazing-feature`)。
+3. 変更をコミットしてください (`git commit -m 'Add some amazing feature'`)。
+4. 機能ブランチにプッシュしてください (`git push origin feature/amazing-feature`)。
+5. Pull Request を開いてください。
+
+<!-- 
+*For detailed information, please refer to the [SPEC.md](SPEC.md) file.*
+ -->
+
+*詳細な情報については、[SPEC.md](SPEC.md) ファイルを参照してください。*
+
+## Contributors & Developers
+
+<!-- 
+**“S2J About Window”** is open-source software. The following individuals have contributed to this plugin:
+ -->
+
+**"S2J About Window"** はオープンソース・ソフトウェアです。以下の皆様がこのプラグインに貢献しています。
+
+<!-- 
+* **Developer**: Koutarou ISHIKAWA
+ -->
+
+* **開発者**: Koutarou ISHIKAWA
 
 ## Acknowledgments
 
