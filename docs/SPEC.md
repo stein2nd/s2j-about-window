@@ -8,6 +8,8 @@
 * 目的: AppKit ベースの「About Window」を SwiftUI で再実装する
 * 対応 OS: macOS v12以上、iPadOS v15以上
 
+**実装状況**: ✅ **基本機能実装済み** - コア機能は実装完了、一部機能は未実装
+
 ## 技術スタック
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
@@ -39,9 +41,9 @@
 * ダークモード対応は、必須です。
 * 本プロジェクトは、「Swift Package Manager」によって、Universal Binary 形式の Swift Package ツールとして他アプリケーション (以後、ホスト・アプリケーションと呼称) に組み込まれます。
 * ホスト・アプリケーションからは、下記のいずれかによって呼び出され、「About ウィンドウ」として表示します。
-    * メニューバー ▶︎ 「このアプリケーションについて」のクリック
-    * キー・コンビネーション (command I) のプレス
-    * 「アプリケーション情報を表示」ボタンのクリック
+    * メニューバー ▶︎ 「このアプリケーションについて」のクリック (✅実装済み - ホストアプリ側で `AboutWindow().showAboutWindow()` を呼び出し)
+    * キー・コンビネーション (command I) のプレス (✅実装済み - ホストアプリ側で実装)
+    * 「アプリケーション情報を表示」ボタンのクリック (✅実装済み - ホストアプリ側で実装)
 * 「About ウィンドウ」としての表示情報は、下記のとおりです。
     * アプリケーション名
     * バージョン
@@ -49,19 +51,21 @@
     * ライセンス情報
     * その他、ホスト・アプリケーションが指定する内容
 * ホスト・アプリケーションからは、下記のいずれかの手段で、「About ウィンドウ」への表示内容が渡されます。
-    * Markdown 記法で記述されたテキスト情報
-    * JSON オブジェクト
-    * RTF ドキュメント
+    * Markdown 記法で記述されたテキスト情報 (✅100% 実装完了 - `AttributedString(markdown:)` を使用)
+    * JSON オブジェクト (⚠️ 未実装 - Backlog に追加)
+    * RTF ドキュメント (⚠️ 未実装 - Backlog に追加)
 * ホスト・アプリケーションは、macOS アプリケーション (または iPadOS アプリケーション) を想定します。
-    * macOS の場合は、「独立ウィンドウ / パネル (App の About)」として「About ウィンドウ」をポップアップし、ウィンドウを閉じると自動でインスタンスを破棄します。
-    * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。
-        * 例: `AboutView(content: aboutContent)` を `sheet(isPresented:)` から呼び出す。
+    * macOS の場合は、「独立ウィンドウ / パネル (App の About)」として「About ウィンドウ」をポップアップし、ウィンドウを閉じると自動でインスタンスを破棄します。 (✅100% 実装完了 - `AboutWindow` クラスで実装)
+    * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。 (✅100% 実装完了 - `Extensions.swift` で `aboutSheet`/`aboutPopover` を実装)
+        * 例: `AboutView(content: aboutContent)` を `sheet(isPresented:)` から呼び出す。 (✅100% 実装完了)
 
 ### プラットフォーム固有 API 利用方針
 
-* macOS 向け About ウィンドウでは、`NSWindow` および `NSHostingController` を利用します。
-* iPadOS 向けでは、`UIViewControllerRepresentable` を利用せず、SwiftUI のネイティブ `.sheet` / `.popover` API のみで構成します。
-* 共有ロジック (ViewModel / Markdown パーサー) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。
+**実装状況**: ✅ **完全実装済み** - プラットフォーム固有 API の実装完了
+
+* macOS 向け About ウィンドウでは、`NSWindow` および `NSHostingController` を利用します。 (✅100% 実装完了 - `AboutWindow.swift` で実装)
+* iPadOS 向けでは、`UIViewControllerRepresentable` を利用せず、SwiftUI のネイティブ `.sheet` / `.popover` API のみで構成します。 (✅100% 実装完了 - `Extensions.swift` で実装)
+* 共有ロジック (ViewModel / Markdown パーサー) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。 (✅100% 実装完了)
 
 ### プロジェクト構成
 
@@ -80,59 +84,102 @@
 ├── LICENSE
 ├── README.md
 ├── SampleApp.swift  # エントリー・ポイント
-├── Package.swift  # Swift Package 定義 (プロジェクト・ファイル兼用)
+├── Package.swift  # Swift Package 定義 (プロジェクト・ファイル兼用) (✅100% 実装完了)
 ├┬─ Sources/
 │└┬─ S2JAboutWindow/  # メイン・ソースコード
-│　├─ AboutWindow.swift  # macOS: NSWindow 管理 + public API
-│　├─ AboutView.swift  # SwiftUI view (共通)
-│　├─ AboutViewModel.swift  # ViewModel (app metadata、markdown)
-│　├─ MarkdownView.swift  # Markdown を AttributedString で描画
-│　├─ Extensions.swift  # iPadOS 向け拡張
+│　├─ AboutWindow.swift  # macOS: NSWindow 管理 + public API (✅100% 実装完了)
+│　├─ AboutView.swift  # SwiftUI view (共通) (✅100% 実装完了)
+│　├─ AboutViewModel.swift  # ViewModel (app metadata、markdown) (✅100% 実装完了)
+│　├─ MarkdownView.swift  # Markdown を AttributedString で描画 (✅100% 実装完了)
+│　├─ Extensions.swift  # iPadOS 向け拡張 (✅100% 実装完了)
 │　├┬─ Resources/  # リソースファイル
-│　│├─ AboutDefault.md  # デフォルトコンテンツ
-│　│├─ Images.xcassets
-│　│├─ Assets.xcassets/  # アセット
-│　│└─ Localizable.strings/  # ローカライゼーション (Base、en、ja、…)
+│　│├─ AboutDefault.md  # デフォルトコンテンツ (✅100% 実装完了)
+│　│├─ Assets.xcassets/  # アセット (✅100% 実装完了)
+│　│└┬─ Localizable.strings/  # ローカライゼーション (Base、en、ja、…) (✅100% 実装完了)
+│　│ ├─ Base.lproj/Localizable.strings (✅100% 実装完了)
+│　│ ├─ en.lproj/Localizable.strings (✅100% 実装完了)
+│　│ └─ ja.lproj/Localizable.strings (✅100% 実装完了)
 ├┬─ Tests/
 │└┬─ S2JAboutWindowTests/  # テストコード
-│　└─ AboutViewTests.swift
-├── UITests/
-└── Preview Content/
+│　└─ AboutViewTests.swift (⚠️ 実装中)
+├── UITests/ (⚠️ 未実装)
+└── Preview Content/ (⚠️ 未実装)
 ```
+
+### 2.1. 主要ファイルの実装状況
+
+* `Package.swift` : Swift Package 定義、リソース設定 (✅100% 実装完了)
+* `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API (✅100% 実装完了)
+* `AboutView.swift` : SwiftUI ビュー、アプリアイコン表示、アプリ情報表示、MarkdownView 統合 (✅100% 実装完了)
+* `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリメタデータ管理、Bundle 拡張 (✅100% 実装完了)
+* `MarkdownView.swift` : Markdown を AttributedString で描画、スクロール対応 (✅100% 実装完了)
+* `Extensions.swift` : iPadOS 向け aboutSheet/aboutPopover 拡張 (✅100% 実装完了)
+* `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
+* `Resources/Localizable.strings` : 英語・日本語ローカライゼーション (✅100% 実装完了)
 
 ### 国際化・ローカライズ
 
-* ローカライズ対応は、必須 (英語・日本語) の為、Base、English、Japanese を初期追加します。
-* `Bundle.module` 経由で `Localizable.strings` を読み込んでください (SwiftPM の `resources: [.process("Resources")]`)。
-* Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書きできるようにしてください。
-* 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`
+**実装状況**: ✅ **完全実装済み** - 英語・日本語のローカライゼーション対応完了
+
+* ローカライズ対応は、必須 (英語・日本語) の為、Base、English、Japanese を初期追加します。 (✅100% 実装完了)
+* `Bundle.module` 経由で `Localizable.strings` を読み込んでください (SwiftPM の `resources: [.process("Resources")]`)。 (✅100% 実装完了)
+* Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書きできるようにしてください。 (✅100% 実装完了)
+* 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Close"`、`"About.Version"` (✅100% 実装完了)
 
 ### デザイン規約
 
-* アイコンは App アイコンから自動取得します。
+**実装状況**: ✅ **完全実装済み** - ダークモード対応、アプリアイコン自動取得完了
+
+* アイコンは App アイコンから自動取得します。 (✅100% 実装完了 - `NSApplication.shared.applicationIconImage` を使用)
+* ダークモード対応は、必須です。 (✅100% 実装完了 - `Color(NSColor.windowBackgroundColor)` を使用)
 
 ### 使用方法
+
+**実装状況**: ✅ **完全実装済み** - 使用方法の実装完了
 
 **macOS:**
 
 ```swift
 let aboutWindow = AboutWindow()
-aboutWindow.showAboutWindow(content: "Your content", appName: "App", version: "1.0.0")
+aboutWindow.showAboutWindow(
+    content: "Your content",
+    appName: "App",
+    version: "1.0.0",
+    copyright: "© 2024 Your Company"
+)
 ```
 
 **iPadOS:**
 
 ```swift
-.aboutSheet(isPresented: $showAbout, content: "Your content")
+// Sheet として表示
+.aboutSheet(
+    isPresented: $showAbout,
+    content: "Your content",
+    appName: "App",
+    version: "1.0.0",
+    copyright: "© 2024 Your Company"
+)
+
+// Popover として表示
+.aboutPopover(
+    isPresented: $showAbout,
+    content: "Your content",
+    appName: "App",
+    version: "1.0.0",
+    copyright: "© 2024 Your Company"
+)
 ```
 
 ### テスト方針
 
-* テスト: ライセンス表示部分は SnapshotTesting を実施します。
+**実装状況**: ⚠️ **実装中** - テストコードの実装が進行中
+
+* テスト: ライセンス表示部分は SnapshotTesting を実施します。 (⚠️ 実装中)
 
 **UI テスト環境**:
-* macOS: `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting。
-* iPadOS: `.sheet` 表示を `XCTest` + `ViewInspector` で検証可能とする。
+* macOS: `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting。 (⚠️ 実装中)
+* iPadOS: `.sheet` 表示を `XCTest` + `ViewInspector` で検証可能とする。 (⚠️ 実装中)
 
 ### ビルド出力ポリシー
 
@@ -193,6 +240,19 @@ aboutWindow.showAboutWindow(content: "Your content", appName: "App", version: "1
 
 ## Backlog
 
-* ライセンスビューで Markdown をサポートする。
-* Swift Package として切り出し可能な構造にする。
+### 未実装機能
+
+* JSON オブジェクト形式のコンテンツサポート (⚠️ 未実装)
+* RTF ドキュメント形式のコンテンツサポート (⚠️ 未実装)
+* UI テスト・スナップショットテストの実装 (⚠️ 実装中)
+
+### 将来の拡張機能
+
 * UI ローカライズについて、外部翻訳サービス (例: DeepL API) との連携を検討する。
+* カスタマイズ可能なテーマ・スタイル設定
+* アニメーション効果の追加
+
+### 完了した機能
+
+* ✅ ライセンスビューで Markdown をサポートする。 (✅100% 実装完了 - `MarkdownView.swift` で実装)
+* ✅ Swift Package として切り出し可能な構造にする。 (✅100% 実装完了 - `Package.swift` で実装)
