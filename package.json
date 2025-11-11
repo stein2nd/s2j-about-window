@@ -1,6 +1,6 @@
 {
   "name": "s2j-about-window",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Using SwiftUI, reimplementing the AppKit-based “About Window”.",
   "main": "README.md",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "postinstall": "cd tools/docs-linter && npm install",
-    "prelint:docs": "git submodule update --remote --merge && cd tools/docs-linter && (npm ci || (rm -f package-lock.json && npm install)) && npm run build",
+    "prelint:docs": "cd tools/docs-linter && git restore . && cd ../.. && git submodule update --remote --merge && cd tools/docs-linter && (npm ci || (rm -f package-lock.json && npm install)) && npm run build",
     "lint:docs": "NODE_PATH=./tools/docs-linter/node_modules textlint --config ./tools/docs-linter/wordpress/.textlintrc.wp.json ./README.md ./docs/**/*.md"
   },
   "repository": {
