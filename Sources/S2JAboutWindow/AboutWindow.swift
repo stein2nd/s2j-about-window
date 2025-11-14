@@ -6,7 +6,7 @@ import AppKit
 /** 
 * @return AboutWindow
 */
-public class AboutWindow {
+public class AboutWindow: NSObject, NSWindowDelegate {
     /**
     * @var window: NSWindow?
     */
@@ -15,7 +15,9 @@ public class AboutWindow {
     /**
     * @return AboutWindow
     */
-    public init() {}
+    public override init() {
+        super.init()
+    }
     
     /**
     * macOS向けのAbout Windowを表示
@@ -63,6 +65,8 @@ public class AboutWindow {
         window.title = NSLocalizedString("About.Title", bundle: .module, comment: "About Window Title")
         window.contentViewController = hostingController
         window.center()
+        window.isReleasedWhenClosed = false
+        window.delegate = self
         window.makeKeyAndOrderFront(nil)
         
         self.window = window
@@ -77,6 +81,19 @@ public class AboutWindow {
         #if os(macOS)
         window?.close()
         window = nil
+        #endif
+    }
+    
+    /**
+    * NSWindowDelegate: ウィンドウが閉じられる前に呼ばれる
+    * @param notification: Notification
+    * @return void
+    */
+    public func windowWillClose(_ notification: Notification) {
+        #if os(macOS)
+        if let window = notification.object as? NSWindow, window == self.window {
+            self.window = nil
+        }
         #endif
     }
 }
