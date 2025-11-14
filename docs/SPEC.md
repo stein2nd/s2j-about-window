@@ -206,7 +206,7 @@
 
 ## 4. 個別要件
 
-**実装状況**: ✅ **基本機能は実装済み** - コア機能は実装完了、一部機能は未実装
+**実装状況**: ✅ **基本機能は実装済み** - コア機能は実装完了。一部機能は未実装。
 
 * 元リポジトリ (DCOAboutWindow) の Objective-C / AppKit 実装は参考とし、直接利用しません。
 * UI は SwiftUI の `WindowGroup` / `Sheet` を利用します。
@@ -485,8 +485,8 @@ aboutWindow.showAboutWindow(
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み
   * iPadOS での基本的な動作は実装済み (アプリケーション・アイコン取得とダークモード対応は macOS 専用 API を使用しているため要確認)
-* 主要な拡張機能 (JSON/RTF サポート) は未実装だが、Markdown サポートにより基本的な用途には対応可能
-* テストコードは基本的なユニットテストは実装済みだが、SnapshotTesting による UI テストは未実装
+* 主要な拡張機能 (JSON/RTF サポート) は未実装。Markdown サポートにより基本的な用途には対応可能。
+* テストコードについて: 基本的なユニットテストは実装済み。SnapshotTesting による UI テストは未実装。
 
 ### 10.5. 品質評価
 
@@ -497,7 +497,7 @@ aboutWindow.showAboutWindow(
   * ⚠️ **プラットフォーム対応**:
     * macOS/iPadOS 両対応、プラットフォーム固有 API を適切に利用します
     * ただし、`AboutView.swift` で `NSColor.windowBackgroundColor` が macOS 専用 API として使用されており、iPadOS での動作確認が必要です
-    * `NSApplication.shared.applicationIconImage` も macOS 専用 API のため、iPadOS では別の実装が必要な可能性があります
+    * `NSApplication.shared.applicationIconImage` も macOS 専用 API のため、iPadOS では別の実装を必要とする可能性があります。
   * ✅ **エラーハンドリング**:
     * Markdown パース失敗時のフォールバック処理を実装します (`do-catch` でエラーを捕捉し、プレーンテキストとして表示します)
   * ✅ **ドキュメント**:
