@@ -236,6 +236,8 @@
 **実装状況**: ✅ **完全実装済み** - プラットフォーム固有 API の実装完了
 
 * macOS 向け About ウィンドウでは、`NSWindow` および `NSHostingController` を利用します。(✅100% 実装完了 - `AboutWindow.swift` で実装)
+  * `NSWindowDelegate` プロトコルを実装し、ウィンドウのライフサイクルを適切に管理します
+  * タイトルバーの閉じるボタン（×）と ESC キーの両方でウィンドウを閉じることができます
 * iPadOS 向けでは、`UIViewControllerRepresentable` を利用せず、SwiftUI のネイティブ `.sheet` / `.popover` API のみで構成します。(✅100% 実装完了 - `Extensions.swift` で実装)
 * 共有ロジック (ViewModel / Markdown パーサー) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。(✅100% 実装完了)
 
@@ -279,7 +281,7 @@
 ### 4.3. 主要ファイルの実装状況
 
 * `Package.swift` : Swift Package 定義、リソース設定 (✅100% 実装完了)
-* `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API (✅100% 実装完了)
+* `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)
 * `AboutView.swift` : SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合 (✅100% 実装完了)
 * `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
 * `MarkdownView.swift` : Markdown を AttributedString で描画、スクロール対応 (✅100% 実装完了)
@@ -371,6 +373,10 @@ aboutWindow.showAboutWindow(
     * `NSHostingController` を使用して SwiftUI ビューを NSWindow に統合します
     * ウィンドウサイズ: 400x500、スタイル: `.titled`, `.closable`, `.miniaturizable`
     * ウィンドウタイトルは `NSLocalizedString("About.Title", bundle: .module)` を使用
+    * `NSObject` を継承し、`NSWindowDelegate` プロトコルを実装してウィンドウのライフサイクルを管理します
+    * `window.isReleasedWhenClosed = false` を設定し、`window.delegate = self` でデリゲートを設定します
+    * `windowWillClose(_:)` メソッドを実装し、ウィンドウが閉じられた際に適切にクリーンアップします
+    * タイトルバーの閉じるボタン（×）と ESC キーの両方でウィンドウを閉じることができます
   * **AboutView.swift**:
     * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合
     * `@StateObject` を使用して `AboutViewModel` を管理します
@@ -518,6 +524,8 @@ aboutWindow.showAboutWindow(
 * パフォーマンス
   * ✅ **メモリ管理**:
     * SwiftUI の `@StateObject`、`@Published` を適切に使用
+    * `NSWindowDelegate` を実装し、`windowWillClose(_:)` メソッドでウィンドウが閉じられた際に適切にクリーンアップします
+    * `window.isReleasedWhenClosed = false` を設定し、ウィンドウのライフサイクルを適切に管理します
   * ✅ **レンダリング**:
     * `AttributedString(markdown:)` による効率的な Markdown レンダリング
 * 総合評価
