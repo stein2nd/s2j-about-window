@@ -1,7 +1,7 @@
 # S2J About Window
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![React](https://img.shields.io/badge/Swift-5.9-blue?logo=Swift&logoColor=white)](https://www.swift.org)
+[![Swift](https://img.shields.io/badge/Swift-5.9-blue?logo=Swift&logoColor=white)](https://www.swift.org)
 
 ## Description
 
@@ -55,8 +55,7 @@ For support, feature requests, or bug reports, please visit the [GitHub Issues](
 
 ### Requirements
 
-* macOS v12.0+
-* iPadOS v15.0+
+* macOS v12.0+ / iPadOS v15.0+
 * Xcode v14.0+
 * Swift v5.9+
 
@@ -70,7 +69,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "1.0.0")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "1.0.1")
 ]
 ```
 
