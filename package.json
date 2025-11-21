@@ -1,8 +1,7 @@
 {
   "name": "s2j-about-window",
   "version": "1.0.1",
-  "description": "Using SwiftUI, reimplementing the AppKit-based “About Window”.",
-  "main": "README.md",
+  "description": "Using SwiftUI, reimplementing the AppKit-based \"About Window\".",
   "directories": {
     "doc": "docs"
   },

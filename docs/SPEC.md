@@ -94,11 +94,11 @@
 
 * **要件レベル**: **Must (必須)**
 * **応答時間**:
-  * About ウィンドウの表示は、呼び出しから1秒以内に完了すること。
-  * Markdown コンテンツのレンダリングは、コンテンツサイズ10KB 以下で0.5秒以内に完了すること。
+  * About ウィンドウの表示は、呼び出しから1秒以内の完了を目指します。
+  * Markdown コンテンツのレンダリングは、コンテンツサイズ10KB 以下で0.5秒以内の完了を目指します。
 * **メモリ使用量**:
-  * About ウィンドウ表示時のメモリ使用量は、追加で10MB 以下に抑えること。
-  * ウィンドウを閉じた際に、メモリリークが発生しないこと。
+  * About ウィンドウ表示時のメモリ使用量は、追加で10MB 以下に抑えることを目指します。
+  * ウィンドウを閉じた際に、メモリリークが発生しないことを目指します。
 
 #### 2.2.2. 互換性
 
@@ -125,11 +125,11 @@
 
 * **要件レベル**: **Must (必須)**
 * **コード品質**:
-  * MVVM パターンに準拠した設計とすること。
+  * MVVM パターンに準拠した設計とします。
   * 主要なクラス・メソッドに JSDoc スタイルのコメントを記載すること。
   * プラットフォーム固有のコードは `#if os(macOS)` / `#if os(iOS)` で適切に分離すること。
 * **テスト容易性**:
-  * ユニットテストが容易に記述できる設計とすること。
+  * ユニットテストが容易に記述できる設計とします。
   * Xcode Preview に対応すること。
 
 #### 2.2.5. セキュリティ
@@ -165,7 +165,7 @@
 * **要件レベル**: **Must (必須)**
 * **テスト・カバレッジ**:
   * 主要な機能 (AboutWindow、AboutView、AboutViewModel、MarkdownView) のユニットテストを実装すること。
-  * テスト・カバレッジは、70% 以上を目標とすること。
+  * テスト・カバレッジは、70% 以上を目標とします。
 * **UI テスト**:
   * SnapshotTesting フレームワークを使用した UI テストを実装すること (**Should** - 推奨)。
   * macOS と iPadOS それぞれのプラットフォームで UI テストを実施すること。
@@ -174,8 +174,8 @@
 
 * **要件レベル**: **Must (必須)**
 * **Swift Package Manager 対応**:
-  * Swift Package Manager で配布可能な形式とすること。
-  * Universal Binary 形式でビルド可能とすること。
+  * Swift Package Manager で配布可能な形式とします。
+  * Universal Binary 形式でビルド可能とします。
   * リソースファイル (`AboutDefault.md`、`Localizable.strings`、`Assets.xcassets`) を適切にパッケージングすること。
 
 ## 3. 準拠仕様
@@ -294,8 +294,8 @@
 **実装状況**: ✅ **完全実装済み** - 英語・日本語のローカライゼーション対応完了
 
 * ローカライズ対応は、必須 (英語・日本語) の為、Base、English、Japanese を初期追加します。(✅100% 実装完了)
-* `Bundle.module` 経由で `Localizable.strings` を読み込んでください (SwiftPM の `resources: [.process("Resources")]`)。(✅100% 実装完了)
-* Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書き可能にしてください。(✅100% 実装完了)
+* `Bundle.module` 経由で `Localizable.strings` を読み込みます (SwiftPM の `resources: [.process("Resources")]`)。(✅100% 実装完了)
+* Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書き可能にします。(✅100% 実装完了)
 * 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Close"`、`"About.Version"` (✅100% 実装完了)
 
 ## 5. デザイン規約
@@ -303,7 +303,7 @@
 **実装状況**: ⚠️ **ほぼ実装済み** - ダークモード対応、アプリケーション・アイコン自動取得が完了 (macOS は完全実装、iPadOS は要確認)
 
 * アイコンは App アイコンから自動取得します。(✅100% 実装完了 - `NSApplication.shared.applicationIconImage` を使用、macOS 専用)
-* ダークモード対応は、必須です。(⚠️ macOS は実装完了 - `Color(NSColor.windowBackgroundColor)` を使用、iPadOS での動作確認が必要)
+* ダークモード対応は、必須です。(⚠️ macOS は実装完了 - `Color(NSColor.windowBackgroundColor)` を使用。iPadOS での動作確認が必要)
 
 ## 6. 使用方法
 
@@ -369,87 +369,87 @@ aboutWindow.showAboutWindow(
 
 * コア機能
   * **AboutWindow.swift**:
-    * macOS 向け NSWindow 管理、`showAboutWindow()` / `closeWindow()` API の実装
-    * `NSHostingController` を使用して SwiftUI ビューを NSWindow に統合します
-    * ウィンドウサイズ: 400x500、スタイル: `.titled`, `.closable`, `.miniaturizable`
-    * ウィンドウタイトルは `NSLocalizedString("About.Title", bundle: .module)` を使用
-    * `NSObject` を継承し、`NSWindowDelegate` プロトコルを実装してウィンドウのライフサイクルを管理します
-    * `window.isReleasedWhenClosed = false` を設定し、`window.delegate = self` でデリゲートを設定します
-    * `windowWillClose(_:)` メソッドを実装し、ウィンドウが閉じられた際に適切にクリーンアップします
-    * タイトルバーの閉じるボタン（×）と ESC キーの両方でウィンドウを閉じることができます
+    * macOS 向け NSWindow 管理、`showAboutWindow()` / `closeWindow()` API の実装。
+    * `NSHostingController` を使用して SwiftUI ビューを NSWindow に統合します。
+    * ウィンドウサイズ: 400x500、スタイル: `.titled`, `.closable`, `.miniaturizable` を設定します。
+    * ウィンドウタイトルは `NSLocalizedString("About.Title", bundle: .module)` を使用します。
+    * `NSObject` を継承し、`NSWindowDelegate` プロトコルを実装してウィンドウのライフサイクルを管理します。
+    * `window.isReleasedWhenClosed = false` を設定し、`window.delegate = self` でデリゲートを設定します。
+    * `windowWillClose(_:)` メソッドを実装し、ウィンドウが閉じられた際に適切にクリーンアップします。
+    * タイトルバーの閉じるボタン（×）と ESC キーの両方でウィンドウを閉じることができます。
   * **AboutView.swift**:
-    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合
-    * `@StateObject` を使用して `AboutViewModel` を管理します
-    * アプリケーション・アイコン: 64x64、角丸矩形 (`RoundedRectangle(cornerRadius: 12)`)
-    * アプリケーション情報: アプリケーション名 (`.title2`, `.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)
-    * Xcode Preview 対応 (`AboutView_Previews` を実装)
+    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合。
+    * `@StateObject` を使用して `AboutViewModel` を管理します。
+    * アプリケーション・アイコン: 64x64、角丸矩形 (`RoundedRectangle(cornerRadius: 12)`)。
+    * アプリケーション情報: アプリケーション名 (`.title2`, `.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
+    * Xcode Preview 対応 (`AboutView_Previews` を実装)。
   * **AboutViewModel.swift**:
-    * ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張機能
-    * `@Published` プロパティで `content`, `appName`, `version`, `copyright` を管理します
-    * `loadDefaultContent()` メソッドでデフォルトコンテンツを読み込みます
-    * Bundle 拡張: `displayName`, `version`, `copyright` プロパティを追加します
+    * ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張機能。
+    * `@Published` プロパティで `content`, `appName`, `version`, `copyright` を管理します。
+    * `loadDefaultContent()` メソッドでデフォルトコンテンツを読み込みます。
+    * Bundle 拡張: `displayName`, `version`, `copyright` プロパティを追加します。
   * **MarkdownView.swift**:
-    * Markdown を `AttributedString` で描画し、スクロール対応、テキスト選択対応を実装します
-    * `AttributedString(markdown:)` を使用した Markdown レンダリング
-    * Markdown パース失敗時のフォールバック処理 (プレーンテキスト表示)
-    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します
+    * Markdown を `AttributedString` で描画し、スクロール対応、テキスト選択対応を実装します。
+    * `AttributedString(markdown:)` を使用した Markdown レンダリング。
+    * Markdown パース失敗時のフォールバック処理 (プレーンテキスト表示)。
+    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します。
     * Xcode Preview 対応 (`MarkdownView_Previews` を実装)
   * **Extensions.swift**:
-    * iPadOS 向け `aboutSheet()` / `aboutPopover()` 拡張機能
-    * `aboutSheet()`: `NavigationView` を使用、閉じるボタンをツールバーに配置
-    * `aboutPopover()`: 400x500px の固定サイズで表示します
+    * iPadOS 向け `aboutSheet()` / `aboutPopover()` 拡張機能。
+    * `aboutSheet()`: `NavigationView` を使用し、閉じるボタンをツールバーに配置。
+    * `aboutPopover()`: 400x500px の固定サイズで表示します。
 * プラットフォーム対応
   * **macOS 対応**:
-    * `NSWindow` および `NSHostingController` を利用した独立ウィンドウ表示を実装します
-    * `#if os(macOS)` 条件分岐で macOS 専用コードを分離します
-    * `NSApplication.shared.applicationIconImage` でアプリケーション・アイコンを取得
+    * `NSWindow` および `NSHostingController` を利用した独立ウィンドウ表示を実装します。
+    * `#if os(macOS)` 条件分岐で macOS 専用コードを分離します。
+    * `NSApplication.shared.applicationIconImage` でアプリケーション・アイコンを取得。
   * **iPadOS 対応**:
-    * SwiftUI ネイティブ `.sheet` / `.popover` API によるモーダル表示を実装します
-    * `#if os(iOS)` 条件分岐で iOS/iPadOS 専用コードを分離します
-    * `NavigationView` と `ToolbarItem` を使用した UI 構成を実装します
+    * SwiftUI ネイティブ `.sheet` / `.popover` API によるモーダル表示を実装します。
+    * `#if os(iOS)` 条件分岐で iOS/iPadOS 専用コードを分離します。
+    * `NavigationView` と `ToolbarItem` を使用した UI 構成を実装します。
   * **マルチプラットフォーム対応**:
-    * `#if canImport(SwiftUI)` ベースの共通化ロジック
-    * `@available(macOS 12.0, iOS 15.0, *)` でプラットフォーム要件を指定
+    * `#if canImport(SwiftUI)` ベースの共通化ロジック。
+    * `@available(macOS 12.0, iOS 15.0, *)` でプラットフォーム要件を指定。
 * リソース・ローカライゼーション
   * **Package.swift**:
-    * Swift Package 定義、リソース設定 (`resources: [.process("Resources")]`)
-    * macOS/iPadOS 両対応のマルチプラットフォーム対応 (`.macOS(.v12)`, `.iOS(.v15)`)
-    * Swift Package として切り出し可能な構造
-    * デフォルトローカライゼーション: `defaultLocalization: "en"`
+    * Swift Package 定義、リソース設定 (`resources: [.process("Resources")]`)。
+    * macOS/iPadOS 両対応のマルチプラットフォーム対応 (`.macOS(.v12)`, `.iOS(.v15)`)。
+    * Swift Package として切り出し可能な構造。
+    * デフォルトローカライゼーション: `defaultLocalization: "en"`。
   * **AboutDefault.md**:
-    * デフォルト Markdown コンテンツ (使用例、機能説明、ライセンス情報を含む)
+    * デフォルト Markdown コンテンツ (使用例、機能説明、ライセンス情報を含む)。
   * **Localizable.strings**:
-    * 英語・日本語ローカライゼーション (Base、en、ja)
-    * 文字列キー: `"About.Title"`、`"About.Close"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Version"`
-    * `Bundle.module` 経由で `NSLocalizedString` を使用して読み込み
+    * 英語・日本語ローカライゼーション (Base、en、ja)。
+    * 文字列キー: `"About.Title"`、`"About.Close"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Version"`。
+    * `Bundle.module` 経由で `NSLocalizedString` を使用してロード。
 * UI/UX 機能
   * **ダークモード対応**:
-    * macOS: `Color(NSColor.windowBackgroundColor)` を使用した自動対応 (✅実装完了)
-    * iPadOS: 動作確認が必要 (⚠️ `NSColor.windowBackgroundColor` は macOS 専用 API のため、iPadOS では別の実装が必要な可能性)
+    * macOS: `Color(NSColor.windowBackgroundColor)` を使用した自動対応 (✅実装完了)。
+    * iPadOS: 動作確認が必要 (⚠️ `NSColor.windowBackgroundColor` は macOS 専用 API のため、iPadOS では別の実装が必要な可能性)。
   * **アプリケーション・アイコン自動取得**:
-    * macOS: `NSApplication.shared.applicationIconImage` を使用 (✅実装完了)
-    * iPadOS: 未実装 (⚠️ `NSApplication` は macOS 専用 API のため、iPadOS では別の実装が必要)
+    * macOS: `NSApplication.shared.applicationIconImage` を使用 (✅実装完了)。
+    * iPadOS: 未実装 (⚠️ `NSApplication` は macOS 専用 API のため、iPadOS では別の実装が必要)。
   * **アプリケーション・メタデータ自動取得**:
-    * Bundle 拡張による `displayName`、`version`、`copyright` の自動取得
+    * Bundle 拡張による `displayName`、`version`、`copyright` の自動取得。
 * コンテンツ形式サポート
   * **Markdown 形式のコンテンツサポート**:
-    * `MarkdownView.swift` で実装完了
-    * `AttributedString(markdown:)` を使用した Markdown レンダリング
-    * スクロール対応 (`ScrollView` を使用)、テキスト選択対応 (`.textSelection(.enabled)` を使用)
-    * Markdown パース失敗時のフォールバック処理 (プレーンテキストとして表示)
-    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します
+    * `MarkdownView.swift` で実装完了。
+    * `AttributedString(markdown:)` を使用した Markdown レンダリング。
+    * スクロール対応 (`ScrollView` を使用)、テキスト選択対応 (`.textSelection(.enabled)` を使用)。
+    * Markdown パース失敗時のフォールバック処理 (プレーンテキストとして表示)。
+    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します。
 
 ### 10.2. ほとんど実装済み機能 (85-95% 完了)
 
 以下の機能は実装がほぼ完了していますが、一部の機能やテストが未完了です。
 
 * テストコード
-  * **AboutViewTests.swift**: 基本的なユニットテストは実装済み
-    * ✅ `AboutViewModel` の初期化テスト (デフォルト値、nil 値の両方をテスト)
-    * ✅ `MarkdownView` の作成テスト
-    * ✅ `AboutView` の作成テスト
-    * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)
-    * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (テストメソッド `testAboutViewSnapshot()` と `testMarkdownViewSnapshot()` は存在するが、実際のスナップショット検証ロジックは未実装、コメントで「Note: This test would require SnapshotTesting framework」と記載されています)
+  * **AboutViewTests.swift**: 基本的なユニットテストは実装済み。
+    * ✅ `AboutViewModel` の初期化テスト (デフォルト値、nil 値の両方をテスト)。
+    * ✅ `MarkdownView` の作成テスト。
+    * ✅ `AboutView` の作成テスト。
+    * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
+    * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (テストメソッド `testAboutViewSnapshot()` と `testMarkdownViewSnapshot()` は存在するが、実際のスナップショット検証ロジックは未実装、コメントで「Note: This test would require SnapshotTesting framework」と記載されています)。
 
 ### 10.3. 未実装機能
 
@@ -457,24 +457,24 @@ aboutWindow.showAboutWindow(
 
 * コンテンツ形式サポート
   * **JSON オブジェクト形式のコンテンツサポート**:
-    * Markdown のみ対応、JSON 形式のパース・表示機能は未実装
+    * Markdown のみ対応、JSON 形式のパース・表示機能は未実装。
   * **RTF ドキュメント形式のコンテンツサポート**:
-    * RTF 形式のパース・表示機能は未実装
+    * RTF 形式のパース・表示機能は未実装。
 * テスト・品質保証
   * **UI テスト・スナップショットテスト**:
-    * SnapshotTesting フレームワークの統合と実際のスナップショット検証が未実装
+    * SnapshotTesting フレームワークの統合と実際のスナップショット検証が未実装。
       * macOS:
-        * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します
+        * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します。
       * iPadOS:
-        * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します
+        * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
   * **Preview Content**:
-    * Xcode Preview 用のリソースディレクトリが未作成です
+    * Xcode Preview 用のリソースディレクトリが未作成です。
 
 ### 10.4. 実装完了率
 
 **実装完了率の算出方法**:
-* 各機能カテゴリーの実装状況を評価し、重み付け平均で全体の完了率を算出
-* 完全実装済み (100%)、ほとんど実装済み (90%)、未実装 (0%) として計算
+* 各機能カテゴリーの実装状況を評価し、重み付け平均で全体の完了率を算出。
+* 完全実装済み (100%)、ほとんど実装済み (90%)、未実装 (0%) として計算。
 
 **カテゴリー別完了率**:
 
@@ -489,50 +489,50 @@ aboutWindow.showAboutWindow(
 
 **全体実装の完了率**: **約81%** (コア機能は完全実装、一部の拡張機能とテストが未実装)
 * コア機能 (About Window の基本機能) は、100% 実装完了
-  * macOS での動作は完全に実装済み
-  * iPadOS での基本的な動作は実装済み (アプリケーション・アイコン取得とダークモード対応は macOS 専用 API を使用しているため要確認)
-* 主要な拡張機能 (JSON/RTF サポート) は未実装。Markdown サポートにより基本的な用途には対応可能。
+  * macOS での動作は完全に実装済み。
+  * iPadOS での基本的な動作は実装済み (アプリケーション・アイコン取得とダークモード対応は macOS 専用 API を使用しているため要確認)。
+* 主要な拡張機能 (JSON/RTF サポート) は未実装です。Markdown サポートにより基本的な用途には対応可能です。
 * テストコードについて: 基本的なユニットテストは実装済み。SnapshotTesting による UI テストは未実装。
 
 ### 10.5. 品質評価
 
 * コード品質
   * ✅ **アーキテクチャー**:
-    * MVVM パターンに準拠した設計、責務分離が適切
-    * `@StateObject`, `@Published` を適切に使用した状態管理
+    * MVVM パターンに準拠した設計、責務分離が適切。
+    * `@StateObject`, `@Published` を適切に使用した状態管理。
   * ⚠️ **プラットフォーム対応**:
-    * macOS/iPadOS 両対応、プラットフォーム固有 API を適切に利用します
-    * ただし、`AboutView.swift` で `NSColor.windowBackgroundColor` が macOS 専用 API として使用されており、iPadOS での動作確認が必要です
+    * macOS/iPadOS 両対応、プラットフォーム固有 API を適切に利用します。
+    * ただし、`AboutView.swift` で `NSColor.windowBackgroundColor` が macOS 専用 API として使用されており、iPadOS での動作確認が必要です。
     * `NSApplication.shared.applicationIconImage` も macOS 専用 API のため、iPadOS では別の実装を必要とする可能性があります。
   * ✅ **エラーハンドリング**:
-    * Markdown パース失敗時のフォールバック処理を実装します (`do-catch` でエラーを捕捉し、プレーンテキストとして表示します)
+    * Markdown パース失敗時のフォールバック処理を実装します (`do-catch` でエラーを捕捉し、プレーンテキストとして表示します)。
   * ✅ **ドキュメント**:
-    * 主要なクラス・メソッドに JSDoc スタイルのコメントを実装します
-    * パラメータ、戻り値、説明が適切に記載されています
+    * 主要なクラス・メソッドに JSDoc スタイルのコメントを実装します。
+    * パラメータ、戻り値、説明が適切に記載されています。
 * テスト品質
   * ✅ **ユニットテスト**:
-    * 基本的な機能のユニットテストを実装します (`AboutViewTests.swift`)
+    * 基本的な機能のユニットテストを実装します (`AboutViewTests.swift`)。
   * ⚠️ **UI テスト**:
-    * SnapshotTesting フレームワークの統合が未実装
+    * SnapshotTesting フレームワークの統合が未実装です。
   * ⚠️ **テスト・カバレッジ**:
-    * 現時点では基本的なテストのみで、カバレッジは限定的
+    * 現時点では基本的なテストのみで、カバレッジは限定的です。
 * 国際化・ローカライゼーション
   * ✅ **多言語対応**:
-    * 英語・日本語のローカライゼーションを実装します
+    * 英語・日本語のローカライゼーションを実装します。
   * ✅ **リソース管理**:
-    * `Bundle.module` 経由で適切にリソースを読み込みます
+    * `Bundle.module` 経由で適切にリソースを読み込みます。
 * パフォーマンス
   * ✅ **メモリ管理**:
-    * SwiftUI の `@StateObject`、`@Published` を適切に使用
-    * `NSWindowDelegate` を実装し、`windowWillClose(_:)` メソッドでウィンドウが閉じられた際に適切にクリーンアップします
-    * `window.isReleasedWhenClosed = false` を設定し、ウィンドウのライフサイクルを適切に管理します
+    * SwiftUI の `@StateObject`、`@Published` を適切に使用。
+    * `NSWindowDelegate` を実装し、`windowWillClose(_:)` メソッドでウィンドウが閉じられた際に適切にクリーンアップします。
+    * `window.isReleasedWhenClosed = false` を設定し、ウィンドウのライフサイクルを適切に管理します。
   * ✅ **レンダリング**:
-    * `AttributedString(markdown:)` による効率的な Markdown レンダリング
+    * `AttributedString(markdown:)` による効率的な Markdown レンダリング。
 * 総合評価
   * **総合品質**:
-    * **良好** - コア機能は高品質に実装されており、基本的な用途には十分に対応可能
+    * **良好** - コア機能は高品質に実装されており、基本的な用途には十分に対応可能。
   * **改善点**:
-    * SnapshotTesting による UI テストの実装、JSON/RTF 形式のコンテンツサポート追加により、さらなる品質向上が期待できる
+    * SnapshotTesting による UI テストの実装、JSON/RTF 形式のコンテンツサポート追加により、さらなる品質向上が期待できます。
 
 ## 11. Backlog
 
@@ -543,45 +543,45 @@ aboutWindow.showAboutWindow(
 品質保証と開発体験の向上を目的とした改善を、優先的に実施します。
 
 * **UI テスト、スナップショット・テストの実装**
-  * SnapshotTesting フレームワークの統合と実際のスナップショット検証を実装します
+  * SnapshotTesting フレームワークの統合と実際のスナップショット検証を実装します。
   * macOS:
-    * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します
+    * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します。
   * iPadOS:
-    * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します
-  * テスト・カバレッジを向上させます
+    * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
+  * テスト・カバレッジを向上させます。
 * **Preview Content の実装**
-  * Xcode Preview 用のリソースディレクトリを作成します
-  * 開発時のプレビュー機能向上を図ります
+  * Xcode Preview 用のリソースディレクトリを作成します。
+  * 開発時のプレビュー機能向上を図ります。
 
 ### 11.2. 中期での改善予定 (3-6ヵ月)
 
 機能拡張を目的とした改善を実施します。
 
 * **JSON オブジェクト形式のコンテンツサポート**
-  * JSON 形式のパース・表示機能を実装します
-  * `AboutViewModel` での JSON コンテンツ処理を追加します
-  * Markdown と同様に `AboutView` で表示可能にします
+  * JSON 形式のパース・表示機能を実装します。
+  * `AboutViewModel` での JSON コンテンツ処理を追加します。
+  * Markdown と同様に `AboutView` で表示可能にします。
 * **RTF ドキュメント形式のコンテンツサポート**
-  * RTF 形式のパース・表示機能を実装します
-  * `NSAttributedString` を利用した RTF レンダリングを実装します
-  * Markdown、JSON と同様に `AboutView` で表示可能にします
+  * RTF 形式のパース・表示機能を実装します。
+  * `NSAttributedString` を利用した RTF レンダリングを実装します。
+  * Markdown、JSON と同様に `AboutView` で表示可能にします。
 
 ### 11.3. 長期での改善予定 (6ヵ月以上)
 
 高度な機能や UX 向上を目的とした改善を検討します。
 
 * **カスタマイズ可能なテーマ・スタイル設定**
-  * カラーテーマのカスタマイズ機能
-  * フォントサイズ・スタイルのカスタマイズ機能
-  * レイアウトオプションを追加します
+  * カラーテーマのカスタマイズ機能。
+  * フォントサイズ・スタイルのカスタマイズ機能。
+  * レイアウトオプションを追加します。
 * **アニメーション効果の追加**
-  * ウィンドウ表示時のアニメーション
-  * コンテンツ読み込み時のアニメーション
-  * トランジション効果を追加します
+  * ウィンドウ表示時のアニメーション。
+  * コンテンツ読み込み時のアニメーション。
+  * トランジション効果を追加します。
 * **UI ローカライズについて、外部翻訳サービスとの連携**
-  * 外部翻訳サービス (例: DeepL API) との連携を検討します
-  * 自動翻訳の機能を実装します
-  * 多言語対応の拡充します
+  * 外部翻訳サービス (例: DeepL API) との連携を検討します。
+  * 自動翻訳の機能を実装します。
+  * 多言語対応の拡充します。
 
 ---
 
@@ -591,7 +591,7 @@ aboutWindow.showAboutWindow(
 
 **補足**:
 * 本プロジェクトは Swift Package として他アプリケーションに組み込まれることを前提とするため、Xcode ウィザードで「App」テンプレートを選ぶ必要はありません。
-* macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを .macOS (.v12)、.iOS (.v15) と指定してください。
+* macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを .macOS (.v12)、.iOS (.v15) と指定します。
 * また、本リポジトリでは Git サブモジュール [Docs Linter](https://github.com/stein2nd/docs-linter) を導入し、ドキュメント品質 (表記揺れや用語統一) の検証を CI で実施します。
 
 ### 1. テンプレート選択
