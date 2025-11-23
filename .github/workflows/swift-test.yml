@@ -65,8 +65,21 @@ jobs:
 
     - name: Build for iOS (verify compilation)
       run: |
-        swift build --destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' || \
-        swift build -Xswiftc -sdk -Xswiftc $(xcrun --show-sdk-path --sdk iphonesimulator) -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator
+        # Get iOS SDK path
+        IOS_SDK_PATH=$(xcrun --show-sdk-path --sdk iphonesimulator)
+        echo "iOS SDK Path: $IOS_SDK_PATH"
+
+        # Try building with xcodebuild first (preferred method)
+        if xcodebuild build -package . -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -sdk iphonesimulator 2>&1; then
+          echo "Build succeeded using xcodebuild with package"
+        elif xcodebuild build -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -sdk iphonesimulator 2>&1; then
+          echo "Build succeeded using xcodebuild with scheme"
+        else
+          echo "xcodebuild failed, trying swift build with iOS target..."
+          # Fallback to swift build with explicit SDK and target
+          swift build -Xswiftc -sdk -Xswiftc "$IOS_SDK_PATH" -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator || \
+          swift build -Xswiftc -sdk -Xswiftc "$IOS_SDK_PATH" -Xswiftc -target -Xswiftc x86_64-apple-ios15.0-simulator
+        fi
 
     - name: List Xcode schemes
       run: |
