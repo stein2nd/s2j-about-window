@@ -50,10 +50,12 @@ final class AboutViewTests: XCTestCase {
         XCTAssertNotNil(aboutView)
     }
     
+    #if os(macOS)
     func testAboutWindowCreation() {
         let aboutWindow = AboutWindow()
         XCTAssertNotNil(aboutWindow)
     }
+    #endif
     
     #if os(macOS)
     func testAboutWindowShowWindow() {

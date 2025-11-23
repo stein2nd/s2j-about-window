@@ -1,8 +1,10 @@
 import SwiftUI
-import AppKit
 
 #if canImport(SwiftUI)
-@available(macOS 12.0, iOS 15.0, *)
+#if os(macOS)
+import AppKit
+
+@available(macOS 12.0, *)
 /** 
 * @return AboutWindow
 */
@@ -97,4 +99,5 @@ public class AboutWindow: NSObject, NSWindowDelegate {
         #endif
     }
 }
+#endif
 #endif

@@ -42,16 +42,57 @@ jobs:
       with:
         xcode-version: latest-stable
     
+    - name: Verify Swift Package
+      run: |
+        swift package describe --type json | head -20
+        swift package resolve
+
+    - name: List available simulators
+      run: |
+        xcrun simctl list devices available | grep -i "iPad Pro"
+
+    - name: Find and boot iOS Simulator
+      run: |
+        DEVICE=$(xcrun simctl list devices available | grep -i "iPad Pro" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+        if [ -z "$DEVICE" ]; then
+          echo "No iPad Pro simulator found, creating one..."
+          xcrun simctl create "iPad Pro Test" "iPad Pro (12.9-inch) (6th generation)" "iOS17.5" || true
+          DEVICE=$(xcrun simctl list devices available | grep -i "iPad Pro" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
+        fi
+        echo "Using device: $DEVICE"
+        xcrun simctl boot "$DEVICE" || true
+        echo "DEVICE_UDID=$DEVICE" >> $GITHUB_ENV
+
+    - name: Build for iOS (verify compilation)
+      run: |
+        swift build --destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' || \
+        swift build -Xswiftc -sdk -Xswiftc $(xcrun --show-sdk-path --sdk iphonesimulator) -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator
+
+    - name: List Xcode schemes
+      run: |
+        xcodebuild -list -package . 2>&1 || echo "Note: xcodebuild -list may not work with Swift Package directly"
+
     - name: Run tests on iOS Simulator
       run: |
-        xcodebuild test -scheme S2JAboutWindow -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)'
-    
+        set -e
+        # Try multiple approaches to run iOS tests
+        if xcodebuild test -package . -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -enableCodeCoverage YES 2>&1; then
+          echo "Tests passed using xcodebuild with package"
+        elif xcodebuild test -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -enableCodeCoverage YES 2>&1; then
+          echo "Tests passed using xcodebuild with scheme"
+        else
+          echo "Warning: xcodebuild test failed, trying swift test with iOS target..."
+          swift test --enable-code-coverage 2>&1 || echo "Note: swift test may not support iOS simulator directly"
+          exit 1
+        fi
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: .build/coverage/coverage.xml
         flags: ios
         name: ios-coverage
+        fail_ci_if_error: false
 
   build-release:
     runs-on: macos-latest

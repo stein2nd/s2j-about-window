@@ -1,6 +1,14 @@
 import SwiftUI
 
 #if canImport(SwiftUI)
+#if os(macOS)
+import AppKit
+#endif
+
+#if os(iOS)
+import UIKit
+#endif
+
 @available(macOS 12.0, iOS 15.0, *)
 /**
 * AboutView
@@ -59,7 +67,7 @@ public struct AboutView: View {
         }
         .padding()
         .frame(minWidth: 400, minHeight: 500)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(backgroundColor)
     }
 
     /** 
@@ -68,6 +76,7 @@ public struct AboutView: View {
     */
     private var appIconView: some View {
         Group {
+            #if os(macOS)
             if let icon = NSApplication.shared.applicationIconImage {
                 Image(nsImage: icon)
                     .resizable()
@@ -78,7 +87,33 @@ public struct AboutView: View {
                     .fill(Color.gray)
                     .frame(width: 64, height: 64)
             }
+            #elseif os(iOS)
+            if let icon = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon-60x60") {
+                Image(uiImage: icon)
+                    .resizable()
+                    .frame(width: 64, height: 64)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray)
+                    .frame(width: 64, height: 64)
+            }
+            #endif
         }
+    }
+
+    /**
+    * 背景色を取得
+    * プラットフォームに応じて適切な背景色を返します。
+    */
+    private var backgroundColor: Color {
+        #if os(macOS)
+        return Color(NSColor.windowBackgroundColor)
+        #elseif os(iOS)
+        return Color(UIColor.systemBackground)
+        #else
+        return Color.clear
+        #endif
     }
 
     /**
