@@ -27,12 +27,12 @@ public extension View {
                     version: version,
                     copyright: copyright
                 )
-                .navigationTitle(NSLocalizedString("About.Title", bundle: .module, comment: "About Window Title"))
+                .navigationTitle(NSLocalizedString("About.Title", bundle: Bundle.resourceBundle, comment: "About Window Title"))
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(NSLocalizedString("About.Close", bundle: .module, comment: "Close button")) {
+                        Button(NSLocalizedString("About.Close", bundle: Bundle.resourceBundle, comment: "Close button")) {
                             isPresented.wrappedValue = false
                         }
                     }

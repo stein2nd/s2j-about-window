@@ -21,11 +21,11 @@
 
 **要件レベルの凡例**:
 * **Must (必須)**:
-  * 本プロジェクトの成功に不可欠な要件。実装が必須。
+  * 本プロジェクトの成功に不可欠な要件であり、実装が必須です。
 * **Should (推奨)**:
-  * 本プロジェクトの品質向上に重要な要件。可能な限り実装を推奨。
+  * 本プロジェクトの品質向上に重要な要件であり、可能な限り実装を推奨します。
 * **Could (可能であれば)**:
-  * 本プロジェクトの価値を高める要件。実装可能であれば追加を検討。
+  * 本プロジェクトの価値を高める要件であり、実装可能であれば追加を検討します。
 
 ### 2.1. 機能要件
 
@@ -56,8 +56,8 @@
 * **説明**: ホスト・アプリケーションから渡されたコンテンツ (ライセンス情報、その他の説明文など) を表示します。
 * **詳細**:
   * Markdown 記法で記述されたテキスト情報を表示します (**Must** - 実装済み)。
-  * JSON オブジェクト形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加)。
-  * RTF ドキュメント形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加)。
+  * JSON オブジェクト形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加します)。
+  * RTF ドキュメント形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加します)。
   * コンテンツはスクロール可能で、テキスト選択が可能です。
 
 #### 2.1.4. ローカライゼーション対応機能
@@ -65,7 +65,7 @@
 * **要件レベル**: **Must (必須)**
 * **説明**: 複数言語 (英語、日本語) に対応したローカライゼーション機能を提供します。
 * **詳細**:
-  * 英語 (en) と日本語 (ja) のローカライゼーションを必須とします。
+  * 英語 (en) と日本語 (ja) のローカライゼーションが必須です。
   * `Bundle.module` 経由で `Localizable.strings` を読み込みます。
   * デフォルト Markdown コンテンツ (`AboutDefault.md`) を用意し、利用側で上書き可能にします。
 
@@ -143,7 +143,7 @@
 
 * **要件レベル**: **Must (必須)**
 * **UI / UX**:
-  * 直感的で操作しやすいユーザーインターフェースを提供すること。
+  * 直感的で操作しやすい UI を提供すること。
   * ウィンドウサイズは適切なデフォルト値 (400x500) を設定すること。
   * コンテンツが長い場合は、スクロール可能にすること。
 * **アクセシビリティ**:
@@ -245,6 +245,8 @@
 
 ```
 `s2j-about-window`/
+├── LICENSE
+├── README.md
 ├┬─ docs/  # ドキュメント類
 │└─ `SPEC.md`  # 本ドキュメント
 ├┬─ tools/
@@ -252,11 +254,12 @@
 ├┬─ .github/  # CI/CD
 │└┬─ workflows/
 │　├─ docs-linter.yml
-│　└─ swift-test.yml
-├── LICENSE
-├── README.md
+│　└─ swift-test.yml (✅100% 実装完了)
+├┬─ scripts/  # スクリプト
+│└─ test-local.sh  # ローカル・テスト実行スクリプト (✅100% 実装完了 - 統合版、汎用的)
 ├── SampleApp.swift  # エントリー・ポイント
 ├── Package.swift  # Swift Package 定義 (プロジェクト・ファイル兼用) (✅100% 実装完了)
+├── project.yml  # XcodeGen 設定ファイル (✅100% 実装完了)
 ├┬─ Sources/
 │└┬─ S2JAboutWindow/  # メイン・ソースコード
 │　├─ AboutWindow.swift  # macOS: NSWindow 管理 + public API (✅100% 実装完了)
@@ -281,6 +284,16 @@
 ### 4.3. 主要ファイルの実装状況
 
 * `Package.swift` : Swift Package 定義、リソース設定 (✅100% 実装完了)
+* `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
+  * **ターゲット構成**:
+    * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
+    * `S2JAboutWindow-iOS`: iOS 向けフレームワーク
+    * `S2JAboutWindowTests-macOS`: macOS 向けテストバンドル
+    * `S2JAboutWindowTests-iOS`: iOS 向けテストバンドル (署名設定: `CODE_SIGN_STYLE: Automatic`、`DEVELOPMENT_TEAM: ""`)
+  * **スキーム構成**:
+    * `S2JAboutWindow`: 統合スキーム (macOS + iOS)
+    * `S2JAboutWindow-macOS`: macOS 専用スキーム (macOS ターゲットのみ)
+    * `S2JAboutWindow-iOS`: iOS 専用スキーム (iOS ターゲットのみ)
 * `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)
 * `AboutView.swift` : SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合 (✅100% 実装完了)
 * `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
@@ -303,7 +316,7 @@
 **実装状況**: ⚠️ **ほぼ実装済み** - ダークモード対応、アプリケーション・アイコン自動取得が完了 (macOS は完全実装、iPadOS は要確認)
 
 * アイコンは App アイコンから自動取得します。(✅100% 実装完了 - `NSApplication.shared.applicationIconImage` を使用、macOS 専用)
-* ダークモード対応は、必須です。(⚠️ macOS は実装完了 - `Color(NSColor.windowBackgroundColor)` を使用。iPadOS での動作確認が必要)
+* ダークモード対応は、必須です。(✅100% 実装完了 - macOS: `Color(NSColor.windowBackgroundColor)`、iPadOS: `Color(UIColor.systemBackground)` を使用)
 
 ## 6. 使用方法
 
@@ -355,9 +368,90 @@ aboutWindow.showAboutWindow(
 
 ## 9. CI / CD
 
+**実装状況**: ✅ **完全実装済み** - CI/CD ワークフローとローカル・テストスクリプトの実装完了
+
 * Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外とします。
 * Universal Binary 化は SwiftPM のビルドフェーズで自動処理されます。
 * リリース用ビルドは GitHub Actions の CI ワークフローで生成し、Artifacts として管理します。
+
+### 9.1. GitHub Actions ワークフロー
+
+**実装状況**: ✅ **完全実装済み** - `swift-test.yml` の実装完了
+
+* **`swift-test.yml`**: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行
+  * **`test-macos` ジョブ**:
+    * macOS Runner で `swift test --enable-code-coverage` を実行
+    * テスト・カバレッジを Codecov にアップロード (`flags: macos`、`name: macos-coverage`)
+  * **`test-ios` ジョブ**:
+    * **Swift Package の検証**: `swift package describe --type json` と `swift package resolve` を実行
+    * **シミュレーターの確認**: 利用可能な iPad Pro シミュレーターをリスト表示
+    * **シミュレーターの検出と起動**:
+      * iPad Pro シミュレーターを自動検出
+      * 見つからない場合は自動作成を試行
+      * 検出したシミュレーターを自動起動
+    * **iOS 向けビルドの事前確認**:
+      * `swift build --destination` で iOS シミュレーター向けビルドを試行
+      * 失敗時は `swift build -Xswiftc -sdk -Xswiftc ... -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator` でフォールバック
+    * **Xcode スキームの確認**: `xcodebuild -list -package .` でスキームを確認 (オプション)
+    * **テスト実行**:
+      * 複数のアプローチで `xcodebuild test` を試行:
+        1. `xcodebuild test -package . -scheme <scheme> -destination ...` (Swift Package として)
+        2. `xcodebuild test -scheme <scheme> -destination ...` (Xcode プロジェクトとして)
+        3. `swift test --enable-code-coverage` (フォールバック)
+    * **テスト・カバレッジのアップロード**: Codecov にアップロード (失敗時も CI を継続するため `fail_ci_if_error: false` を設定)
+  * **`build-release` ジョブ**:
+    * リリース用ビルドの生成 (`swift build -c release`)
+    * ビルド成果物を Artifacts としてアップロード
+
+### 9.2. ローカル・テストスクリプト
+
+**実装状況**: ✅ **完全実装済み** - `scripts/test-local.sh` の統合版実装完了
+
+* **`scripts/test-local.sh`**: コミット前に CI/CD と同じテストをローカルで実行するスクリプト
+  * **汎用性**: 他の Swift Package Manager プロジェクトでも使用可能
+  * **シェル**: bash で実装 (CI/CD 環境との互換性のため)
+  * **実行方法**:
+    * 直接実行: `./scripts/test-local.sh [オプション]` (macOS では zsh から実行可能)
+    * npm スクリプトから実行: `npm run test:local -- [オプション]`
+  * **優先順位**: 1. コマンドライン引数 ＞ 2. 自動検出 (Package.swift から) ＞ 3. 環境変数 ＞ 4. デフォルト値
+  * **自動検出機能**:
+    * `Package.swift` からパッケージ名とライブラリ名を自動検出
+    * Xcode プロジェクト名の自動検出 (`.xcodeproj` ディレクトリまたは `project.yml` から)
+    * iOS シミュレーターデバイスの自動検出
+  * **コマンドライン引数によるカスタマイズ**:
+    * `-s, --scheme-name <name>`: Xcode スキーム名
+    * `-d, --ios-device <device>`: iOS/iPadOS シミュレーターデバイス名
+    * `-v, --ios-version <version>`: iOS/iPadOS 最小バージョン
+    * `--skip-ios`: iOS/iPadOS テストをスキップ
+    * `--enable-xcode-project`: Xcode プロジェクト生成とテストを有効化
+    * `--xcode-project-name <name>`: Xcode プロジェクト名
+    * `--xcodegen-auto-install`: `xcodegen` を自動インストール
+    * `-h, --help`: ヘルプを表示
+  * **環境変数によるカスタマイズ** (引数と自動検出が優先されます):
+    * `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
+    * `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
+    * `IOS_VERSION`: iOS 最小バージョン (デフォルト: "15.0")
+    * `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
+    * `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効化 (デフォルト: `project.yml` が存在する場合に自動有効化)
+    * `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
+    * `XCODEGEN_AUTO_INSTALL`: `xcodegen` を自動インストールする場合は "true" (デフォルト: "false")
+  * **実行内容**:
+    * **Swift Package テスト (macOS)**: `swift test --enable-code-coverage` を実行
+    * **Xcode プロジェクトの生成とテスト** (オプション、`project.yml` が存在する場合):
+      * `xcodegen generate` で Xcode プロジェクトを生成
+      * **プラットフォーム専用スキームの自動選択**:
+        * macOS テスト実行時: `S2JAboutWindow-macOS` スキームが存在する場合は自動選択 (macOS ターゲットのみをビルド・テスト)
+        * iOS テスト実行時: `S2JAboutWindow-iOS` スキームが存在する場合は自動選択 (iOS ターゲットのみをビルド・テスト)
+        * 専用スキームが存在しない場合は、統合スキーム (`S2JAboutWindow`) を使用
+      * `xcodebuild test -project <project> -scheme <scheme> -destination 'platform=macOS'` でテスト実行
+    * **iOS/iPadOS シミュレーターの確認とテスト** (オプション):
+      * 利用可能なシミュレーターを確認
+      * **デバイス ID の取得**: UUID 形式 (8-4-4-4-12) で正しく抽出
+      * **シミュレーターの起動**: 既に起動済みの場合はスキップ、未起動の場合は自動起動
+      * iOS/iPadOS 向けビルドの確認 (`swift build -Xswiftc -sdk ... -Xswiftc -target ...`)
+      * Swift Package として `xcodebuild test` を試行
+      * Xcode プロジェクトが存在する場合は、Xcode プロジェクトとしても `xcodebuild test` を試行 (プラットフォーム専用スキームを自動選択)
+    * **詳細なエラーメッセージとデバッグ情報の表示**: 各ステップで適切なログとエラーメッセージを出力
 
 ## 10. 実装状況サマリー
 
@@ -371,7 +465,7 @@ aboutWindow.showAboutWindow(
   * **AboutWindow.swift**:
     * macOS 向け NSWindow 管理、`showAboutWindow()` / `closeWindow()` API の実装。
     * `NSHostingController` を使用して SwiftUI ビューを NSWindow に統合します。
-    * ウィンドウサイズ: 400x500、スタイル: `.titled`, `.closable`, `.miniaturizable` を設定します。
+    * ウィンドウサイズ: 400x500、スタイル: `.titled`、`.closable`、`.miniaturizable` を設定します。
     * ウィンドウタイトルは `NSLocalizedString("About.Title", bundle: .module)` を使用します。
     * `NSObject` を継承し、`NSWindowDelegate` プロトコルを実装してウィンドウのライフサイクルを管理します。
     * `window.isReleasedWhenClosed = false` を設定し、`window.delegate = self` でデリゲートを設定します。
@@ -381,13 +475,15 @@ aboutWindow.showAboutWindow(
     * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合。
     * `@StateObject` を使用して `AboutViewModel` を管理します。
     * アプリケーション・アイコン: 64x64、角丸矩形 (`RoundedRectangle(cornerRadius: 12)`)。
-    * アプリケーション情報: アプリケーション名 (`.title2`, `.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
+    * アプリケーション情報: アプリケーション名 (`.title2`、`.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
+    * プラットフォーム固有の背景色対応: macOS では `Color(NSColor.windowBackgroundColor)`、iPadOS では `Color(UIColor.systemBackground)` を使用。
+    * プラットフォーム固有のアプリケーション・アイコン取得: macOS では `NSApplication.shared.applicationIconImage`、iPadOS では `UIImage(named:)` を使用。
     * Xcode Preview 対応 (`AboutView_Previews` を実装)。
   * **AboutViewModel.swift**:
     * ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張機能。
-    * `@Published` プロパティで `content`, `appName`, `version`, `copyright` を管理します。
+    * `@Published` プロパティで `content`、`appName`、`version`、`copyright` を管理します。
     * `loadDefaultContent()` メソッドでデフォルトコンテンツを読み込みます。
-    * Bundle 拡張: `displayName`, `version`, `copyright` プロパティを追加します。
+    * Bundle 拡張: `displayName`、`version`、`copyright` プロパティを追加します。
   * **MarkdownView.swift**:
     * Markdown を `AttributedString` で描画し、スクロール対応、テキスト選択対応を実装します。
     * `AttributedString(markdown:)` を使用した Markdown レンダリング。
@@ -413,7 +509,7 @@ aboutWindow.showAboutWindow(
 * リソース・ローカライゼーション
   * **Package.swift**:
     * Swift Package 定義、リソース設定 (`resources: [.process("Resources")]`)。
-    * macOS/iPadOS 両対応のマルチプラットフォーム対応 (`.macOS(.v12)`, `.iOS(.v15)`)。
+    * macOS/iPadOS 両対応のマルチプラットフォーム対応 (`.macOS(.v12)`、`.iOS(.v15)`)。
     * Swift Package として切り出し可能な構造。
     * デフォルトローカライゼーション: `defaultLocalization: "en"`。
   * **AboutDefault.md**:
@@ -425,10 +521,10 @@ aboutWindow.showAboutWindow(
 * UI/UX 機能
   * **ダークモード対応**:
     * macOS: `Color(NSColor.windowBackgroundColor)` を使用した自動対応 (✅実装完了)。
-    * iPadOS: 動作確認が必要 (⚠️ `NSColor.windowBackgroundColor` は macOS 専用 API のため、iPadOS では別の実装が必要な可能性)。
+    * iPadOS: `Color(UIColor.systemBackground)` を使用した自動対応 (✅実装完了)。
   * **アプリケーション・アイコン自動取得**:
     * macOS: `NSApplication.shared.applicationIconImage` を使用 (✅実装完了)。
-    * iPadOS: 未実装 (⚠️ `NSApplication` は macOS 専用 API のため、iPadOS では別の実装が必要)。
+    * iPadOS: `UIImage(named: "AppIcon")` を使用 (✅実装完了)。
   * **アプリケーション・メタデータ自動取得**:
     * Bundle 拡張による `displayName`、`version`、`copyright` の自動取得。
 * コンテンツ形式サポート
@@ -481,16 +577,19 @@ aboutWindow.showAboutWindow(
 | カテゴリー | 完了率 | 備考 |
 |---|---|---|
 | コア機能 | 100% | AboutWindow、AboutView、AboutViewModel、MarkdownView、Extensions すべて実装完了、Xcode Preview 対応も実装済み |
-| プラットフォーム対応 | 95% | macOS は完全実装、iPadOS は基本的な実装完了 (アプリケーション・アイコン取得とダークモード対応は macOS 専用 API を使用しているため要確認) |
+| プラットフォーム対応 | 100% | macOS と iPadOS の両方で完全実装 (プラットフォーム固有 API を適切に使用) |
 | リソース・ローカライゼーション | 100% | 英語・日本語ローカライゼーション、デフォルトコンテンツ実装完了、`Bundle.module` 経由で適切に読み込み |
-| UI/UX 機能 | 90% | macOS のダークモード・アプリケーション・アイコン自動取得は実装完了、iPadOS での動作確認が必要 |
+| UI/UX 機能 | 100% | macOS と iPadOS の両方でダークモード・アプリケーション・アイコン自動取得を実装完了 |
+| CI/CD | 100% | GitHub Actions ワークフローとローカル・テストスクリプトの実装完了 |
 | コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
 | テスト・品質保証 | 60% | 基本的なユニットテストは実装済み (AboutViewModel、MarkdownView、AboutView、AboutWindow の作成・表示・閉じるテスト)、SnapshotTesting は未実装 (テストメソッドは存在するが実際の検証ロジックは未実装) |
 
-**全体実装の完了率**: **約81%** (コア機能は完全実装、一部の拡張機能とテストが未実装)
+**全体実装の完了率**: **約85%** (コア機能とプラットフォーム対応は完全実装、一部の拡張機能とテストが未実装)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
-  * iPadOS での基本的な動作は実装済み (アプリケーション・アイコン取得とダークモード対応は macOS 専用 API を使用しているため要確認)。
+  * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
+* プラットフォーム対応は、100% 実装完了 (macOS と iPadOS の両方で完全実装)。
+* CI/CD は、100% 実装完了 (GitHub Actions ワークフローとローカル・テストスクリプトの実装完了)。
 * 主要な拡張機能 (JSON/RTF サポート) は未実装です。Markdown サポートにより基本的な用途には対応可能です。
 * テストコードについて: 基本的なユニットテストは実装済み。SnapshotTesting による UI テストは未実装。
 
@@ -499,11 +598,12 @@ aboutWindow.showAboutWindow(
 * コード品質
   * ✅ **アーキテクチャー**:
     * MVVM パターンに準拠した設計、責務分離が適切。
-    * `@StateObject`, `@Published` を適切に使用した状態管理。
-  * ⚠️ **プラットフォーム対応**:
+    * `@StateObject`、`@Published` を適切に使用した状態管理。
+  * ✅ **プラットフォーム対応**:
     * macOS/iPadOS 両対応、プラットフォーム固有 API を適切に利用します。
-    * ただし、`AboutView.swift` で `NSColor.windowBackgroundColor` が macOS 専用 API として使用されており、iPadOS での動作確認が必要です。
-    * `NSApplication.shared.applicationIconImage` も macOS 専用 API のため、iPadOS では別の実装を必要とする可能性があります。
+    * `AboutView.swift` でプラットフォーム固有の背景色とアプリケーション・アイコン取得を実装:
+      * macOS: `Color(NSColor.windowBackgroundColor)` と `NSApplication.shared.applicationIconImage` を使用。
+      * iPadOS: `Color(UIColor.systemBackground)` と `UIImage(named: "AppIcon")` を使用。
   * ✅ **エラーハンドリング**:
     * Markdown パース失敗時のフォールバック処理を実装します (`do-catch` でエラーを捕捉し、プレーンテキストとして表示します)。
   * ✅ **ドキュメント**:
@@ -581,7 +681,7 @@ aboutWindow.showAboutWindow(
 * **UI ローカライズについて、外部翻訳サービスとの連携**
   * 外部翻訳サービス (例: DeepL API) との連携を検討します。
   * 自動翻訳の機能を実装します。
-  * 多言語対応の拡充します。
+  * 多言語対応を拡充します。
 
 ---
 
@@ -626,12 +726,47 @@ aboutWindow.showAboutWindow(
 | プラットフォーム | 実行確認ターゲット | 理由 |
 |---|---|---|
 | macOS | macOS v13 (Ventura) 以降 | NSWindow の動作確認 |
-| iPadOS | iPadOS v16以降 (iPad Pro シミュレータ) | `.sheet` / `.popover` の UI 挙動確認 |
+| iPadOS | iPadOS v16以降 (iPad Pro シミュレーター) | `.sheet` / `.popover` の UI 挙動確認 |
 
 ### 5. CI ワークフロー補足
 
+**実装状況**: ✅ **完全実装済み** - CI ワークフローの実装完了
+
+* **注意**: CI/CD 環境 (GitHub Actions など) では bash が標準シェルとして使用されます。
 * 本プロジェクトでは、以下の GitHub Actions ワークフローを導入します。
     * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter)
-    * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショットテストの自動実行
-* macOS Runner では `swift test --enable-code-coverage` を実行し、テストカバレッジを出力します。
-* iPadOS 互換性テストは、`xcodebuild test -scheme S2JAboutWindow -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch)'` で検証します。
+    * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了)
+* **macOS テスト**:
+    * macOS Runner では `swift test --enable-code-coverage` を実行し、テスト・カバレッジを出力します。
+    * テスト・カバレッジを Codecov にアップロードします。
+* **iOS/iPadOS テスト**:
+    * Swift Package の検証 (`swift package describe --type json`、`swift package resolve`) を実行します。
+    * 利用可能な iPad Pro シミュレーターを確認し、リスト表示します。
+    * シミュレーターの自動検出と起動:
+        * iPad Pro シミュレーターを自動検出
+        * 見つからない場合は自動作成を試行
+        * 検出したシミュレーターを自動起動
+    * iOS 向けビルドの「事前確認」を実行します:
+        * `swift build --destination` で iOS シミュレーター向けビルドを試行
+        * 失敗時は `swift build -Xswiftc -sdk ... -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator` でフォールバック
+    * Xcode スキームの確認 (`xcodebuild -list -package .`) を実行します (オプション)。
+    * 複数のアプローチで `xcodebuild test` を試行します:
+        * Swift Package として: `xcodebuild test -package . -scheme <scheme> -destination ... -enableCodeCoverage YES`
+        * Xcode プロジェクトとして: `xcodebuild test -scheme <scheme> -destination ... -enableCodeCoverage YES`
+        * フォールバック: `swift test --enable-code-coverage`
+    * テスト・カバレッジを Codecov にアップロードします (`flags: ios`、`name: ios-coverage`、`fail_ci_if_error: false` で失敗時も CI を継続)。
+    * **ローカル・テストスクリプト**:
+    * `scripts/test-local.sh`: コミット前に CI/CD と同じテストをローカルで実行 (✅100% 実装完了)
+    * 汎用的で、他の Swift Package Manager プロジェクトでも使用可能
+    * シェル: bash で実装 (CI/CD 環境との互換性のため、macOS では zsh から実行可能)
+    * 実行方法: 直接実行 (`./scripts/test-local.sh`) または npm スクリプトから実行 (`npm run test:local`)
+    * 優先順位: 1. コマンドライン引数 ＞ 2. 自動検出 (Package.swift から) ＞ 3. 環境変数 ＞ 4. デフォルト値
+    * コマンドライン引数でカスタマイズ可能 (`--scheme-name`、`--ios-device`、`--ios-version`、`--skip-ios` など)
+    * 環境変数でカスタマイズ可能 (`SCHEME_NAME`、`IOS_DEVICE`、`IOS_VERSION`、`SKIP_IOS_TESTS`、`ENABLE_XCODE_PROJECT`、`XCODE_PROJECT_NAME`、`XCODEGEN_AUTO_INSTALL`)
+    * **プラットフォーム専用スキームの自動選択機能** (✅100% 実装完了):
+      * macOS テスト実行時: `xcodebuild -list` でスキーム一覧を取得し、`${SCHEME_NAME}-macOS` スキームが存在する場合は自動選択
+      * iOS テスト実行時: `xcodebuild -list` でスキーム一覧を取得し、`${SCHEME_NAME}-iOS` スキームが存在する場合は自動選択
+      * これにより、各プラットフォームのテスト実行時に不要なターゲットのビルドを回避し、署名エラーやリンカーエラーを防止
+    * **シミュレーター管理の改善** (✅100% 実装完了):
+      * デバイス ID の取得: UUID 形式 (8-4-4-4-12) で正しく抽出
+      * シミュレーターの起動: 既に起動済みの場合はスキップ、未起動の場合は自動起動してからテスト実行

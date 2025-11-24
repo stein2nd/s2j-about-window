@@ -64,7 +64,7 @@ public class AboutWindow: NSObject, NSWindowDelegate {
             defer: false
         )
         
-        window.title = NSLocalizedString("About.Title", bundle: .module, comment: "About Window Title")
+        window.title = NSLocalizedString("About.Title", bundle: Bundle.resourceBundle, comment: "About Window Title")
         window.contentViewController = hostingController
         window.center()
         window.isReleasedWhenClosed = false

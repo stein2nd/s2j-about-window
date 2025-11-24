@@ -216,7 +216,7 @@ The library includes built-in localization for:
 You can add your own localizations by providing `Localizable.strings` files in your app bundle.
  -->
 
-アプリバンドルに `Localizable.strings` ファイルを追加することで、独自のローカライズを追加できます。
+アプリケーション・バンドルに `Localizable.strings` ファイルを追加することで、独自のローカライズを追加できます。
 
 ## Customization
 
@@ -226,7 +226,7 @@ You can add your own localizations by providing `Localizable.strings` files in y
 You can provide default content by including an `AboutDefault.md` file in your app bundle:
  -->
 
-アプリバンドルに `AboutDefault.md` ファイルを含めることで、デフォルトコンテンツを提供できます。
+アプリケーション・バンドルに `AboutDefault.md` ファイルを含めることで、デフォルト・コンテンツを提供できます。
 
 ```markdown
 # About This App
@@ -280,7 +280,7 @@ The library includes comprehensive tests:
 
 ライブラリには、包括的なテストが含まれています。
 
-```bash
+```zsh
 swift test
 ```
 
@@ -290,9 +290,86 @@ For UI testing with snapshots:
 
 スナップショットを用いた UI テストの場合。
 
-```bash
+```zsh
 swift test --enable-code-coverage
 ```
+
+<!-- 
+### Local Testing Before Commit
+ -->
+
+### コミット前のローカルテスト
+
+<!-- 
+Before committing, you can run the same tests that CI/CD will run:
+ -->
+
+コミット前に、CI/CD と同じテストをローカルで実行できます:
+
+```zsh
+# 直接実行
+./scripts/test-local.sh
+
+# npm スクリプトから実行
+npm run test:local
+```
+
+このスクリプトは以下を実行します:
+- macOS テストの実行
+- Xcode プロジェクトの生成とテスト (`project.yml` が存在する場合):
+  - `xcodegen generate` で Xcode プロジェクトを生成
+  - プラットフォーム専用スキームの自動選択 (macOS テスト時は `S2JAboutWindow-macOS`、iOS テスト時は `S2JAboutWindow-iOS`)
+  - 各プラットフォームのテストを独立して実行
+- iOS シミュレーターの確認と起動:
+  - 利用可能なシミュレーターを自動検出
+  - デバイス ID を UUID 形式で正しく抽出
+  - 既に起動済みの場合はスキップ、未起動の場合は自動起動
+- iOS テストの実行を試行 (Xcode が利用可能な場合)
+- テスト失敗時の有用なエラー・メッセージの表示
+
+このスクリプトは汎用的で、他の Swift Package Manager プロジェクトでも使用できます。
+
+### カスタマイズ方法
+
+**優先順位**: 1. コマンドライン引数 ＞ 2. 自動検出 (Package.swift から) ＞ 3. 環境変数 ＞ 4. デフォルト値
+
+#### コマンドライン引数で指定
+
+```zsh
+# npm スクリプトから引数を渡す
+npm run test:local -- --skip-ios
+npm run test:local -- --scheme-name MyApp --ios-device "iPhone 15"
+
+# 直接実行
+./scripts/test-local.sh --skip-ios
+./scripts/test-local.sh --scheme-name MyApp --ios-device "iPhone 15" --ios-version "16.0"
+```
+
+利用可能なオプション:
+- `-s, --scheme-name <name>`: Xcode スキーム名
+- `-d, --ios-device <device>`: iOS/iPadOS シミュレーターデバイス名
+- `-v, --ios-version <version>`: iOS/iPadOS 最小バージョン
+- `--skip-ios`: iOS/iPadOS テストをスキップ
+- `--enable-xcode-project`: Xcode プロジェクト生成とテストを有効化
+- `--xcode-project-name <name>`: Xcode プロジェクト名
+- `--xcodegen-auto-install`: `xcodegen` を自動インストール
+- `-h, --help`: ヘルプを表示
+
+#### 環境変数で指定
+
+```zsh
+# 環境変数でカスタマイズ (引数と自動検出が優先されます)
+SCHEME_NAME="MyPackage" IOS_DEVICE="iPhone 15" IOS_VERSION="16.0" ./scripts/test-local.sh
+```
+
+利用可能な環境変数:
+- `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
+- `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
+- `IOS_VERSION`: iOS 最小バージョン (デフォルト: "15.0")
+- `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
+- `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効にする場合は "true"
+- `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
+- `XCODEGEN_AUTO_INSTALL`: `xcodegen` を自動インストールする場合は "true"
 
 ## Development
 
@@ -306,7 +383,7 @@ swift test --enable-code-coverage
 The project follows a standard Swift Package Manager structure:
  -->
 
-このプロジェクトは標準的な Swift Package Manager の構造に従っています:
+このプロジェクトは標準的な Swift Package Manager の構造に従っています。
 
 <!-- 
 * `Sources/` - Source code
@@ -328,57 +405,57 @@ The project follows a standard Swift Package Manager structure:
 To set up the development environment for this project:
  -->
 
-このプロジェクトの開発環境をセットアップするには:
+このプロジェクトの開発環境をセットアップするには。
 
 <!-- 
 1. Clone the repository:
 
-   ```bash
+   ```zsh
    git clone https://github.com/stein2nd/s2j-about-window.git
    cd s2j-about-window
    ```
 
 2. Open the project in Xcode:
 
-   ```bash
+   ```zsh
    open Package.swift
    ```
 
 3. Build the project:
 
-   ```bash
+   ```zsh
    swift build
    ```
 
 4. Run tests:
 
-   ```bash
+   ```zsh
    swift test
    ```
  -->
 
 1. リポジトリをクローンします:
 
-   ```bash
+   ```zsh
    git clone https://github.com/stein2nd/s2j-about-window.git
    cd s2j-about-window
    ```
 
 2. Xcode でプロジェクトを開きます:
 
-   ```bash
+   ```zsh
    open Package.swift
    ```
 
 3. プロジェクトをビルドします:
 
-   ```bash
+   ```zsh
    swift build
    ```
 
 4. テストを実行します:
 
-   ```bash
+   ```zsh
    swift test
    ```
 
@@ -392,21 +469,20 @@ To set up the development environment for this project:
 To build the project, use:
  -->
 
-プロジェクトをビルドするには:
+プロジェクトをビルドするには。
 
-```bash
+```zsh
 swift build
 ```
 <!-- 
 To run tests with code coverage:
  -->
 
-コードカバレッジ付きでテストを実行するには:
+コード・カバレッジ付きでテストを実行するには。
 
-```bash
+```zsh
 swift test --enable-code-coverage
 ```
-
 
 ## Contributing
 

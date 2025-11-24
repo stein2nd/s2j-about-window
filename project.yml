@@ -1,0 +1,156 @@
+name: s2j-about-window
+options:
+  bundleIdPrefix: com.s2j
+  deploymentTarget:
+    macOS: "12.0"
+    iOS: "15.0"
+  developmentLanguage: en
+  usesTabs: false
+  indentWidth: 4
+  tabWidth: 4
+  xcodeVersion: "15.0"
+
+targets:
+  S2JAboutWindow-macOS:
+    type: framework
+    platform: macOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: Sources/S2JAboutWindow
+        excludes:
+          - "**/*.md"
+    resources:
+      - path: Sources/S2JAboutWindow/Resources
+    settings:
+      base:
+        PRODUCT_NAME: S2JAboutWindow
+        PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindow
+        SWIFT_VERSION: "5.9"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+        DEVELOPMENT_LANGUAGE: en
+        GENERATE_INFOPLIST_FILE: YES
+        MACOSX_DEPLOYMENT_TARGET: "12.0"
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: -Onone
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: -O
+
+  S2JAboutWindow-iOS:
+    type: framework
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Sources/S2JAboutWindow
+        excludes:
+          - "**/*.md"
+    resources:
+      - path: Sources/S2JAboutWindow/Resources
+    settings:
+      base:
+        PRODUCT_NAME: S2JAboutWindow
+        PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindow
+        SWIFT_VERSION: "5.9"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+        DEVELOPMENT_LANGUAGE: en
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        SUPPORTS_MACCATALYST: false
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: -Onone
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: -O
+
+  S2JAboutWindowTests-macOS:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: Tests/S2JAboutWindowTests
+    dependencies:
+      - target: S2JAboutWindow-macOS
+    settings:
+      base:
+        PRODUCT_NAME: S2JAboutWindowTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindowTests
+        SWIFT_VERSION: "5.9"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+        DEVELOPMENT_LANGUAGE: en
+        GENERATE_INFOPLIST_FILE: YES
+        MACOSX_DEPLOYMENT_TARGET: "12.0"
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: -Onone
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: -O
+
+  S2JAboutWindowTests-iOS:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Tests/S2JAboutWindowTests
+    dependencies:
+      - target: S2JAboutWindow-iOS
+    settings:
+      base:
+        PRODUCT_NAME: S2JAboutWindowTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindowTests
+        SWIFT_VERSION: "5.9"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+        DEVELOPMENT_LANGUAGE: en
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        SUPPORTS_MACCATALYST: false
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: -Onone
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) DEBUG"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: -O
+
+schemes:
+  S2JAboutWindow:
+    build:
+      targets:
+        S2JAboutWindow-macOS: all
+        S2JAboutWindow-iOS: all
+    test:
+      targets:
+        - S2JAboutWindowTests-macOS
+        - S2JAboutWindowTests-iOS
+    run:
+      config: Debug
+    archive:
+      config: Release
+  S2JAboutWindow-macOS:
+    build:
+      targets:
+        S2JAboutWindow-macOS: all
+    test:
+      targets:
+        - S2JAboutWindowTests-macOS
+    run:
+      config: Debug
+    archive:
+      config: Release
+  S2JAboutWindow-iOS:
+    build:
+      targets:
+        S2JAboutWindow-iOS: all
+    test:
+      targets:
+        - S2JAboutWindowTests-iOS
+    run:
+      config: Debug
+    archive:
+      config: Release

@@ -54,9 +54,9 @@ public class AboutViewModel: ObservableObject {
     * @return void
     */
     public func loadDefaultContent() {
-        guard let defaultContentPath = Bundle.module.path(forResource: "AboutDefault", ofType: "md"),
+        guard let defaultContentPath = Bundle.resourceBundle.path(forResource: "AboutDefault", ofType: "md"),
               let defaultContent = try? String(contentsOfFile: defaultContentPath) else {
-            content = NSLocalizedString("About.NoDescription", bundle: .module, comment: "No description available")
+            content = NSLocalizedString("About.NoDescription", bundle: Bundle.resourceBundle, comment: "No description available")
             return
         }
         content = defaultContent
@@ -66,25 +66,41 @@ public class AboutViewModel: ObservableObject {
 // MARK: - Bundle Extensions
 extension Bundle {
     /** 
-    * @return アプリ名
-    */
+     * @return アプリ名
+     */
     var displayName: String? {
         return object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ??
                object(forInfoDictionaryKey: "CFBundleName") as? String
     }
     
     /**
-    * @return バージョン
-    */
+     * @return バージョン
+     */
     var version: String? {
         return object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     }
 
     /** 
-    * @return 著作権情報
-    */
+     * @return 著作権情報
+     */
     var copyright: String? {
         return object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String
+    }
+
+    /**
+     * モジュールの Bundle を取得
+     * Swift Package Manager の場合は自動生成された Bundle.module を使用
+     * Xcode プロジェクトの場合はフレームワークの Bundle を使用
+     * @return Bundle
+     */
+    static var resourceBundle: Bundle {
+        #if SWIFT_PACKAGE
+        // Swift Package Manager の場合、自動生成された Bundle.module を使用
+        return Bundle.module
+        #else
+        // Xcode プロジェクトの場合、フレームワークの Bundle を使用
+        return Bundle(for: AboutViewModel.self)
+        #endif
     }
 }
 #endif
