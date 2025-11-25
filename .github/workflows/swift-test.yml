@@ -57,6 +57,15 @@ jobs:
           echo "Generating Xcode project from project.yml..."
           xcodegen generate
           echo "Xcode project generated successfully"
+          echo ""
+          echo "=== Verifying scheme configuration ==="
+          if [ -f "s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme" ]; then
+            echo "Scheme file exists, checking test destination..."
+            grep -A 5 "TestAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme || echo "TestAction not found"
+            grep -A 5 "LaunchAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme || echo "LaunchAction not found"
+          else
+            echo "Warning: Scheme file not found at expected location"
+          fi
         else
           echo "Error: project.yml not found. Cannot generate Xcode project."
           exit 1
@@ -190,13 +199,19 @@ jobs:
           xcrun simctl list devices available | head -20 || true
           echo ""
           echo "=== Full xcodebuild -showdestinations output (with SDK) ==="
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | tee /tmp/destinations-with-sdk.txt || true
           echo ""
           echo "=== Full xcodebuild -showdestinations output (without SDK) ==="
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | tee /tmp/destinations-without-sdk.txt || true
           echo ""
           echo "=== Checking scheme build destinations ==="
           xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | grep -i "simulator" || echo "No simulator destinations found"
+          echo ""
+          echo "=== Checking scheme test destinations ==="
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | grep -i "simulator" || echo "No simulator destinations found for test"
+          echo ""
+          echo "=== Checking scheme configuration ==="
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showBuildSettings 2>&1 | grep -i "sdk\|platform" | head -10 || true
           echo "=== End of destinations output ==="
         else
           echo "Error: Xcode project not found"
