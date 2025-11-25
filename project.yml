@@ -152,5 +152,7 @@ schemes:
         - S2JAboutWindowTests-iOS
     run:
       config: Debug
+      destination:
+        platform: iOS Simulator
     archive:
       config: Release
