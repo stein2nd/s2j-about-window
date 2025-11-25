@@ -75,23 +75,39 @@ jobs:
         xcrun simctl list devices available | grep -i "iPhone\|iPad" | head -10 || true
 
         # Try to find an iPhone simulator first, then iPad
-        SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPhone" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
-        if [ -z "$SIMULATOR_UDID" ]; then
-          SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPad" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPhone" | head -1)
+        if [ -z "$SIMULATOR_LINE" ]; then
+          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPad" | head -1)
         fi
 
-        if [ -z "$SIMULATOR_UDID" ]; then
+        if [ -z "$SIMULATOR_LINE" ]; then
           echo "Error: No available iOS simulator found"
           echo "All available devices:"
           xcrun simctl list devices available || true
           exit 1
         fi
 
-        echo "Found iOS Simulator UDID: $SIMULATOR_UDID"
+        echo "Found simulator line: $SIMULATOR_LINE"
 
-        # Get simulator name for display
-        SIMULATOR_INFO=$(xcrun simctl list devices available | grep "$SIMULATOR_UDID")
-        echo "Simulator info: $SIMULATOR_INFO"
+        # Extract UDID
+        SIMULATOR_UDID=$(echo "$SIMULATOR_LINE" | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+
+        # Extract simulator name (e.g., "iPhone 15" or "iPhone 15 Pro")
+        # Format: "iPhone 15 (A95FF35F-...) (Available)"
+        SIMULATOR_NAME=$(echo "$SIMULATOR_LINE" | sed -E 's/^[[:space:]]*([^(]+) \(.*/\1/' | xargs)
+
+        # Extract OS version from runtime
+        # Get the runtime for this device
+        DEVICE_TYPE=$(xcrun simctl list devicetypes | grep "$SIMULATOR_NAME" | head -1 | awk -F'[()]' '{print $2}' || echo "")
+        if [ -n "$DEVICE_TYPE" ]; then
+          RUNTIME=$(xcrun simctl list runtimes available | grep -i "iOS" | head -1 | awk -F'[()]' '{print $2}' || echo "")
+          if [ -n "$RUNTIME" ]; then
+            OS_VERSION=$(echo "$RUNTIME" | sed 's/com.apple.CoreSimulator.SimRuntime.iOS-//' | sed 's/-.*//')
+            echo "Detected OS version: $OS_VERSION"
+          fi
+        fi
+
+        echo "Found iOS Simulator: $SIMULATOR_NAME (UDID: $SIMULATOR_UDID)"
 
         # Boot the simulator (if not already booted)
         echo "Booting simulator $SIMULATOR_UDID..."
@@ -112,24 +128,50 @@ jobs:
         # Try to get destination from xcodebuild after simulator is booted
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Querying xcodebuild for available destinations..."
-          XCODE_DEST=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>/dev/null | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1)
-          if [ -n "$XCODE_DEST" ]; then
-            echo "Found destination from xcodebuild: $XCODE_DEST"
-            # Extract the full destination string
-            DEST_STRING=$(echo "$XCODE_DEST" | sed 's/^[[:space:]]*//')
-            echo "destination=$DEST_STRING" >> $GITHUB_OUTPUT
-          else
-            # Fallback to UDID-based destination
-            echo "Using UDID-based destination as fallback"
+          echo "Full xcodebuild -showdestinations output:"
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | head -50 || true
+
+          # Try to find destination with name
+          if [ -n "$SIMULATOR_NAME" ]; then
+            XCODE_DEST=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>/dev/null | grep -i "platform=iOS Simulator" | grep -i "$SIMULATOR_NAME" | head -1)
+            if [ -n "$XCODE_DEST" ]; then
+              echo "Found destination by name: $XCODE_DEST"
+              DEST_STRING=$(echo "$XCODE_DEST" | sed 's/^[[:space:]]*//')
+              echo "destination=$DEST_STRING" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # If not found by name, try by UDID
+          if [ -z "$XCODE_DEST" ]; then
+            XCODE_DEST=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>/dev/null | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1)
+            if [ -n "$XCODE_DEST" ]; then
+              echo "Found destination by UDID: $XCODE_DEST"
+              DEST_STRING=$(echo "$XCODE_DEST" | sed 's/^[[:space:]]*//')
+              echo "destination=$DEST_STRING" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # If still not found, use name-based destination
+          if [ -z "$XCODE_DEST" ] && [ -n "$SIMULATOR_NAME" ]; then
+            echo "Using name-based destination as fallback: platform=iOS Simulator,name=$SIMULATOR_NAME"
+            echo "destination=platform=iOS Simulator,name=$SIMULATOR_NAME" >> $GITHUB_OUTPUT
+          elif [ -z "$XCODE_DEST" ]; then
+            echo "Using UDID-based destination as fallback: platform=iOS Simulator,id=$SIMULATOR_UDID"
             echo "destination=platform=iOS Simulator,id=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
           fi
         else
-          # Fallback to UDID-based destination
-          echo "Using UDID-based destination (project not found for verification)"
-          echo "destination=platform=iOS Simulator,id=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
+          # Fallback to name-based or UDID-based destination
+          if [ -n "$SIMULATOR_NAME" ]; then
+            echo "Using name-based destination (project not found): platform=iOS Simulator,name=$SIMULATOR_NAME"
+            echo "destination=platform=iOS Simulator,name=$SIMULATOR_NAME" >> $GITHUB_OUTPUT
+          else
+            echo "Using UDID-based destination (project not found): platform=iOS Simulator,id=$SIMULATOR_UDID"
+            echo "destination=platform=iOS Simulator,id=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
+          fi
         fi
 
         echo "udid=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
+        echo "name=$SIMULATOR_NAME" >> $GITHUB_OUTPUT
 
     - name: List Xcode schemes
       run: |
