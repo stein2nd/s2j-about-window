@@ -214,15 +214,23 @@ jobs:
           echo "Building with Xcode project..."
 
           # Try multiple approaches
-          # Approach 1: Try with SDK only (no destination)
-          echo "Attempting build with SDK only (no destination)..."
+          # Approach 1: Try with SDK and architecture (no destination)
+          echo "Attempting build with SDK and architecture (no destination)..."
+          # Try arm64 first (Apple Silicon), then x86_64 (Intel)
           if xcodebuild build \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
-            -sdk iphonesimulator 2>&1; then
-            echo "Build succeeded with SDK only"
+            -sdk iphonesimulator \
+            -arch arm64 2>&1; then
+            echo "Build succeeded with SDK and arm64 architecture"
+          elif xcodebuild build \
+            -project s2j-about-window.xcodeproj \
+            -scheme S2JAboutWindow-iOS \
+            -sdk iphonesimulator \
+            -arch x86_64 2>&1; then
+            echo "Build succeeded with SDK and x86_64 architecture"
           else
-            echo "Build failed with SDK only, trying with destination..."
+            echo "Build failed with SDK and architecture, trying with destination..."
 
             # Approach 2: Try with destination from previous step
             DESTINATION="${{ steps.simulator.outputs.destination }}"
