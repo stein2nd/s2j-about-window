@@ -184,16 +184,23 @@ jobs:
 
     - name: Debug xcodebuild destinations
       run: |
+        set -x
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "=== Checking available simulators ==="
           xcrun simctl list devices available | head -20 || true
           echo ""
           echo "=== Full xcodebuild -showdestinations output (with SDK) ==="
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | cat || true
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
           echo ""
           echo "=== Full xcodebuild -showdestinations output (without SDK) ==="
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | cat || true
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
+          echo ""
+          echo "=== Checking scheme build destinations ==="
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | grep -i "simulator" || echo "No simulator destinations found"
           echo "=== End of destinations output ==="
+        else
+          echo "Error: Xcode project not found"
+          exit 1
         fi
 
     - name: Build for iOS (verify compilation)
