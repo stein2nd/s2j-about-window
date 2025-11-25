@@ -206,19 +206,54 @@ jobs:
 
           if [ -z "$XCODE_DEST" ]; then
             ATTEMPT=$((ATTEMPT + 1))
-            echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
+            if [ $((ATTEMPT % 10)) -eq 0 ]; then
+              echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
+              echo "Debug: xcodebuild output (first 30 lines):"
+              echo "$DEST_OUTPUT" | head -30 || true
+              echo "Debug: Simulator status:"
+              xcrun simctl list devices | grep "$SIMULATOR_UDID" || true
+            else
+              echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
+            fi
             sleep 2
           fi
         done
 
+        # If xcodebuild still doesn't return destinations, construct destination manually
         if [ -z "$XCODE_DEST" ]; then
-          echo "Error: Simulator not accessible via xcodebuild after $MAX_ATTEMPTS attempts"
-          echo "Available destinations:"
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | grep "platform=iOS Simulator" || true
-          exit 1
+          echo "Warning: xcodebuild -showdestinations did not return iOS Simulator destinations after $MAX_ATTEMPTS attempts"
+          echo "Full xcodebuild output (last attempt):"
+          echo "$DEST_OUTPUT"
+          echo ""
+          echo "Attempting to construct destination manually from simulator info..."
+
+          # Verify simulator is still booted
+          CURRENT_STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | grep -oE '\([^)]+\)' | head -1 | sed 's/[()]//g' || echo "")
+          if [ "$CURRENT_STATUS" = "Booted" ]; then
+            echo "Simulator is booted, constructing destination string manually..."
+            # Construct destination string manually: platform=iOS Simulator,name=Device Name,id=UDID
+            # Or simpler: platform=iOS Simulator,id=UDID
+            if [ -n "$SIMULATOR_NAME" ] && [ -n "$SIMULATOR_UDID" ]; then
+              XCODE_DEST="platform=iOS Simulator,name=$SIMULATOR_NAME,id=$SIMULATOR_UDID"
+              echo "Constructed destination: $XCODE_DEST"
+            elif [ -n "$SIMULATOR_UDID" ]; then
+              XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
+              echo "Constructed destination: $XCODE_DEST"
+            else
+              echo "Error: Cannot construct destination - missing UDID"
+              echo "Available destinations:"
+              xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+              exit 1
+            fi
+          else
+            echo "Error: Simulator is not booted (status: $CURRENT_STATUS)"
+            echo "Available destinations:"
+            xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+            exit 1
+          fi
         fi
 
-        # Use the destination found via xcodebuild (most reliable)
+        # Use the destination found via xcodebuild or constructed manually
         DEST_STRING=$(echo "$XCODE_DEST" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
         echo "Using destination: $DEST_STRING"
         echo "destination=$DEST_STRING" >> $GITHUB_OUTPUT
