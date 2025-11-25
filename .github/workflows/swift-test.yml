@@ -182,34 +182,62 @@ jobs:
           exit 1
         fi
 
+    - name: Debug xcodebuild destinations
+      run: |
+        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
+          echo "=== Full xcodebuild -showdestinations output ==="
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+          echo "=== End of destinations output ==="
+        fi
+
     - name: Build for iOS (verify compilation)
       run: |
         # Get iOS SDK path
         IOS_SDK_PATH=$(xcrun --show-sdk-path --sdk iphonesimulator)
         echo "iOS SDK Path: $IOS_SDK_PATH"
 
-        # Use destination from previous step
-        DESTINATION="${{ steps.simulator.outputs.destination }}"
-        echo "Using destination: $DESTINATION"
-
         # Build with Xcode project (should exist after generation step)
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Building with Xcode project..."
-          # Try with specific destination first
+
+          # Try multiple approaches
+          # Approach 1: Try with SDK only (no destination)
+          echo "Attempting build with SDK only (no destination)..."
           if xcodebuild build \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
-            -destination "$DESTINATION" \
             -sdk iphonesimulator 2>&1; then
-            echo "Build succeeded with specific destination"
+            echo "Build succeeded with SDK only"
           else
-            echo "Build failed with specific destination, trying generic destination..."
-            # Fallback to generic platform destination
-            xcodebuild build \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "platform=iOS Simulator" \
-              -sdk iphonesimulator
+            echo "Build failed with SDK only, trying with destination..."
+
+            # Approach 2: Try with destination from previous step
+            DESTINATION="${{ steps.simulator.outputs.destination }}"
+            if [ -n "$DESTINATION" ]; then
+              echo "Using destination: $DESTINATION"
+              if xcodebuild build \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "$DESTINATION" \
+                -sdk iphonesimulator 2>&1; then
+                echo "Build succeeded with specific destination"
+              else
+                echo "Build failed with specific destination, trying generic destination..."
+                # Approach 3: Try with generic platform destination
+                xcodebuild build \
+                  -project s2j-about-window.xcodeproj \
+                  -scheme S2JAboutWindow-iOS \
+                  -destination "platform=iOS Simulator" \
+                  -sdk iphonesimulator
+              fi
+            else
+              echo "No destination available, trying generic destination..."
+              xcodebuild build \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "platform=iOS Simulator" \
+                -sdk iphonesimulator
+            fi
           fi
         else
           echo "Error: Xcode project not found. iOS builds require an Xcode project."
@@ -218,28 +246,49 @@ jobs:
 
     - name: Run tests on iOS Simulator
       run: |
-        # Use destination from previous step
-        DESTINATION="${{ steps.simulator.outputs.destination }}"
-        echo "Using destination: $DESTINATION"
-
         # Run tests with Xcode project (should exist after generation step)
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Running tests with Xcode project..."
-          # Try with specific destination first
+
+          # Try multiple approaches
+          # Approach 1: Try with SDK only (no destination)
+          echo "Attempting test with SDK only (no destination)..."
           if xcodebuild test \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
-            -destination "$DESTINATION" \
+            -sdk iphonesimulator \
             -enableCodeCoverage YES 2>&1; then
-            echo "Tests succeeded with specific destination"
+            echo "Tests succeeded with SDK only"
           else
-            echo "Tests failed with specific destination, trying generic destination..."
-            # Fallback to generic platform destination
-            xcodebuild test \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "platform=iOS Simulator" \
-              -enableCodeCoverage YES
+            echo "Tests failed with SDK only, trying with destination..."
+
+            # Approach 2: Try with destination from previous step
+            DESTINATION="${{ steps.simulator.outputs.destination }}"
+            if [ -n "$DESTINATION" ]; then
+              echo "Using destination: $DESTINATION"
+              if xcodebuild test \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "$DESTINATION" \
+                -enableCodeCoverage YES 2>&1; then
+                echo "Tests succeeded with specific destination"
+              else
+                echo "Tests failed with specific destination, trying generic destination..."
+                # Approach 3: Try with generic platform destination
+                xcodebuild test \
+                  -project s2j-about-window.xcodeproj \
+                  -scheme S2JAboutWindow-iOS \
+                  -destination "platform=iOS Simulator" \
+                  -enableCodeCoverage YES
+              fi
+            else
+              echo "No destination available, trying generic destination..."
+              xcodebuild test \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "platform=iOS Simulator" \
+                -enableCodeCoverage YES
+            fi
           fi
         else
           echo "Error: Xcode project not found. iOS tests require an Xcode project."
