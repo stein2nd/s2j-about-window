@@ -150,6 +150,8 @@ schemes:
     test:
       targets:
         - S2JAboutWindowTests-iOS
+      destination:
+        platform: iOS Simulator
     run:
       config: Debug
       destination:
