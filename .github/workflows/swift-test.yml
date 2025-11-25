@@ -214,50 +214,68 @@ jobs:
           echo "Building with Xcode project..."
 
           # Try multiple approaches
-          # Approach 1: Try with SDK and architecture (no destination)
-          echo "Attempting build with SDK and architecture (no destination)..."
-          # Try arm64 first (Apple Silicon), then x86_64 (Intel)
+          # Approach 1: Try building target directly (no scheme)
+          echo "Attempting build with target directly (no scheme)..."
           if xcodebuild build \
             -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
+            -target S2JAboutWindow-iOS \
             -sdk iphonesimulator \
             -arch arm64 2>&1; then
-            echo "Build succeeded with SDK and arm64 architecture"
+            echo "Build succeeded with target directly (arm64)"
           elif xcodebuild build \
             -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
+            -target S2JAboutWindow-iOS \
             -sdk iphonesimulator \
             -arch x86_64 2>&1; then
-            echo "Build succeeded with SDK and x86_64 architecture"
+            echo "Build succeeded with target directly (x86_64)"
           else
-            echo "Build failed with SDK and architecture, trying with destination..."
+            echo "Build failed with target directly, trying with scheme..."
 
-            # Approach 2: Try with destination from previous step
-            DESTINATION="${{ steps.simulator.outputs.destination }}"
-            if [ -n "$DESTINATION" ]; then
-              echo "Using destination: $DESTINATION"
-              if xcodebuild build \
-                -project s2j-about-window.xcodeproj \
-                -scheme S2JAboutWindow-iOS \
-                -destination "$DESTINATION" \
-                -sdk iphonesimulator 2>&1; then
-                echo "Build succeeded with specific destination"
+            # Approach 2: Try with SDK and architecture (no destination)
+            echo "Attempting build with SDK and architecture (no destination)..."
+            # Try arm64 first (Apple Silicon), then x86_64 (Intel)
+            if xcodebuild build \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
+              -arch arm64 2>&1; then
+              echo "Build succeeded with SDK and arm64 architecture"
+            elif xcodebuild build \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
+              -arch x86_64 2>&1; then
+              echo "Build succeeded with SDK and x86_64 architecture"
+            else
+              echo "Build failed with SDK and architecture, trying with destination..."
+
+              # Approach 3: Try with destination from previous step
+              DESTINATION="${{ steps.simulator.outputs.destination }}"
+              if [ -n "$DESTINATION" ]; then
+                echo "Using destination: $DESTINATION"
+                if xcodebuild build \
+                  -project s2j-about-window.xcodeproj \
+                  -scheme S2JAboutWindow-iOS \
+                  -destination "$DESTINATION" \
+                  -sdk iphonesimulator 2>&1; then
+                  echo "Build succeeded with specific destination"
+                else
+                  echo "Build failed with specific destination, trying generic destination..."
+                  # Approach 4: Try with generic platform destination
+                  xcodebuild build \
+                    -project s2j-about-window.xcodeproj \
+                    -scheme S2JAboutWindow-iOS \
+                    -destination "platform=iOS Simulator" \
+                    -sdk iphonesimulator
+                fi
               else
-                echo "Build failed with specific destination, trying generic destination..."
-                # Approach 3: Try with generic platform destination
+                echo "No destination available, trying generic destination..."
                 xcodebuild build \
                   -project s2j-about-window.xcodeproj \
                   -scheme S2JAboutWindow-iOS \
                   -destination "platform=iOS Simulator" \
                   -sdk iphonesimulator
               fi
-            else
-              echo "No destination available, trying generic destination..."
-              xcodebuild build \
-                -project s2j-about-window.xcodeproj \
-                -scheme S2JAboutWindow-iOS \
-                -destination "platform=iOS Simulator" \
-                -sdk iphonesimulator
             fi
           fi
         else
