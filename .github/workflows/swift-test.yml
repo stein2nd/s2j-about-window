@@ -291,13 +291,15 @@ jobs:
 
     - name: Run tests on iOS Simulator
       run: |
+        set -e
         # Run tests with Xcode project (should exist after generation step)
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Running tests with Xcode project..."
 
           # Try multiple approaches
           # Approach 1: Try with SDK and architecture (no destination)
-          echo "Attempting test with SDK and architecture (no destination)..."
+          echo "=== Attempting test with SDK and architecture (no destination) ==="
+          set +e
           # Try arm64 first (Apple Silicon), then x86_64 (Intel)
           if xcodebuild test \
             -project s2j-about-window.xcodeproj \
@@ -305,45 +307,46 @@ jobs:
             -sdk iphonesimulator \
             -arch arm64 \
             -enableCodeCoverage YES 2>&1; then
-            echo "Tests succeeded with SDK and arm64 architecture"
+            echo "✅ Tests succeeded with SDK and arm64 architecture"
+            exit 0
           elif xcodebuild test \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
             -sdk iphonesimulator \
             -arch x86_64 \
             -enableCodeCoverage YES 2>&1; then
-            echo "Tests succeeded with SDK and x86_64 architecture"
+            echo "✅ Tests succeeded with SDK and x86_64 architecture"
+            exit 0
           else
-            echo "Tests failed with SDK and architecture, trying with destination..."
+            echo "❌ Tests failed with SDK and architecture, trying with destination..."
+            set -e
+          fi
 
-            # Approach 2: Try with destination from previous step
-            DESTINATION="${{ steps.simulator.outputs.destination }}"
-            if [ -n "$DESTINATION" ]; then
-              echo "Using destination: $DESTINATION"
-              if xcodebuild test \
-                -project s2j-about-window.xcodeproj \
-                -scheme S2JAboutWindow-iOS \
-                -destination "$DESTINATION" \
-                -enableCodeCoverage YES 2>&1; then
-                echo "Tests succeeded with specific destination"
-              else
-                echo "Tests failed with specific destination, trying generic destination..."
-                # Approach 3: Try with generic platform destination
-                xcodebuild test \
-                  -project s2j-about-window.xcodeproj \
-                  -scheme S2JAboutWindow-iOS \
-                  -destination "platform=iOS Simulator" \
-                  -enableCodeCoverage YES
-              fi
+          # Approach 2: Try with destination from previous step
+          DESTINATION="${{ steps.simulator.outputs.destination }}"
+          if [ -n "$DESTINATION" ]; then
+            echo "=== Attempting test with destination: $DESTINATION ==="
+            set +e
+            if xcodebuild test \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "$DESTINATION" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests succeeded with specific destination"
+              exit 0
             else
-              echo "No destination available, trying generic destination..."
-              xcodebuild test \
-                -project s2j-about-window.xcodeproj \
-                -scheme S2JAboutWindow-iOS \
-                -destination "platform=iOS Simulator" \
-                -enableCodeCoverage YES
+              echo "❌ Tests failed with specific destination, trying generic destination..."
+              set -e
             fi
           fi
+
+          # Approach 3: Try with generic platform destination
+          echo "=== Attempting test with generic platform destination ==="
+          xcodebuild test \
+            -project s2j-about-window.xcodeproj \
+            -scheme S2JAboutWindow-iOS \
+            -destination "platform=iOS Simulator" \
+            -enableCodeCoverage YES
         else
           echo "Error: Xcode project not found. iOS tests require an Xcode project."
           exit 1
