@@ -67,6 +67,26 @@ jobs:
         echo "Available iOS simulators:"
         xcrun simctl list devices available | grep -i "iOS" || true
 
+    - name: Get iOS Simulator UDID
+      id: simulator
+      run: |
+        # Get the first available iOS simulator UDID
+        # Try iPhone first, then iPad, then any iOS device
+        SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPhone" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        if [ -z "$SIMULATOR_UDID" ]; then
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPad" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        fi
+        if [ -z "$SIMULATOR_UDID" ]; then
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iOS" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        fi
+        if [ -z "$SIMULATOR_UDID" ]; then
+          echo "Error: No available iOS simulator found"
+          xcrun simctl list devices available
+          exit 1
+        fi
+        echo "Found iOS Simulator UDID: $SIMULATOR_UDID"
+        echo "udid=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
+
     - name: List Xcode schemes
       run: |
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
@@ -82,8 +102,8 @@ jobs:
         IOS_SDK_PATH=$(xcrun --show-sdk-path --sdk iphonesimulator)
         echo "iOS SDK Path: $IOS_SDK_PATH"
 
-        # Use generic iOS Simulator destination (works with any available simulator)
-        DESTINATION="generic/platform=iOS Simulator"
+        # Use specific iOS Simulator destination with UDID
+        DESTINATION="platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}"
         echo "Using destination: $DESTINATION"
 
         # Build with Xcode project (should exist after generation step)
@@ -102,7 +122,8 @@ jobs:
     - name: Run tests on iOS Simulator
       run: |
         set -e
-        DESTINATION="generic/platform=iOS Simulator"
+        # Use specific iOS Simulator destination with UDID
+        DESTINATION="platform=iOS Simulator,id=${{ steps.simulator.outputs.udid }}"
         echo "Using destination: $DESTINATION"
 
         # Run tests with Xcode project (should exist after generation step)
