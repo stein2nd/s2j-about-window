@@ -267,13 +267,13 @@
 │　├─ AboutViewModel.swift  # ViewModel (app metadata、markdown) (✅100% 実装完了)
 │　├─ MarkdownView.swift  # Markdown を AttributedString で描画 (✅100% 実装完了)
 │　├─ Extensions.swift  # iPadOS 向け拡張 (✅100% 実装完了)
-│　├┬─ Resources/  # リソースファイル
-│　│├─ AboutDefault.md  # デフォルトコンテンツ (✅100% 実装完了)
-│　│├─ Assets.xcassets/  # アセット (✅100% 実装完了)
-│　│└┬─ Localizable.strings/  # ローカライゼーション (Base、en、ja、…) (✅100% 実装完了)
-│　│ ├─ Base.lproj/Localizable.strings (✅100% 実装完了)
-│　│ ├─ en.lproj/Localizable.strings (✅100% 実装完了)
-│　│ └─ ja.lproj/Localizable.strings (✅100% 実装完了)
+│　└┬─ Resources/  # リソースファイル
+│　　├─ AboutDefault.md  # デフォルトコンテンツ (✅100% 実装完了)
+│　　├┬─ Assets.xcassets/  # アセット (✅100% 実装完了)
+│　　│└─ Contents.json
+│　　├─ Base.lproj/Localizable.strings  # ローカライゼーション (✅100% 実装完了)
+│　　├─ en.lproj/Localizable.strings  # ローカライゼーション (✅100% 実装完了)
+│　　└─ ja.lproj/Localizable.strings  # ローカライゼーション (✅100% 実装完了)
 ├┬─ Tests/
 │└┬─ S2JAboutWindowTests/  # テストコード
 │　└─ AboutViewTests.swift (⚠️ 実装中)
