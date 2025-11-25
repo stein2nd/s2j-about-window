@@ -297,7 +297,28 @@ jobs:
           echo "Running tests with Xcode project..."
 
           # Try multiple approaches
-          # Approach 1: Try with SDK and architecture (no destination)
+          # Approach 1: Try building and testing target directly (no scheme)
+          echo "=== Attempting test with target directly (no scheme) ==="
+          set +e
+          # First build the test target, then run tests
+          if xcodebuild build \
+            -project s2j-about-window.xcodeproj \
+            -target S2JAboutWindowTests-iOS \
+            -sdk iphonesimulator \
+            -arch arm64 2>&1; then
+            echo "Test target built successfully (arm64), but cannot run tests without scheme"
+          elif xcodebuild build \
+            -project s2j-about-window.xcodeproj \
+            -target S2JAboutWindowTests-iOS \
+            -sdk iphonesimulator \
+            -arch x86_64 2>&1; then
+            echo "Test target built successfully (x86_64), but cannot run tests without scheme"
+          else
+            echo "Test target build failed"
+          fi
+          set -e
+
+          # Approach 2: Try with SDK and architecture (no destination)
           echo "=== Attempting test with SDK and architecture (no destination) ==="
           set +e
           # Try arm64 first (Apple Silicon), then x86_64 (Intel)
@@ -322,7 +343,7 @@ jobs:
             set -e
           fi
 
-          # Approach 2: Try with destination from previous step
+          # Approach 3: Try with destination from previous step
           DESTINATION="${{ steps.simulator.outputs.destination }}"
           if [ -n "$DESTINATION" ]; then
             echo "=== Attempting test with destination: $DESTINATION ==="
@@ -340,7 +361,7 @@ jobs:
             fi
           fi
 
-          # Approach 3: Try with generic platform destination
+          # Approach 4: Try with generic platform destination
           echo "=== Attempting test with generic platform destination ==="
           xcodebuild test \
             -project s2j-about-window.xcodeproj \
