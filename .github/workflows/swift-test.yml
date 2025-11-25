@@ -47,10 +47,34 @@ jobs:
         swift package describe --type json | head -20
         swift package resolve
 
+    - name: Install XcodeGen
+      run: |
+        brew install xcodegen
+
+    - name: Generate Xcode Project
+      run: |
+        if [ -f "project.yml" ]; then
+          echo "Generating Xcode project from project.yml..."
+          xcodegen generate
+          echo "Xcode project generated successfully"
+        else
+          echo "Error: project.yml not found. Cannot generate Xcode project."
+          exit 1
+        fi
+
     - name: List available simulators
       run: |
         echo "Available iOS simulators:"
         xcrun simctl list devices available | grep -i "iOS" || true
+
+    - name: List Xcode schemes
+      run: |
+        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
+          xcodebuild -list -project s2j-about-window.xcodeproj
+        else
+          echo "Error: Xcode project not found after generation"
+          exit 1
+        fi
 
     - name: Build for iOS (verify compilation)
       run: |
@@ -62,26 +86,17 @@ jobs:
         DESTINATION="generic/platform=iOS Simulator"
         echo "Using destination: $DESTINATION"
 
-        # Check if Xcode project exists
+        # Build with Xcode project (should exist after generation step)
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Building with Xcode project..."
           xcodebuild build \
             -project s2j-about-window.xcodeproj \
-            -scheme s2j-about-window \
+            -scheme S2JAboutWindow-iOS \
             -destination "$DESTINATION" \
             -sdk iphonesimulator
         else
           echo "Error: Xcode project not found. iOS builds require an Xcode project."
-          echo "Please generate the project using xcodegen or Xcode."
           exit 1
-        fi
-
-    - name: List Xcode schemes
-      run: |
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          xcodebuild -list -project s2j-about-window.xcodeproj
-        else
-          echo "Note: Xcode project not found"
         fi
 
     - name: Run tests on iOS Simulator
@@ -90,12 +105,12 @@ jobs:
         DESTINATION="generic/platform=iOS Simulator"
         echo "Using destination: $DESTINATION"
 
-        # Check if Xcode project exists
+        # Run tests with Xcode project (should exist after generation step)
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Running tests with Xcode project..."
           xcodebuild test \
             -project s2j-about-window.xcodeproj \
-            -scheme s2j-about-window \
+            -scheme S2JAboutWindow-iOS \
             -destination "$DESTINATION" \
             -enableCodeCoverage YES
         else
