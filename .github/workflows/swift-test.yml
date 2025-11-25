@@ -325,6 +325,23 @@ jobs:
           # If test target was built successfully, try to run tests without building
           if [ "$TEST_BUILD_SUCCESS" = true ]; then
             echo "=== Attempting to run tests without building (using built test bundle) ==="
+            # Try with UDID directly (like test-local.sh does)
+            SIMULATOR_UDID="${{ steps.simulator.outputs.udid }}"
+            if [ -n "$SIMULATOR_UDID" ]; then
+              echo "Trying with UDID: $SIMULATOR_UDID"
+              if xcodebuild test-without-building \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+                -enableCodeCoverage YES 2>&1; then
+                echo "✅ Tests succeeded with test-without-building and UDID"
+                exit 0
+              else
+                echo "❌ Tests failed with test-without-building and UDID"
+              fi
+            fi
+
+            # Try with destination from previous step
             DESTINATION="${{ steps.simulator.outputs.destination }}"
             if [ -n "$DESTINATION" ]; then
               if xcodebuild test-without-building \
@@ -378,7 +395,25 @@ jobs:
             set -e
           fi
 
-          # Approach 3: Try with destination from previous step
+          # Approach 3: Try with UDID directly (like test-local.sh does)
+          SIMULATOR_UDID="${{ steps.simulator.outputs.udid }}"
+          if [ -n "$SIMULATOR_UDID" ]; then
+            echo "=== Attempting test with UDID: $SIMULATOR_UDID ==="
+            set +e
+            if xcodebuild test \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests succeeded with UDID"
+              exit 0
+            else
+              echo "❌ Tests failed with UDID, trying with destination..."
+              set -e
+            fi
+          fi
+
+          # Approach 4: Try with destination from previous step
           DESTINATION="${{ steps.simulator.outputs.destination }}"
           if [ -n "$DESTINATION" ]; then
             echo "=== Attempting test with destination: $DESTINATION ==="
@@ -396,7 +431,7 @@ jobs:
             fi
           fi
 
-          # Approach 4: Try with generic platform destination
+          # Approach 5: Try with generic platform destination
           echo "=== Attempting test with generic platform destination ==="
           xcodebuild test \
             -project s2j-about-window.xcodeproj \
