@@ -67,44 +67,42 @@ jobs:
         echo "Available iOS simulators:"
         xcrun simctl list devices available | grep -i "iOS" || true
 
-    - name: Get iOS Simulator Destination
+    - name: Get and Boot iOS Simulator
       id: simulator
       run: |
-        # Use xcodebuild -showdestinations to get available destinations for the scheme
-        # This ensures we get destinations that xcodebuild can actually use
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          echo "Querying available destinations for S2JAboutWindow-iOS scheme..."
-          # Capture both stdout and stderr, but filter for iOS Simulator destinations
-          # xcodebuild outputs destinations to stdout, errors to stderr
-          DESTINATIONS=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>/dev/null | grep "platform=iOS Simulator" | head -1)
-          if [ -z "$DESTINATIONS" ]; then
-            echo "Error: No iOS Simulator destinations found"
-            echo "Trying to list all destinations (including errors)..."
-            xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | head -20 || true
-            exit 1
-          fi
-          echo "Found destination: $DESTINATIONS"
-          # Extract UDID from destination string (format: platform=iOS Simulator,id=...)
-          SIMULATOR_UDID=$(echo "$DESTINATIONS" | grep -oE 'id=[A-F0-9-]+' | cut -d= -f2 | head -1)
-          if [ -z "$SIMULATOR_UDID" ]; then
-            # If no UDID found, try to use name-based destination
-            SIMULATOR_NAME=$(echo "$DESTINATIONS" | grep -oE 'name=[^,]+' | cut -d= -f2 | head -1)
-            if [ -n "$SIMULATOR_NAME" ]; then
-              echo "Using name-based destination: platform=iOS Simulator,name=$SIMULATOR_NAME"
-              echo "destination=platform=iOS Simulator,name=$SIMULATOR_NAME" >> $GITHUB_OUTPUT
-            else
-              echo "Error: Could not extract simulator identifier from destination"
-              echo "Full destination string: $DESTINATIONS"
-              exit 1
-            fi
-          else
-            echo "Using UDID-based destination: platform=iOS Simulator,id=$SIMULATOR_UDID"
-            echo "destination=platform=iOS Simulator,id=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
-          fi
-        else
-          echo "Error: Xcode project not found"
+        # Get available iOS simulators and boot one
+        echo "Listing available iOS simulators..."
+        xcrun simctl list devices available | grep -i "iPhone\|iPad" | head -10 || true
+
+        # Try to find an iPhone simulator first, then iPad
+        SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPhone" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        if [ -z "$SIMULATOR_UDID" ]; then
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep -i "iPad" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
+        fi
+
+        if [ -z "$SIMULATOR_UDID" ]; then
+          echo "Error: No available iOS simulator found"
+          echo "All available devices:"
+          xcrun simctl list devices available || true
           exit 1
         fi
+
+        echo "Found iOS Simulator UDID: $SIMULATOR_UDID"
+
+        # Get simulator name for display
+        SIMULATOR_INFO=$(xcrun simctl list devices available | grep "$SIMULATOR_UDID")
+        echo "Simulator info: $SIMULATOR_INFO"
+
+        # Boot the simulator (if not already booted)
+        echo "Booting simulator $SIMULATOR_UDID..."
+        xcrun simctl boot "$SIMULATOR_UDID" 2>&1 || echo "Simulator may already be booted"
+
+        # Wait a moment for simulator to be ready
+        sleep 3
+
+        # Set output for use in subsequent steps
+        echo "destination=platform=iOS Simulator,id=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
+        echo "udid=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
 
     - name: List Xcode schemes
       run: |
