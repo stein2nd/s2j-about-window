@@ -49,19 +49,8 @@ jobs:
 
     - name: List available simulators
       run: |
-        xcrun simctl list devices available | grep -i "iPad Pro"
-
-    - name: Find and boot iOS Simulator
-      run: |
-        DEVICE=$(xcrun simctl list devices available | grep -i "iPad Pro" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
-        if [ -z "$DEVICE" ]; then
-          echo "No iPad Pro simulator found, creating one..."
-          xcrun simctl create "iPad Pro Test" "iPad Pro (12.9-inch) (6th generation)" "iOS17.5" || true
-          DEVICE=$(xcrun simctl list devices available | grep -i "iPad Pro" | head -1 | sed 's/.*(\([^)]*\)).*/\1/')
-        fi
-        echo "Using device: $DEVICE"
-        xcrun simctl boot "$DEVICE" || true
-        echo "DEVICE_UDID=$DEVICE" >> $GITHUB_ENV
+        echo "Available iOS simulators:"
+        xcrun simctl list devices available | grep -i "iOS" || true
 
     - name: Build for iOS (verify compilation)
       run: |
@@ -69,33 +58,48 @@ jobs:
         IOS_SDK_PATH=$(xcrun --show-sdk-path --sdk iphonesimulator)
         echo "iOS SDK Path: $IOS_SDK_PATH"
 
-        # Try building with xcodebuild first (preferred method)
-        if xcodebuild build -package . -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -sdk iphonesimulator 2>&1; then
-          echo "Build succeeded using xcodebuild with package"
-        elif xcodebuild build -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -sdk iphonesimulator 2>&1; then
-          echo "Build succeeded using xcodebuild with scheme"
+        # Use generic iOS Simulator destination (works with any available simulator)
+        DESTINATION="generic/platform=iOS Simulator"
+        echo "Using destination: $DESTINATION"
+
+        # Check if Xcode project exists
+        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
+          echo "Building with Xcode project..."
+          xcodebuild build \
+            -project s2j-about-window.xcodeproj \
+            -scheme s2j-about-window \
+            -destination "$DESTINATION" \
+            -sdk iphonesimulator
         else
-          echo "xcodebuild failed, trying swift build with iOS target..."
-          # Fallback to swift build with explicit SDK and target
-          swift build -Xswiftc -sdk -Xswiftc "$IOS_SDK_PATH" -Xswiftc -target -Xswiftc arm64-apple-ios15.0-simulator || \
-          swift build -Xswiftc -sdk -Xswiftc "$IOS_SDK_PATH" -Xswiftc -target -Xswiftc x86_64-apple-ios15.0-simulator
+          echo "Error: Xcode project not found. iOS builds require an Xcode project."
+          echo "Please generate the project using xcodegen or Xcode."
+          exit 1
         fi
 
     - name: List Xcode schemes
       run: |
-        xcodebuild -list -package . 2>&1 || echo "Note: xcodebuild -list may not work with Swift Package directly"
+        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
+          xcodebuild -list -project s2j-about-window.xcodeproj
+        else
+          echo "Note: Xcode project not found"
+        fi
 
     - name: Run tests on iOS Simulator
       run: |
         set -e
-        # Try multiple approaches to run iOS tests
-        if xcodebuild test -package . -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -enableCodeCoverage YES 2>&1; then
-          echo "Tests passed using xcodebuild with package"
-        elif xcodebuild test -scheme s2j-about-window -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' -enableCodeCoverage YES 2>&1; then
-          echo "Tests passed using xcodebuild with scheme"
+        DESTINATION="generic/platform=iOS Simulator"
+        echo "Using destination: $DESTINATION"
+
+        # Check if Xcode project exists
+        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
+          echo "Running tests with Xcode project..."
+          xcodebuild test \
+            -project s2j-about-window.xcodeproj \
+            -scheme s2j-about-window \
+            -destination "$DESTINATION" \
+            -enableCodeCoverage YES
         else
-          echo "Warning: xcodebuild test failed, trying swift test with iOS target..."
-          swift test --enable-code-coverage 2>&1 || echo "Note: swift test may not support iOS simulator directly"
+          echo "Error: Xcode project not found. iOS tests require an Xcode project."
           exit 1
         fi
 
