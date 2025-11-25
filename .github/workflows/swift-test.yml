@@ -297,24 +297,59 @@ jobs:
           echo "Running tests with Xcode project..."
 
           # Try multiple approaches
-          # Approach 1: Try building and testing target directly (no scheme)
-          echo "=== Attempting test with target directly (no scheme) ==="
+          # Approach 1: Try building test target, then running tests without building
+          echo "=== Attempting to build test target, then run tests without building ==="
           set +e
-          # First build the test target, then run tests
+          # First build the test target
+          TEST_BUILD_SUCCESS=false
           if xcodebuild build \
             -project s2j-about-window.xcodeproj \
             -target S2JAboutWindowTests-iOS \
             -sdk iphonesimulator \
             -arch arm64 2>&1; then
-            echo "Test target built successfully (arm64), but cannot run tests without scheme"
+            echo "✅ Test target built successfully (arm64)"
+            TEST_BUILD_SUCCESS=true
+            TEST_ARCH="arm64"
           elif xcodebuild build \
             -project s2j-about-window.xcodeproj \
             -target S2JAboutWindowTests-iOS \
             -sdk iphonesimulator \
             -arch x86_64 2>&1; then
-            echo "Test target built successfully (x86_64), but cannot run tests without scheme"
+            echo "✅ Test target built successfully (x86_64)"
+            TEST_BUILD_SUCCESS=true
+            TEST_ARCH="x86_64"
           else
-            echo "Test target build failed"
+            echo "❌ Test target build failed"
+          fi
+
+          # If test target was built successfully, try to run tests without building
+          if [ "$TEST_BUILD_SUCCESS" = true ]; then
+            echo "=== Attempting to run tests without building (using built test bundle) ==="
+            DESTINATION="${{ steps.simulator.outputs.destination }}"
+            if [ -n "$DESTINATION" ]; then
+              if xcodebuild test-without-building \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "$DESTINATION" \
+                -enableCodeCoverage YES 2>&1; then
+                echo "✅ Tests succeeded with test-without-building and specific destination"
+                exit 0
+              else
+                echo "❌ Tests failed with test-without-building and specific destination"
+              fi
+            fi
+
+            # Try with generic destination
+            if xcodebuild test-without-building \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "platform=iOS Simulator" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests succeeded with test-without-building and generic destination"
+              exit 0
+            else
+              echo "❌ Tests failed with test-without-building and generic destination"
+            fi
           fi
           set -e
 
