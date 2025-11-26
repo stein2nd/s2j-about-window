@@ -175,8 +175,8 @@ jobs:
         XCODE_DEST=""
 
         while [ $ATTEMPT -lt $MAX_ATTEMPTS ] && [ -z "$XCODE_DEST" ]; do
-          # Query xcodebuild for available destinations
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
+          # Query xcodebuild for available destinations (without -sdk for better compatibility)
+          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
 
           # Try to find destination with UDID first (most reliable)
           if [ -n "$SIMULATOR_UDID" ]; then
@@ -240,40 +240,23 @@ jobs:
             echo "Simulator is booted, constructing destination string manually..."
             echo "Simulator line: $SIMULATOR_LINE"
 
-            # Try to extract OS version from simulator line (e.g., "iOS 18.4")
-            OS_VERSION=$(echo "$SIMULATOR_LINE" | grep -oE "iOS [0-9]+\.[0-9]+" | head -1 | sed 's/iOS //' || echo "")
-            if [ -n "$OS_VERSION" ]; then
-              echo "Found OS version from simulator line: $OS_VERSION"
-            else
-              # Try to get OS version from device list (format: "-- iOS 18.4 --")
-              OS_VERSION=$(xcrun simctl list devices | grep -B 5 "$SIMULATOR_UDID" | grep -E "^-- iOS" | head -1 | sed 's/-- iOS \([0-9]\+\.[0-9]\+\).*/\1/' || echo "")
-              if [ -n "$OS_VERSION" ]; then
-                echo "Found OS version from device list: $OS_VERSION"
-              fi
-            fi
-
-            # Construct destination string manually
+            # Construct destination string manually (without OS version for better compatibility)
+            # xcodebuild will auto-detect the OS version from the simulator
             if [ -n "$SIMULATOR_UDID" ]; then
-              if [ -n "$OS_VERSION" ]; then
-                # Include OS version if available
-                XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID,OS=$OS_VERSION"
-                echo "Constructed destination with OS version: $XCODE_DEST"
-              else
-                # Fallback to UDID only
-                XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
-                echo "Constructed destination without OS version: $XCODE_DEST"
-              fi
+              # Use UDID only (no OS version) for better compatibility
+              XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
+              echo "Constructed destination without OS version: $XCODE_DEST"
             else
               echo "Error: Cannot construct destination - missing UDID"
               echo "Available destinations:"
-              xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+              xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
               exit 1
             fi
           else
             echo "Error: Simulator is not booted"
             echo "Simulator line: $SIMULATOR_LINE"
             echo "Available destinations:"
-            xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
+            xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
             exit 1
           fi
         fi
@@ -437,8 +420,12 @@ jobs:
             if [ -z "$SIMULATOR_UDID" ]; then
               echo "Error: Simulator UDID not found from simulator step"
               echo "Attempting to get destination from xcodebuild..."
-              DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
+              DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
               DESTINATION=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+              # Remove OS= parameter if present
+              if [ -n "$DESTINATION" ]; then
+                DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
+              fi
 
               if [ -z "$DESTINATION" ]; then
                 echo "Error: No iOS Simulator destination found"
@@ -508,36 +495,19 @@ jobs:
             echo "Updated destination: $DESTINATION"
           fi
 
-          # Get simulator OS version from device list (format: "-- iOS 18.4 --")
-          if [ -n "$SIMULATOR_UDID" ]; then
-            echo "Getting simulator OS version from device list..."
-            # Get the section header that contains this simulator (e.g., "-- iOS 18.4 --")
-            OS_SECTION=$(xcrun simctl list devices | grep -B 10 "$SIMULATOR_UDID" | grep -E "^-- iOS" | head -1 || echo "")
-            if [ -n "$OS_SECTION" ]; then
-              # Extract OS version (e.g., "18.4" from "-- iOS 18.4 --")
-              OS_VERSION=$(echo "$OS_SECTION" | sed -E 's/-- iOS ([0-9]+\.[0-9]+).*/\1/' || echo "")
-              if [ -n "$OS_VERSION" ]; then
-                echo "Found OS version from device list: $OS_VERSION"
-                # Remove OS= if present and add the specific version
-                DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-                DESTINATION="$DESTINATION,OS=$OS_VERSION"
-                echo "Updated destination with OS version: $DESTINATION"
-              fi
-            fi
-
-            # If OS version still not found, try without OS= parameter
-            if ! echo "$DESTINATION" | grep -q "OS="; then
-              echo "Warning: Could not determine OS version, trying without OS parameter..."
-              # Remove any existing OS= parameter
-              DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-              echo "Destination without OS: $DESTINATION"
-            fi
+          # Remove OS version from destination if present (causes issues with xcodebuild)
+          # xcodebuild should auto-detect the OS version from the simulator
+          if echo "$DESTINATION" | grep -q "OS="; then
+            echo "Removing OS= parameter from destination (xcodebuild will auto-detect)..."
+            DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
+            echo "Updated destination without OS version: $DESTINATION"
           fi
 
-          # Debug: Show what xcodebuild sees
+          # Debug: Show what xcodebuild sees (without -sdk flag for better compatibility)
           echo "Debug: Checking available destinations with xcodebuild..."
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1)
-          echo "Full xcodebuild -showdestinations output:"
+          # Try without -sdk flag first (better compatibility)
+          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1)
+          echo "Full xcodebuild -showdestinations output (without -sdk):"
           echo "$DEST_OUTPUT" | head -50
 
           # Check if xcodebuild returns any iOS Simulator destinations
@@ -547,31 +517,36 @@ jobs:
             MATCHING_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
             if [ -n "$MATCHING_DEST" ]; then
               echo "Found matching destination: $MATCHING_DEST"
+              # Remove OS= parameter if present
+              MATCHING_DEST=$(echo "$MATCHING_DEST" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
               DESTINATION="$MATCHING_DEST"
             else
               # Use any available iOS Simulator destination
               AVAILABLE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
               if [ -n "$AVAILABLE_DEST" ]; then
                 echo "Using available iOS Simulator destination: $AVAILABLE_DEST"
+                # Remove OS= parameter if present
+                AVAILABLE_DEST=$(echo "$AVAILABLE_DEST" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
                 DESTINATION="$AVAILABLE_DEST"
               fi
             fi
           else
             echo "Warning: xcodebuild -showdestinations did not return any iOS Simulator destinations"
             echo "This may indicate that xcodebuild cannot see the simulator"
+            echo "Will use manually constructed destination: $DESTINATION"
           fi
 
           # Try multiple approaches to run tests
           set +e
           TEST_SUCCESS=false
 
+          # Try multiple approaches to run tests (without -sdk flag for better compatibility)
           if [ "$TEST_BUILD_SUCCESS" = true ]; then
             # Approach 1: Use test-without-building if we successfully built the test target
             echo "Attempting test-without-building (test target already built)..."
             if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
-              -sdk iphonesimulator \
               -destination "$DESTINATION" \
               -enableCodeCoverage YES 2>&1; then
               echo "✅ Tests passed with test-without-building"
@@ -587,7 +562,6 @@ jobs:
             if xcodebuild test \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
-              -sdk iphonesimulator \
               -destination "$DESTINATION" \
               -enableCodeCoverage YES 2>&1; then
               echo "✅ Tests passed with test (build and test together)"
@@ -599,7 +573,6 @@ jobs:
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
                 -scheme S2JAboutWindow-iOS \
-                -sdk iphonesimulator \
                 -destination "platform=iOS Simulator" \
                 -enableCodeCoverage YES 2>&1; then
                 echo "✅ Tests passed with generic destination"
@@ -614,7 +587,6 @@ jobs:
             if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
-              -sdk iphonesimulator \
               -destination "id=$SIMULATOR_UDID" \
               -enableCodeCoverage YES 2>&1; then
               echo "✅ Tests passed with id=UDID only destination"
@@ -624,18 +596,19 @@ jobs:
             fi
           fi
 
-          # Last resort: try without -sdk flag
+          # Last resort: try with -sdk flag (in case removing it caused issues)
           if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
-            echo "⚠️  Trying without -sdk flag..."
+            echo "⚠️  Trying with -sdk flag as last resort..."
             if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
               -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
               -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed without -sdk flag"
+              echo "✅ Tests passed with -sdk flag"
               TEST_SUCCESS=true
             else
-              echo "⚠️  Without -sdk flag also failed"
+              echo "⚠️  With -sdk flag also failed"
             fi
           fi
 
