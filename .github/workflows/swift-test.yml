@@ -489,54 +489,69 @@ jobs:
             echo "Updated destination: $DESTINATION"
           fi
 
-          # Get simulator OS version from simctl
+          # Get simulator runtime information from simctl
           if [ -n "$SIMULATOR_UDID" ]; then
-            echo "Getting simulator OS version..."
-            SIMULATOR_INFO=$(xcrun simctl list devices "$SIMULATOR_UDID" --json 2>/dev/null || echo "")
-            if [ -n "$SIMULATOR_INFO" ]; then
-              SIMULATOR_OS=$(echo "$SIMULATOR_INFO" | grep -oE '"runtime"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"runtime"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
-              if [ -n "$SIMULATOR_OS" ]; then
-                # Extract version from runtime string (e.g., "iOS-18-0" -> "18.0")
-                SIMULATOR_OS_VERSION=$(echo "$SIMULATOR_OS" | sed 's/.*iOS-\([0-9]\+\)-\([0-9]\+\).*/\1.\2/' || echo "")
-                if [ -n "$SIMULATOR_OS_VERSION" ] && [ "$SIMULATOR_OS_VERSION" != "$SIMULATOR_OS" ]; then
-                  echo "Found simulator OS version: $SIMULATOR_OS_VERSION"
-                  # Remove OS= if present and add the specific version
-                  DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-                  DESTINATION="$DESTINATION,OS=$SIMULATOR_OS_VERSION"
-                  echo "Updated destination with OS version: $DESTINATION"
-                else
-                  echo "Could not extract OS version from: $SIMULATOR_OS"
+            echo "Getting simulator runtime information..."
+            # Get device info in JSON format
+            DEVICE_JSON=$(xcrun simctl list devices --json 2>/dev/null | grep -A 20 "$SIMULATOR_UDID" | head -20 || echo "")
+            if [ -n "$DEVICE_JSON" ]; then
+              # Try to extract runtime from JSON
+              RUNTIME=$(echo "$DEVICE_JSON" | grep -oE '"runtime"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"runtime"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
+              if [ -n "$RUNTIME" ]; then
+                echo "Found runtime: $RUNTIME"
+                # Get available runtimes
+                RUNTIMES=$(xcrun simctl list runtimes 2>/dev/null || echo "")
+                echo "Available runtimes:"
+                echo "$RUNTIMES" | head -10
+
+                # Try to extract OS version from runtime (e.g., "iOS 18.0" or "com.apple.CoreSimulator.SimRuntime.iOS-18-0")
+                if echo "$RUNTIME" | grep -q "iOS"; then
+                  OS_VERSION=$(echo "$RUNTIME" | sed -E 's/.*iOS[^0-9]*([0-9]+)[.-]([0-9]+).*/\1.\2/' | head -1)
+                  if [ -n "$OS_VERSION" ] && [ "$OS_VERSION" != "$RUNTIME" ]; then
+                    echo "Extracted OS version: $OS_VERSION"
+                    # Remove OS= if present and add the specific version
+                    DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
+                    DESTINATION="$DESTINATION,OS=$OS_VERSION"
+                    echo "Updated destination with OS version: $DESTINATION"
+                  fi
                 fi
               fi
             fi
 
-            # If OS version not found, try to get it from device list
+            # If OS version still not found, try without OS= parameter
             if ! echo "$DESTINATION" | grep -q "OS="; then
-              echo "Trying alternative method to get OS version..."
-              DEVICE_LIST=$(xcrun simctl list devices available 2>/dev/null || echo "")
-              if echo "$DEVICE_LIST" | grep -q "$SIMULATOR_UDID"; then
-                # Try to find OS version in the device list
-                DEVICE_LINE=$(echo "$DEVICE_LIST" | grep "$SIMULATOR_UDID" | head -1)
-                echo "Device line: $DEVICE_LINE"
-                # For now, use OS=latest as fallback
-                DESTINATION="$DESTINATION,OS=latest"
-                echo "Using OS=latest as fallback: $DESTINATION"
-              fi
+              echo "Warning: Could not determine OS version, trying without OS parameter..."
+              # Remove any existing OS= parameter
+              DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
+              echo "Destination without OS: $DESTINATION"
             fi
           fi
 
           # Debug: Show what xcodebuild sees
           echo "Debug: Checking available destinations with xcodebuild..."
           DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1)
-          echo "$DEST_OUTPUT" | grep -i "simulator" | head -10 || echo "No simulator destinations found"
+          echo "Full xcodebuild -showdestinations output:"
+          echo "$DEST_OUTPUT" | head -50
 
-          # If xcodebuild doesn't show simulator destinations, try to use any available one
-          AVAILABLE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
-          if [ -n "$AVAILABLE_DEST" ] && [ -z "$(echo "$DEST_OUTPUT" | grep "$SIMULATOR_UDID")" ]; then
-            echo "Warning: xcodebuild shows different simulator destinations than expected"
-            echo "Available destination from xcodebuild: $AVAILABLE_DEST"
-            echo "Trying to use this destination instead..."
-            DESTINATION="$AVAILABLE_DEST"
+          # Check if xcodebuild returns any iOS Simulator destinations
+          if echo "$DEST_OUTPUT" | grep -q "platform=iOS Simulator"; then
+            echo "Found iOS Simulator destinations in xcodebuild output"
+            # Try to find a destination that matches our UDID
+            MATCHING_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+            if [ -n "$MATCHING_DEST" ]; then
+              echo "Found matching destination: $MATCHING_DEST"
+              DESTINATION="$MATCHING_DEST"
+            else
+              # Use any available iOS Simulator destination
+              AVAILABLE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+              if [ -n "$AVAILABLE_DEST" ]; then
+                echo "Using available iOS Simulator destination: $AVAILABLE_DEST"
+                DESTINATION="$AVAILABLE_DEST"
+              fi
+            fi
+          else
+            echo "Warning: xcodebuild -showdestinations did not return any iOS Simulator destinations"
+            echo "This may indicate that xcodebuild cannot see the simulator"
           fi
 
           # Try multiple approaches to run tests
