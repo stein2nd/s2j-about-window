@@ -107,11 +107,47 @@ jobs:
 
         # Get available iOS simulators and boot one
         echo "Listing available iOS simulators..."
-        xcrun simctl list devices available | grep -i "iPhone\|iPad" | head -10 || true
+        xcrun simctl list devices available | grep -i "iPhone\|iPad" | head -20 || true
 
-        # Try to find an iPhone simulator first, then iPad
-        SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPhone" | head -1)
+        # Check current Xcode version to determine which simulator to use
+        echo "Checking current Xcode version..."
+        XCODE_VERSION=$(xcodebuild -version | head -1 | sed 's/Xcode //' | cut -d. -f1,2 || echo "")
+        echo "Current Xcode version: $XCODE_VERSION"
+
+        # First, try to find iOS 26.1 simulator (for Xcode 26.1)
+        if [ "$XCODE_VERSION" = "26.1" ] || [ -n "$(echo "$XCODE_VERSION" | grep -E '^26')" ]; then
+          echo "Xcode 26.1 detected, looking for iOS 26.1 simulator..."
+          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 26.1" | grep -i "iPhone" | head -1)
+          if [ -z "$SIMULATOR_LINE" ]; then
+            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 26.1" | grep -i "iPad" | head -1)
+          fi
+        fi
+
+        # If iOS 26.1 not found or Xcode 16.4, try iOS 18.5 simulator (for Xcode 16.4)
         if [ -z "$SIMULATOR_LINE" ]; then
+          echo "Looking for iOS 18.5 simulator (available on macOS 26)..."
+          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.5" | grep -i "iPhone" | head -1)
+          if [ -z "$SIMULATOR_LINE" ]; then
+            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.5" | grep -i "iPad" | head -1)
+          fi
+        fi
+
+        # If iOS 18.5 not found, try iOS 18.4
+        if [ -z "$SIMULATOR_LINE" ]; then
+          echo "iOS 18.5 simulator not found, trying iOS 18.4..."
+          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.4" | grep -i "iPhone" | head -1)
+          if [ -z "$SIMULATOR_LINE" ]; then
+            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.4" | grep -i "iPad" | head -1)
+          fi
+        fi
+
+        # If still not found, try to find any iPhone simulator, then iPad
+        if [ -z "$SIMULATOR_LINE" ]; then
+          echo "iOS 26.1/18.5/18.4 simulator not found, trying any available iPhone simulator..."
+          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPhone" | head -1)
+        fi
+        if [ -z "$SIMULATOR_LINE" ]; then
+          echo "iPhone simulator not found, trying any available iPad simulator..."
           SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPad" | head -1)
         fi
 
@@ -168,9 +204,17 @@ jobs:
           echo "Simulator is already booted"
         fi
 
+        # Wait additional time for simulator to be fully ready
+        echo "Waiting for simulator to be fully ready..."
+        sleep 5
+
+        # Clear xcodebuild derived data cache to ensure fresh state
+        echo "Clearing xcodebuild derived data cache..."
+        rm -rf ~/Library/Developer/Xcode/DerivedData/* 2>/dev/null || true
+
         # Wait for simulator to be fully ready and accessible via xcodebuild
         echo "Waiting for simulator to be accessible via xcodebuild..."
-        MAX_ATTEMPTS=10
+        MAX_ATTEMPTS=15
         ATTEMPT=0
         XCODE_DEST=""
 
@@ -609,6 +653,28 @@ jobs:
               TEST_SUCCESS=true
             else
               echo "⚠️  With -sdk flag also failed"
+            fi
+          fi
+
+          # Final fallback: try restarting simulator and xcodebuild
+          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
+            echo "⚠️  Trying simulator restart as final fallback..."
+            echo "Shutting down simulator..."
+            xcrun simctl shutdown "$SIMULATOR_UDID" 2>&1 || true
+            sleep 3
+            echo "Booting simulator again..."
+            xcrun simctl boot "$SIMULATOR_UDID" 2>&1 || true
+            sleep 5
+            echo "Trying xcodebuild test again after restart..."
+            if xcodebuild test \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests passed after simulator restart"
+              TEST_SUCCESS=true
+            else
+              echo "⚠️  Tests still failed after simulator restart"
             fi
           fi
 
