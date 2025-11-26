@@ -601,12 +601,49 @@ jobs:
             fi
           fi
 
+          # If xcodebuild still fails, try using destination with just id=UDID (no platform=)
+          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
+            echo "⚠️  xcodebuild failed, trying alternative destination format (id=UDID only)..."
+            if xcodebuild test-without-building \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
+              -destination "id=$SIMULATOR_UDID" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests passed with id=UDID only destination"
+              TEST_SUCCESS=true
+            else
+              echo "⚠️  id=UDID only destination also failed"
+            fi
+          fi
+
+          # Last resort: try without -sdk flag
+          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
+            echo "⚠️  Trying without -sdk flag..."
+            if xcodebuild test-without-building \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests passed without -sdk flag"
+              TEST_SUCCESS=true
+            else
+              echo "⚠️  Without -sdk flag also failed"
+            fi
+          fi
+
           set -e
 
           if [ "$TEST_SUCCESS" = false ]; then
             echo "Error: All test execution approaches failed"
             echo "Final debug: Simulator status:"
             xcrun simctl list devices | grep "$SIMULATOR_UDID" || true
+            echo ""
+            echo "Debug: Available simulators:"
+            xcrun simctl list devices available | head -20 || true
+            echo ""
+            echo "Debug: xcodebuild -showsdks:"
+            xcodebuild -showsdks 2>&1 | grep -i simulator || true
             exit 1
           fi
         else
