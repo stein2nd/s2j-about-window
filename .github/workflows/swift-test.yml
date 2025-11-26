@@ -482,6 +482,16 @@ jobs:
             echo "Updated destination: $DESTINATION"
           fi
 
+          # Add OS=latest to destination if not present (helps xcodebuild find the simulator)
+          if ! echo "$DESTINATION" | grep -q "OS="; then
+            DESTINATION="$DESTINATION,OS=latest"
+            echo "Added OS=latest to destination: $DESTINATION"
+          fi
+
+          # Debug: Show what xcodebuild sees
+          echo "Debug: Checking available destinations with xcodebuild..."
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | grep -i "simulator" | head -5 || echo "No simulator destinations found"
+
           # Try multiple approaches to run tests
           set +e
           TEST_SUCCESS=false
@@ -492,6 +502,7 @@ jobs:
             if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
               -destination "$DESTINATION" \
               -enableCodeCoverage YES 2>&1; then
               echo "✅ Tests passed with test-without-building"
@@ -507,12 +518,24 @@ jobs:
             if xcodebuild test \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
               -destination "$DESTINATION" \
               -enableCodeCoverage YES 2>&1; then
               echo "✅ Tests passed with test (build and test together)"
               TEST_SUCCESS=true
             else
               echo "❌ Tests failed with both approaches"
+              # Try with generic destination as last resort
+              echo "Attempting with generic destination as last resort..."
+              if xcodebuild test \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -sdk iphonesimulator \
+                -destination "platform=iOS Simulator" \
+                -enableCodeCoverage YES 2>&1; then
+                echo "✅ Tests passed with generic destination"
+                TEST_SUCCESS=true
+              fi
             fi
           fi
 
@@ -520,6 +543,8 @@ jobs:
 
           if [ "$TEST_SUCCESS" = false ]; then
             echo "Error: All test execution approaches failed"
+            echo "Final debug: Simulator status:"
+            xcrun simctl list devices | grep "$SIMULATOR_UDID" || true
             exit 1
           fi
         else
