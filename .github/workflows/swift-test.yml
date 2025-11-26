@@ -239,11 +239,30 @@ jobs:
           if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
             echo "Simulator is booted, constructing destination string manually..."
             echo "Simulator line: $SIMULATOR_LINE"
-            # Construct destination string manually: prefer id=UDID only (more reliable)
-            # Format: platform=iOS Simulator,id=UDID
+
+            # Try to extract OS version from simulator line (e.g., "iOS 18.4")
+            OS_VERSION=$(echo "$SIMULATOR_LINE" | grep -oE "iOS [0-9]+\.[0-9]+" | head -1 | sed 's/iOS //' || echo "")
+            if [ -n "$OS_VERSION" ]; then
+              echo "Found OS version from simulator line: $OS_VERSION"
+            else
+              # Try to get OS version from device list (format: "-- iOS 18.4 --")
+              OS_VERSION=$(xcrun simctl list devices | grep -B 5 "$SIMULATOR_UDID" | grep -E "^-- iOS" | head -1 | sed 's/-- iOS \([0-9]\+\.[0-9]\+\).*/\1/' || echo "")
+              if [ -n "$OS_VERSION" ]; then
+                echo "Found OS version from device list: $OS_VERSION"
+              fi
+            fi
+
+            # Construct destination string manually
             if [ -n "$SIMULATOR_UDID" ]; then
-              XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
-              echo "Constructed destination: $XCODE_DEST"
+              if [ -n "$OS_VERSION" ]; then
+                # Include OS version if available
+                XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID,OS=$OS_VERSION"
+                echo "Constructed destination with OS version: $XCODE_DEST"
+              else
+                # Fallback to UDID only
+                XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
+                echo "Constructed destination without OS version: $XCODE_DEST"
+              fi
             else
               echo "Error: Cannot construct destination - missing UDID"
               echo "Available destinations:"
@@ -489,32 +508,20 @@ jobs:
             echo "Updated destination: $DESTINATION"
           fi
 
-          # Get simulator runtime information from simctl
+          # Get simulator OS version from device list (format: "-- iOS 18.4 --")
           if [ -n "$SIMULATOR_UDID" ]; then
-            echo "Getting simulator runtime information..."
-            # Get device info in JSON format
-            DEVICE_JSON=$(xcrun simctl list devices --json 2>/dev/null | grep -A 20 "$SIMULATOR_UDID" | head -20 || echo "")
-            if [ -n "$DEVICE_JSON" ]; then
-              # Try to extract runtime from JSON
-              RUNTIME=$(echo "$DEVICE_JSON" | grep -oE '"runtime"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"runtime"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
-              if [ -n "$RUNTIME" ]; then
-                echo "Found runtime: $RUNTIME"
-                # Get available runtimes
-                RUNTIMES=$(xcrun simctl list runtimes 2>/dev/null || echo "")
-                echo "Available runtimes:"
-                echo "$RUNTIMES" | head -10
-
-                # Try to extract OS version from runtime (e.g., "iOS 18.0" or "com.apple.CoreSimulator.SimRuntime.iOS-18-0")
-                if echo "$RUNTIME" | grep -q "iOS"; then
-                  OS_VERSION=$(echo "$RUNTIME" | sed -E 's/.*iOS[^0-9]*([0-9]+)[.-]([0-9]+).*/\1.\2/' | head -1)
-                  if [ -n "$OS_VERSION" ] && [ "$OS_VERSION" != "$RUNTIME" ]; then
-                    echo "Extracted OS version: $OS_VERSION"
-                    # Remove OS= if present and add the specific version
-                    DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-                    DESTINATION="$DESTINATION,OS=$OS_VERSION"
-                    echo "Updated destination with OS version: $DESTINATION"
-                  fi
-                fi
+            echo "Getting simulator OS version from device list..."
+            # Get the section header that contains this simulator (e.g., "-- iOS 18.4 --")
+            OS_SECTION=$(xcrun simctl list devices | grep -B 10 "$SIMULATOR_UDID" | grep -E "^-- iOS" | head -1 || echo "")
+            if [ -n "$OS_SECTION" ]; then
+              # Extract OS version (e.g., "18.4" from "-- iOS 18.4 --")
+              OS_VERSION=$(echo "$OS_SECTION" | sed -E 's/-- iOS ([0-9]+\.[0-9]+).*/\1/' || echo "")
+              if [ -n "$OS_VERSION" ]; then
+                echo "Found OS version from device list: $OS_VERSION"
+                # Remove OS= if present and add the specific version
+                DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
+                DESTINATION="$DESTINATION,OS=$OS_VERSION"
+                echo "Updated destination with OS version: $DESTINATION"
               fi
             fi
 
