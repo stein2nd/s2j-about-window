@@ -401,37 +401,57 @@ jobs:
         if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
           echo "Running tests with Xcode project..."
 
-          # Get simulator information
+          # Get simulator information from previous step
           DESTINATION="${{ steps.simulator.outputs.destination }}"
+          SIMULATOR_UDID="${{ steps.simulator.outputs.udid }}"
+          SIMULATOR_NAME="${{ steps.simulator.outputs.name }}"
 
           if [ -z "$DESTINATION" ]; then
-            echo "Error: Destination not found from simulator step"
-            echo "Attempting to get destination from xcodebuild..."
-            DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
-            DESTINATION=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+            echo "Warning: Destination not found from simulator step"
+            echo "Attempting to reconstruct destination from simulator info..."
 
-            if [ -z "$DESTINATION" ]; then
-              echo "Error: No iOS Simulator destination found"
-              echo "Available destinations:"
-              echo "$DEST_OUTPUT" | grep "platform=" || true
-              exit 1
+            # Try to get UDID and name from previous step outputs
+            if [ -z "$SIMULATOR_UDID" ]; then
+              echo "Error: Simulator UDID not found from simulator step"
+              echo "Attempting to get destination from xcodebuild..."
+              DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
+              DESTINATION=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+
+              if [ -z "$DESTINATION" ]; then
+                echo "Error: No iOS Simulator destination found"
+                echo "Available destinations:"
+                echo "$DEST_OUTPUT" | grep "platform=" || true
+                exit 1
+              fi
+              echo "Found destination: $DESTINATION"
+            else
+              # Reconstruct destination from UDID and name
+              if [ -n "$SIMULATOR_NAME" ] && [ -n "$SIMULATOR_UDID" ]; then
+                DESTINATION="platform=iOS Simulator,name=$SIMULATOR_NAME,id=$SIMULATOR_UDID"
+              elif [ -n "$SIMULATOR_UDID" ]; then
+                DESTINATION="platform=iOS Simulator,id=$SIMULATOR_UDID"
+              else
+                echo "Error: Cannot reconstruct destination - missing UDID"
+                exit 1
+              fi
+              echo "Reconstructed destination: $DESTINATION"
             fi
-            echo "Found destination: $DESTINATION"
+          else
+            echo "Using destination from simulator step: $DESTINATION"
           fi
 
-          # Verify destination is still available
-          echo "Verifying destination is available..."
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
-          if ! echo "$DEST_OUTPUT" | grep -q "$DESTINATION"; then
-            echo "Warning: Original destination not found, trying to find a new one..."
-            DESTINATION=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
-            if [ -z "$DESTINATION" ]; then
-              echo "Error: No iOS Simulator destination available"
-              echo "Available destinations:"
-              echo "$DEST_OUTPUT" | grep "platform=" || true
-              exit 1
+          # Verify simulator is still booted (instead of relying on xcodebuild -showdestinations)
+          echo "Verifying simulator is still booted..."
+          if [ -n "$SIMULATOR_UDID" ]; then
+            SIMULATOR_LINE=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | head -1 || echo "")
+            if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
+              echo "Simulator is booted: $SIMULATOR_LINE"
+            else
+              echo "Warning: Simulator may not be booted, but continuing with destination: $DESTINATION"
+              echo "Simulator line: $SIMULATOR_LINE"
             fi
-            echo "Using new destination: $DESTINATION"
+          else
+            echo "Warning: Simulator UDID not available, skipping boot verification"
           fi
 
           # Build test target first (for faster test execution)
