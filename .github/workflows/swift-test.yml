@@ -163,7 +163,7 @@ jobs:
 
         # Wait for simulator to be fully ready and accessible via xcodebuild
         echo "Waiting for simulator to be accessible via xcodebuild..."
-        MAX_ATTEMPTS=60
+        MAX_ATTEMPTS=10
         ATTEMPT=0
         XCODE_DEST=""
 
@@ -206,7 +206,7 @@ jobs:
 
           if [ -z "$XCODE_DEST" ]; then
             ATTEMPT=$((ATTEMPT + 1))
-            if [ $((ATTEMPT % 10)) -eq 0 ]; then
+            if [ $ATTEMPT -eq 1 ] || [ $((ATTEMPT % 5)) -eq 0 ]; then
               echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
               echo "Debug: xcodebuild output (first 30 lines):"
               echo "$DEST_OUTPUT" | head -30 || true
@@ -228,9 +228,10 @@ jobs:
           echo "Attempting to construct destination manually from simulator info..."
 
           # Verify simulator is still booted
-          CURRENT_STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | grep -oE '\([^)]+\)' | head -1 | sed 's/[()]//g' || echo "")
-          if [ "$CURRENT_STATUS" = "Booted" ]; then
+          SIMULATOR_LINE=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | head -1 || echo "")
+          if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
             echo "Simulator is booted, constructing destination string manually..."
+            echo "Simulator line: $SIMULATOR_LINE"
             # Construct destination string manually: platform=iOS Simulator,name=Device Name,id=UDID
             # Or simpler: platform=iOS Simulator,id=UDID
             if [ -n "$SIMULATOR_NAME" ] && [ -n "$SIMULATOR_UDID" ]; then
@@ -246,7 +247,8 @@ jobs:
               exit 1
             fi
           else
-            echo "Error: Simulator is not booted (status: $CURRENT_STATUS)"
+            echo "Error: Simulator is not booted"
+            echo "Simulator line: $SIMULATOR_LINE"
             echo "Available destinations:"
             xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true
             exit 1
