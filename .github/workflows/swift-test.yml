@@ -232,12 +232,9 @@ jobs:
           if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
             echo "Simulator is booted, constructing destination string manually..."
             echo "Simulator line: $SIMULATOR_LINE"
-            # Construct destination string manually: platform=iOS Simulator,name=Device Name,id=UDID
-            # Or simpler: platform=iOS Simulator,id=UDID
-            if [ -n "$SIMULATOR_NAME" ] && [ -n "$SIMULATOR_UDID" ]; then
-              XCODE_DEST="platform=iOS Simulator,name=$SIMULATOR_NAME,id=$SIMULATOR_UDID"
-              echo "Constructed destination: $XCODE_DEST"
-            elif [ -n "$SIMULATOR_UDID" ]; then
+            # Construct destination string manually: prefer id=UDID only (more reliable)
+            # Format: platform=iOS Simulator,id=UDID
+            if [ -n "$SIMULATOR_UDID" ]; then
               XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
               echo "Constructed destination: $XCODE_DEST"
             else
@@ -425,10 +422,8 @@ jobs:
               fi
               echo "Found destination: $DESTINATION"
             else
-              # Reconstruct destination from UDID and name
-              if [ -n "$SIMULATOR_NAME" ] && [ -n "$SIMULATOR_UDID" ]; then
-                DESTINATION="platform=iOS Simulator,name=$SIMULATOR_NAME,id=$SIMULATOR_UDID"
-              elif [ -n "$SIMULATOR_UDID" ]; then
+              # Reconstruct destination from UDID (prefer id=UDID only, more reliable)
+              if [ -n "$SIMULATOR_UDID" ]; then
                 DESTINATION="platform=iOS Simulator,id=$SIMULATOR_UDID"
               else
                 echo "Error: Cannot reconstruct destination - missing UDID"
@@ -479,22 +474,53 @@ jobs:
 
           # Run tests with the verified destination
           echo "=== Running tests with destination: $DESTINATION ==="
+
+          # Ensure destination uses id=UDID format (remove name= if present)
+          if echo "$DESTINATION" | grep -q "name="; then
+            echo "Removing name= from destination string for better compatibility..."
+            DESTINATION=$(echo "$DESTINATION" | sed 's/,name=[^,]*//' | sed 's/name=[^,]*,\?//')
+            echo "Updated destination: $DESTINATION"
+          fi
+
+          # Try multiple approaches to run tests
+          set +e
+          TEST_SUCCESS=false
+
           if [ "$TEST_BUILD_SUCCESS" = true ]; then
-            # Use test-without-building if we successfully built the test target
-            echo "Using test-without-building (test target already built)..."
-            xcodebuild test-without-building \
+            # Approach 1: Use test-without-building if we successfully built the test target
+            echo "Attempting test-without-building (test target already built)..."
+            if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
               -destination "$DESTINATION" \
-              -enableCodeCoverage YES
-          else
-            # Build and test together
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests passed with test-without-building"
+              TEST_SUCCESS=true
+            else
+              echo "⚠️  test-without-building failed, trying test (build and test together)..."
+            fi
+          fi
+
+          if [ "$TEST_SUCCESS" = false ]; then
+            # Approach 2: Build and test together
             echo "Building and testing together..."
-            xcodebuild test \
+            if xcodebuild test \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
               -destination "$DESTINATION" \
-              -enableCodeCoverage YES
+              -enableCodeCoverage YES 2>&1; then
+              echo "✅ Tests passed with test (build and test together)"
+              TEST_SUCCESS=true
+            else
+              echo "❌ Tests failed with both approaches"
+            fi
+          fi
+
+          set -e
+
+          if [ "$TEST_SUCCESS" = false ]; then
+            echo "Error: All test execution approaches failed"
+            exit 1
           fi
         else
           echo "Error: Xcode project not found. iOS tests require an Xcode project."
