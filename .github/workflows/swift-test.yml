@@ -330,6 +330,26 @@ jobs:
           fi
           echo "Runtime version: $RUNTIME_VERSION" | tee -a $LOG_DIR/test-run.txt
 
+          # Find matching SDK for the runtime version
+          echo "Debug: Finding matching SDK for runtime $RUNTIME_VERSION..." | tee -a $LOG_DIR/test-run.txt
+          AVAILABLE_SDKS=$(xcodebuild -showsdks 2>&1 | grep -i "iphonesimulator" || echo "")
+          echo "Available iOS Simulator SDKs:" | tee -a $LOG_DIR/test-run.txt
+          echo "$AVAILABLE_SDKS" | tee -a $LOG_DIR/test-run.txt
+
+          # Try to find SDK matching the runtime version (e.g., "iphonesimulator26.0" for iOS 26.0)
+          # Handle different output formats: "iphonesimulator26.0" or "-sdk iphonesimulator26.0"
+          MATCHING_SDK=$(echo "$AVAILABLE_SDKS" | grep -iE "iphonesimulator.*${RUNTIME_VERSION}" | head -1 | sed -E 's/.*-sdk[[:space:]]*(iphonesimulator[0-9.]+).*/\1/' | sed -E 's/.*(iphonesimulator[0-9.]+).*/\1/' || echo "")
+          if [ -z "$MATCHING_SDK" ]; then
+            # Try to find SDK with major version match (e.g., "iphonesimulator26" for iOS 26.0)
+            MAJOR_VERSION=$(echo "$RUNTIME_VERSION" | cut -d. -f1)
+            MATCHING_SDK=$(echo "$AVAILABLE_SDKS" | grep -iE "iphonesimulator.*${MAJOR_VERSION}" | head -1 | sed -E 's/.*-sdk[[:space:]]*(iphonesimulator[0-9.]+).*/\1/' | sed -E 's/.*(iphonesimulator[0-9.]+).*/\1/' || echo "")
+          fi
+          if [ -z "$MATCHING_SDK" ]; then
+            # Fallback to any iphonesimulator SDK
+            MATCHING_SDK=$(echo "$AVAILABLE_SDKS" | head -1 | sed -E 's/.*-sdk[[:space:]]*(iphonesimulator[0-9.]+).*/\1/' | sed -E 's/.*(iphonesimulator[0-9.]+).*/\1/' || echo "")
+          fi
+          echo "Matching SDK: $MATCHING_SDK" | tee -a $LOG_DIR/test-run.txt
+
           # Debug: Check scheme information
           echo "Debug: Checking scheme information..." | tee -a $LOG_DIR/test-run.txt
           xcodebuild -list -project s2j-about-window.xcodeproj 2>&1 | tee -a $LOG_DIR/test-run.txt || true
@@ -393,31 +413,86 @@ jobs:
 
           echo "Using destination: $DEST" | tee -a $LOG_DIR/test-run.txt
 
-          # Strategy A: Try test-without-building first (without SDK, let xcodebuild auto-select)
-          echo "Attempting xcodebuild test-without-building (without -sdk)..." | tee -a $LOG_DIR/test-run.txt
-          if xcodebuild test-without-building \
-            -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
-            -destination "$DEST" \
-            -enableCodeCoverage YES \
-            -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-            echo "test-without-building succeeded" | tee -a $LOG_DIR/test-run.txt
-          else
-            echo "test-without-building failed, trying with -sdk iphonesimulator..." | tee -a $LOG_DIR/test-run.txt
-            rm -rf "$RESULT_BUNDLE" || true
+          # Strategy A: Try test-without-building first (with matching SDK if available)
+          if [ -n "$MATCHING_SDK" ]; then
+            echo "Attempting xcodebuild test-without-building with matching SDK ($MATCHING_SDK)..." | tee -a $LOG_DIR/test-run.txt
             if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
-              -sdk iphonesimulator \
+              -sdk "$MATCHING_SDK" \
               -destination "$DEST" \
               -enableCodeCoverage YES \
               -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-              echo "test-without-building succeeded with -sdk" | tee -a $LOG_DIR/test-run.txt
+              echo "test-without-building succeeded with matching SDK" | tee -a $LOG_DIR/test-run.txt
+            else
+              echo "test-without-building failed with matching SDK, trying without SDK..." | tee -a $LOG_DIR/test-run.txt
+              rm -rf "$RESULT_BUNDLE" || true
+              if xcodebuild test-without-building \
+                -project s2j-about-window.xcodeproj \
+                -scheme S2JAboutWindow-iOS \
+                -destination "$DEST" \
+                -enableCodeCoverage YES \
+                -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                echo "test-without-building succeeded without SDK" | tee -a $LOG_DIR/test-run.txt
+              else
+                echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
+                rm -rf "$RESULT_BUNDLE" || true
+                # Strategy B: Build & test (with matching SDK first)
+                if [ -n "$MATCHING_SDK" ]; then
+                  if xcodebuild test \
+                    -project s2j-about-window.xcodeproj \
+                    -scheme S2JAboutWindow-iOS \
+                    -sdk "$MATCHING_SDK" \
+                    -destination "$DEST" \
+                    -enableCodeCoverage YES \
+                    -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                    echo "xcodebuild test succeeded with matching SDK" | tee -a $LOG_DIR/test-run.txt
+                  else
+                    echo "xcodebuild test failed with matching SDK, trying without SDK..." | tee -a $LOG_DIR/test-run.txt
+                    rm -rf "$RESULT_BUNDLE" || true
+                    if xcodebuild test \
+                      -project s2j-about-window.xcodeproj \
+                      -scheme S2JAboutWindow-iOS \
+                      -destination "$DEST" \
+                      -enableCodeCoverage YES \
+                      -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                      echo "xcodebuild test succeeded without SDK" | tee -a $LOG_DIR/test-run.txt
+                    else
+                      echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
+                      # Save logs for debug (artifact step will upload)
+                      exit 10
+                    fi
+                  fi
+                else
+                  # No matching SDK, try without SDK
+                  if xcodebuild test \
+                    -project s2j-about-window.xcodeproj \
+                    -scheme S2JAboutWindow-iOS \
+                    -destination "$DEST" \
+                    -enableCodeCoverage YES \
+                    -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                    echo "xcodebuild test succeeded without SDK" | tee -a $LOG_DIR/test-run.txt
+                  else
+                    echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
+                    # Save logs for debug (artifact step will upload)
+                    exit 10
+                  fi
+                fi
+              fi
+            fi
+          else
+            # No matching SDK found, try without SDK
+            echo "No matching SDK found, attempting xcodebuild test-without-building (without -sdk)..." | tee -a $LOG_DIR/test-run.txt
+            if xcodebuild test-without-building \
+              -project s2j-about-window.xcodeproj \
+              -scheme S2JAboutWindow-iOS \
+              -destination "$DEST" \
+              -enableCodeCoverage YES \
+              -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+              echo "test-without-building succeeded" | tee -a $LOG_DIR/test-run.txt
             else
               echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
-              # Remove result bundle again before retry
               rm -rf "$RESULT_BUNDLE" || true
-              # Strategy B: Build & test (without SDK first)
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
                 -scheme S2JAboutWindow-iOS \
@@ -426,34 +501,9 @@ jobs:
                 -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
                 echo "xcodebuild test succeeded" | tee -a $LOG_DIR/test-run.txt
               else
-                echo "xcodebuild test failed without SDK, trying with -sdk iphonesimulator..." | tee -a $LOG_DIR/test-run.txt
-                rm -rf "$RESULT_BUNDLE" || true
-                if xcodebuild test \
-                  -project s2j-about-window.xcodeproj \
-                  -scheme S2JAboutWindow-iOS \
-                  -sdk iphonesimulator \
-                  -destination "$DEST" \
-                  -enableCodeCoverage YES \
-                  -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-                  echo "xcodebuild test succeeded with -sdk" | tee -a $LOG_DIR/test-run.txt
-                else
-                  echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
-                  # Remove result bundle again before retry
-                  rm -rf "$RESULT_BUNDLE" || true
-                  # Last resort: generic platform without SDK
-                  if xcodebuild test \
-                    -project s2j-about-window.xcodeproj \
-                    -scheme S2JAboutWindow-iOS \
-                    -destination "platform=iOS Simulator" \
-                    -enableCodeCoverage YES \
-                    -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-                    echo "succeeded with generic platform" | tee -a $LOG_DIR/test-run.txt
-                  else
-                    echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
-                    # Save logs for debug (artifact step will upload)
-                    exit 10
-                  fi
-                fi
+                echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
+                # Save logs for debug (artifact step will upload)
+                exit 10
               fi
             fi
           fi
