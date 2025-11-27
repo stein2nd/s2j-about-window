@@ -337,35 +337,13 @@ jobs:
             fi
           fi
 
-          # If still not found, construct destination manually from UDID
+          # If still not found, construct destination manually from UDID (without OS version)
+          # Note: xcodebuild should auto-detect OS version from simulator
           if [ -z "$DEST" ] && [ -n "$UDID" ]; then
-            echo "Debug: Constructing destination manually from UDID..." | tee -a $LOG_DIR/test-run.txt
-            # Get simulator device info to find runtime
-            SIM_DEVICE_INFO=$(xcrun simctl list devices available | grep "$UDID" || echo "")
-            if [ -n "$SIM_DEVICE_INFO" ]; then
-              echo "Simulator device info: $SIM_DEVICE_INFO" | tee -a $LOG_DIR/test-run.txt
-              # Try to get runtime from the section header (e.g., "-- iOS 26.1 --")
-              # We need to find which runtime section this device belongs to
-              RUNTIME_SECTION=$(xcrun simctl list devices available | grep -B 20 "$UDID" | grep "^--" | tail -1 | sed 's/^-- //' | sed 's/ --$//' || echo "")
-              if [ -n "$RUNTIME_SECTION" ] && echo "$RUNTIME_SECTION" | grep -q "iOS"; then
-                # Extract iOS version (e.g., "iOS 26.1" -> "26.1")
-                IOS_VERSION=$(echo "$RUNTIME_SECTION" | grep -oE '[0-9]+(\.[0-9]+)?' | head -1 || echo "")
-                if [ -n "$IOS_VERSION" ]; then
-                  DEST="platform=iOS Simulator,id=$UDID,OS=$IOS_VERSION"
-                  echo "Constructed destination with OS version $IOS_VERSION: $DEST" | tee -a $LOG_DIR/test-run.txt
-                else
-                  DEST="platform=iOS Simulator,id=$UDID"
-                  echo "Constructed destination without OS version: $DEST" | tee -a $LOG_DIR/test-run.txt
-                fi
-              else
-                DEST="platform=iOS Simulator,id=$UDID"
-                echo "Constructed destination (fallback, no runtime found): $DEST" | tee -a $LOG_DIR/test-run.txt
-              fi
-            else
-              # Last resort: just use UDID without OS version
-              DEST="platform=iOS Simulator,id=$UDID"
-              echo "Constructed destination (last resort): $DEST" | tee -a $LOG_DIR/test-run.txt
-            fi
+            echo "Debug: Constructing destination manually from UDID (without OS version)..." | tee -a $LOG_DIR/test-run.txt
+            # Use UDID only - xcodebuild will auto-detect OS version
+            DEST="platform=iOS Simulator,id=$UDID"
+            echo "Constructed destination: $DEST" | tee -a $LOG_DIR/test-run.txt
           fi
 
           if [ -z "$DEST" ]; then
@@ -380,6 +358,7 @@ jobs:
           if xcodebuild test-without-building \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
+            -sdk iphonesimulator \
             -destination "$DEST" \
             -enableCodeCoverage YES \
             -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
@@ -392,6 +371,7 @@ jobs:
             if xcodebuild test \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
+              -sdk iphonesimulator \
               -destination "$DEST" \
               -enableCodeCoverage YES \
               -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
@@ -400,10 +380,11 @@ jobs:
               echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
               # Remove result bundle again before retry
               rm -rf "$RESULT_BUNDLE" || true
-              # Last resort: generic platform
+              # Last resort: generic platform with SDK
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
                 -scheme S2JAboutWindow-iOS \
+                -sdk iphonesimulator \
                 -destination "platform=iOS Simulator" \
                 -enableCodeCoverage YES \
                 -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
