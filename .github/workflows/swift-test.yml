@@ -9,20 +9,20 @@ on:
 jobs:
   test-macos:
     runs-on: macos-latest
-    
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    
+
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-    
+
     - name: Run tests on macOS
       run: |
         swift test --enable-code-coverage
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
@@ -32,678 +32,342 @@ jobs:
 
   test-ios:
     runs-on: macos-latest
-    
+    timeout-minutes: 60   # 長めに確保 (ビルド／シミュレータ起動で時間がかかる場合あり)
+    env:
+      # 出力ログ保存先
+      LOG_DIR: /tmp/gha-ios-logs
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    
-    - name: Setup Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-    
-    - name: Verify Swift Package
-      run: |
-        swift package describe --type json | head -20
-        swift package resolve
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install XcodeGen
-      run: |
-        brew install xcodegen
+      # ----- Try to install/select Xcode versions in preferred order.
+      # Note: each setup step is allowed to fail (continue-on-error: true).
+      # We'll detect the selected Xcode with xcodebuild -version below and then
+      # use sudo xcode-select -s if specific path exists.
+      - name: Try setup Xcode 26.1
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.1'
+        continue-on-error: true
 
-    - name: Generate Xcode Project
-      run: |
-        if [ -f "project.yml" ]; then
-          echo "Generating Xcode project from project.yml..."
-          xcodegen generate
-          echo "Xcode project generated successfully"
-          echo ""
-          echo "=== Verifying scheme configuration ==="
-          if [ -f "s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme" ]; then
-            echo "Scheme file exists, checking test destination..."
-            echo "--- TestAction section ---"
-            grep -A 20 "TestAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme | head -30 || echo "TestAction not found"
-            echo ""
-            echo "--- LaunchAction section ---"
-            grep -A 20 "LaunchAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme | head -30 || echo "LaunchAction not found"
-            echo ""
-            echo "--- Full scheme file (first 100 lines) ---"
-            head -100 s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme
+      - name: Try setup Xcode 26.0.1
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.0.1'
+        continue-on-error: true
+
+      - name: Try setup Xcode 16.4.0
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.4.0'
+        continue-on-error: true
+
+      - name: Ensure log dir
+        run: |
+          mkdir -p $LOG_DIR
+
+      - name: Environment detection: Xcode / SDKs / Simulators (save logs)
+        id: detect
+        run: |
+          set -euo pipefail
+          echo "::group::Xcode / SDK / Runtimes detection"
+          xcodebuild -version | tee $LOG_DIR/xcodebuild-version.txt
+          ls -la /Applications | tee $LOG_DIR/applications-list.txt || true
+          echo "--- xcodebuild -showsdks ---" | tee $LOG_DIR/showsdks.txt
+          xcodebuild -showsdks 2>&1 | tee -a $LOG_DIR/showsdks.txt || true
+          echo "--- simctl runtimes ---" | tee $LOG_DIR/simctl-runtimes.txt
+          xcrun simctl list runtimes 2>&1 | tee -a $LOG_DIR/simctl-runtimes.txt || true
+          echo "--- simctl devices available ---" | tee $LOG_DIR/simctl-devices.txt
+          xcrun simctl list devices available 2>&1 | tee -a $LOG_DIR/simctl-devices.txt || true
+          echo "::endgroup::"
+
+          # expose summary for later steps
+          XCODE_VER=$(xcodebuild -version | head -1 | sed 's/Xcode //g' | cut -d" " -f1 || echo "")
+          echo "xcode_version=${XCODE_VER}" >> $GITHUB_OUTPUT
+          # Record whether runtimes contain iOS 26.1 / 26.0
+          if xcrun simctl list runtimes | grep -q "iOS 26.1"; then
+            echo "has_ios_26_1=true" >> $GITHUB_OUTPUT
           else
-            echo "Warning: Scheme file not found at expected location"
-            echo "Looking for scheme files..."
-            find s2j-about-window.xcodeproj -name "*.xcscheme" -type f || echo "No scheme files found"
+            echo "has_ios_26_1=false" >> $GITHUB_OUTPUT
           fi
-        else
-          echo "Error: project.yml not found. Cannot generate Xcode project."
-          exit 1
-        fi
-
-    - name: List available simulators
-      run: |
-        echo "Available iOS simulators:"
-        xcrun simctl list devices available | grep -i "iOS" || true
-
-    - name: Get and Boot iOS Simulator
-      id: simulator
-      run: |
-        # Ensure iOS platform is available for xcodebuild
-        echo "Checking iOS platform availability..."
-        if ! xcodebuild -showsdks | grep -q "iphonesimulator"; then
-          echo "iOS Simulator SDK not found, attempting to download platform..."
-          sudo xcodebuild -downloadPlatform iOS || echo "Platform download may have failed or already installed"
-        fi
-
-        # First, generate the Xcode project if it doesn't exist
-        if [ ! -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          echo "Xcode project not found, generating it..."
-          if [ -f "project.yml" ]; then
-            xcodegen generate
+          if xcrun simctl list runtimes | grep -q "iOS 26.0"; then
+            echo "has_ios_26_0=true" >> $GITHUB_OUTPUT
           else
-            echo "Error: project.yml not found"
-            exit 1
+            echo "has_ios_26_0=false" >> $GITHUB_OUTPUT
           fi
-        fi
-
-        # Get available iOS simulators and boot one
-        echo "Listing available iOS simulators..."
-        xcrun simctl list devices available | grep -i "iPhone\|iPad" | head -20 || true
-
-        # Check current Xcode version to determine which simulator to use
-        echo "Checking current Xcode version..."
-        XCODE_VERSION=$(xcodebuild -version | head -1 | sed 's/Xcode //' | cut -d. -f1,2 || echo "")
-        echo "Current Xcode version: $XCODE_VERSION"
-
-        # First, try to find iOS 26.1 simulator (for Xcode 26.1)
-        if [ "$XCODE_VERSION" = "26.1" ] || [ -n "$(echo "$XCODE_VERSION" | grep -E '^26')" ]; then
-          echo "Xcode 26.1 detected, looking for iOS 26.1 simulator..."
-          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 26.1" | grep -i "iPhone" | head -1)
-          if [ -z "$SIMULATOR_LINE" ]; then
-            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 26.1" | grep -i "iPad" | head -1)
+          if xcrun simctl list runtimes | grep -q "iOS 18.5"; then
+            echo "has_ios_18_5=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_ios_18_5=false" >> $GITHUB_OUTPUT
           fi
-        fi
 
-        # If iOS 26.1 not found or Xcode 16.4, try iOS 18.5 simulator (for Xcode 16.4)
-        if [ -z "$SIMULATOR_LINE" ]; then
-          echo "Looking for iOS 18.5 simulator (available on macOS 26)..."
-          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.5" | grep -i "iPhone" | head -1)
-          if [ -z "$SIMULATOR_LINE" ]; then
-            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.5" | grep -i "iPad" | head -1)
-          fi
-        fi
-
-        # If iOS 18.5 not found, try iOS 18.4
-        if [ -z "$SIMULATOR_LINE" ]; then
-          echo "iOS 18.5 simulator not found, trying iOS 18.4..."
-          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.4" | grep -i "iPhone" | head -1)
-          if [ -z "$SIMULATOR_LINE" ]; then
-            SIMULATOR_LINE=$(xcrun simctl list devices available | grep -A 20 "^-- iOS 18.4" | grep -i "iPad" | head -1)
-          fi
-        fi
-
-        # If still not found, try to find any iPhone simulator, then iPad
-        if [ -z "$SIMULATOR_LINE" ]; then
-          echo "iOS 26.1/18.5/18.4 simulator not found, trying any available iPhone simulator..."
-          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPhone" | head -1)
-        fi
-        if [ -z "$SIMULATOR_LINE" ]; then
-          echo "iPhone simulator not found, trying any available iPad simulator..."
-          SIMULATOR_LINE=$(xcrun simctl list devices available | grep -i "iPad" | head -1)
-        fi
-
-        if [ -z "$SIMULATOR_LINE" ]; then
-          echo "Error: No available iOS simulator found"
-          echo "All available devices:"
-          xcrun simctl list devices available || true
-          exit 1
-        fi
-
-        echo "Found simulator line: $SIMULATOR_LINE"
-
-        # Extract UDID
-        SIMULATOR_UDID=$(echo "$SIMULATOR_LINE" | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
-
-        # Extract simulator name (e.g., "iPhone 15" or "iPhone 15 Pro")
-        # Format: "iPhone 15 (A95FF35F-...) (Available)"
-        SIMULATOR_NAME=$(echo "$SIMULATOR_LINE" | sed -E 's/^[[:space:]]*([^(]+) \(.*/\1/' | xargs)
-
-        echo "Found iOS Simulator: $SIMULATOR_NAME (UDID: $SIMULATOR_UDID)"
-
-        # Boot the simulator (if not already booted)
-        echo "Checking simulator status..."
-        CURRENT_STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | grep -oE '\([^)]+\)' | head -1 | sed 's/[()]//g' || echo "")
-
-        if [ "$CURRENT_STATUS" != "Booted" ]; then
-          echo "Booting simulator $SIMULATOR_UDID..."
-          xcrun simctl boot "$SIMULATOR_UDID" 2>&1 || echo "Boot command completed (may already be booting)"
-
-          # Open Simulator app to ensure it's fully initialized
-          echo "Opening Simulator app..."
-          open -a Simulator || true
-
-          # Wait for simulator to be ready with polling
-          echo "Waiting for simulator to be ready..."
-          MAX_ATTEMPTS=60
-          ATTEMPT=0
-          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            BOOT_STATUS=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | grep -o "Booted" || echo "")
-            if [ -n "$BOOT_STATUS" ]; then
-              echo "Simulator is booted"
+      # ----- If a preferred Xcode app path exists on the runner, force select it -----
+      - name: Force-select Xcode app if present (26.1 -> 26.0.1 -> 16.4)
+        run: |
+          set -euo pipefail
+          echo "Checking for known Xcode app paths and selecting first match..."
+          # Check candidate paths in priority order (user requested)
+          CANDIDATES=(
+            "/Applications/Xcode_26.1.app/Contents/Developer"
+            "/Applications/Xcode_26.1.0.app/Contents/Developer"
+            "/Applications/Xcode.app/Contents/Developer"        # may be 26.0.1 or other
+            "/Applications/Xcode_26.0.app/Contents/Developer"
+            "/Applications/Xcode_16.4.0.app/Contents/Developer"
+          )
+          SELECTED=""
+          for p in "${CANDIDATES[@]}"; do
+            if [ -d "$p" ]; then
+              SELECTED="$p"
               break
             fi
-            ATTEMPT=$((ATTEMPT + 1))
-            echo "Waiting for simulator to boot... ($ATTEMPT/$MAX_ATTEMPTS)"
+          done
+
+          if [ -n "$SELECTED" ]; then
+            echo "Selecting Xcode at: $SELECTED"
+            sudo xcode-select -s "$SELECTED"
+            echo "DEVELOPER_DIR=$SELECTED" >> $GITHUB_ENV
+          else
+            echo "No preferred Xcode app path found among candidates. Will rely on setup-xcode selection."
+          fi
+
+      - name: Re-detect Xcode and runtimes (post-selection)
+        run: |
+          echo "Post-selection Xcode:" > $LOG_DIR/post_selection.txt
+          xcodebuild -version >> $LOG_DIR/post_selection.txt 2>&1 || true
+          xcodebuild -showsdks >> $LOG_DIR/post_selection.txt 2>&1 || true
+          xcrun simctl list runtimes >> $LOG_DIR/post_selection.txt 2>&1 || true
+          xcrun simctl list devices available >> $LOG_DIR/post_selection.txt 2>&1 || true
+          tail -n +1 $LOG_DIR/post_selection.txt | sed -n '1,200p'
+
+      - name: Verify Swift Package
+        run: |
+          swift package describe --type json | head -20
+          swift package resolve
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          if [ -f "project.yml" ]; then
+            echo "Generating Xcode project from project.yml..."
+            xcodegen generate
+            echo "Xcode project generated successfully"
+            echo ""
+            echo "=== Verifying scheme configuration ==="
+            if [ -f "s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme" ]; then
+              echo "Scheme file exists, checking test destination..."
+              echo "--- TestAction section ---"
+              grep -A 20 "TestAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme | head -30 || echo "TestAction not found"
+              echo ""
+              echo "--- LaunchAction section ---"
+              grep -A 20 "LaunchAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme | head -30 || echo "LaunchAction not found"
+              echo ""
+              echo "--- Full scheme file (first 100 lines) ---"
+              head -100 s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme
+            else
+              echo "Warning: Scheme file not found at expected location"
+              echo "Looking for scheme files..."
+              find s2j-about-window.xcodeproj -name "*.xcscheme" -type f || echo "No scheme files found"
+            fi
+          else
+            echo "Error: project.yml not found. Cannot generate Xcode project."
+            exit 1
+          fi
+
+      # ----- Determine runtime + device with fallback order per your requirements -----
+      - name: Choose simulator runtime & device (26.1 -> 26.0 -> 18.5 -> any)
+        id: choose_sim
+        run: |
+          set -euo pipefail
+          mkdir -p $LOG_DIR
+          # prefer iOS 26.1 -> 26.0 -> 18.5 -> first available iOS
+          RUNTIMES=$(xcrun simctl list runtimes || true)
+          CHOSEN_RUNTIME=""
+          if echo "$RUNTIMES" | grep -q "iOS 26.1"; then
+            CHOSEN_RUNTIME="iOS 26.1"
+          elif echo "$RUNTIMES" | grep -q "iOS 26.0"; then
+            CHOSEN_RUNTIME="iOS 26.0"
+          elif echo "$RUNTIMES" | grep -q "iOS 18.5"; then
+            CHOSEN_RUNTIME="iOS 18.5"
+          else
+            # fallback to first iOS runtime line
+            CHOSEN_RUNTIME=$(echo "$RUNTIMES" | grep "iOS " | head -1 | sed -E 's/.*(iOS [0-9]+(\.[0-9]+)?).*/\1/' || true)
+          fi
+
+          if [ -z "$CHOSEN_RUNTIME" ]; then
+            echo "Error: No iOS simulator runtime available on this runner" | tee $LOG_DIR/no-runtime.txt
+            exit 2
+          fi
+
+          echo "Chosen runtime: $CHOSEN_RUNTIME" | tee $LOG_DIR/chosen-runtime.txt
+          # Find a device that lists this runtime in the available devices block.
+          # We use a tolerant search for known device names (your preferred list),
+          # but fallback to first iPhone / iPad found for that runtime.
+          DEVICE_LINE=$(xcrun simctl list devices available | awk -v r="$CHOSEN_RUNTIME" '
+            BEGIN{found=0}
+            /^--/ { section = $0; next }
+            { if (section ~ r) { print; exit } }' | grep -E "iPhone|iPad" | head -1 || true)
+
+          # If that fails, try to select from preferred device names anywhere
+          if [ -z "$DEVICE_LINE" ]; then
+            DEVICE_LINE=$(xcrun simctl list devices available | grep -E "iPhone 17|iPhone 16e|iPhone 16|iPad Air|iPad Pro|iPad \\(A16\\)" | head -1 || true)
+          fi
+
+          # Final fallback: any iPhone or iPad
+          if [ -z "$DEVICE_LINE" ]; then
+            DEVICE_LINE=$(xcrun simctl list devices available | grep -E "iPhone|iPad" | head -1 || true)
+          fi
+
+          if [ -z "$DEVICE_LINE" ]; then
+            echo "Error: No device line found for runtime $CHOSEN_RUNTIME" | tee $LOG_DIR/no-device.txt
+            exit 3
+          fi
+
+          echo "Selected device line: $DEVICE_LINE" | tee -a $LOG_DIR/chosen-runtime.txt
+
+          UDID=$(echo "$DEVICE_LINE" | grep -oE '[A-F0-9-]{36}' | head -1 || true)
+          NAME=$(echo "$DEVICE_LINE" | sed -E 's/^[[:space:]]*([^(]+) .*/\1/' | xargs || true)
+          echo "udid=$UDID" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "runtime=$CHOSEN_RUNTIME" >> $GITHUB_OUTPUT
+          echo "device_line=$(echo "$DEVICE_LINE" | sed -E 's/\\n/ /g')" >> $GITHUB_OUTPUT
+
+      # ----- Boot simulator (with timeout & polling) -----
+      - name: Boot simulator (with polling)
+        id: boot
+        run: |
+          set -euo pipefail
+          mkdir -p $LOG_DIR
+          UDID="${{ steps.choose_sim.outputs.udid }}"
+          NAME="${{ steps.choose_sim.outputs.name }}"
+          echo "Booting UDID=$UDID NAME=$NAME" | tee $LOG_DIR/boot-start.txt
+
+          if [ -z "$UDID" ]; then
+            echo "No UDID available; aborting boot" | tee $LOG_DIR/boot-error.txt
+            exit 4
+          fi
+
+          # Boot
+          xcrun simctl boot "$UDID" 2>&1 | tee -a $LOG_DIR/boot.log || true
+          open -a Simulator || true
+
+          # Poll until booted or timeout
+          MAX=60
+          i=0
+          while [ $i -lt $MAX ]; do
+            status=$(xcrun simctl list devices | grep "$UDID" | sed -E 's/.*\(([^)]+)\).*/\1/' | tr -d '[:space:]' || true)
+            echo "poll: $i status=$status" | tee -a $LOG_DIR/boot.log
+            if echo "$status" | grep -qi "Booted"; then
+              echo "Simulator is booted" | tee -a $LOG_DIR/boot.log
+              break
+            fi
+            i=$((i+1))
             sleep 2
           done
 
-          if [ -z "$BOOT_STATUS" ]; then
-            echo "Error: Simulator failed to boot after $MAX_ATTEMPTS attempts"
-            exit 1
-          fi
-        else
-          echo "Simulator is already booted"
-        fi
-
-        # Wait additional time for simulator to be fully ready
-        echo "Waiting for simulator to be fully ready..."
-        sleep 5
-
-        # Clear xcodebuild derived data cache to ensure fresh state
-        echo "Clearing xcodebuild derived data cache..."
-        rm -rf ~/Library/Developer/Xcode/DerivedData/* 2>/dev/null || true
-
-        # Wait for simulator to be fully ready and accessible via xcodebuild
-        echo "Waiting for simulator to be accessible via xcodebuild..."
-        MAX_ATTEMPTS=15
-        ATTEMPT=0
-        XCODE_DEST=""
-
-        while [ $ATTEMPT -lt $MAX_ATTEMPTS ] && [ -z "$XCODE_DEST" ]; do
-          # Query xcodebuild for available destinations (without -sdk for better compatibility)
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
-
-          # Try to find destination with UDID first (most reliable)
-          if [ -n "$SIMULATOR_UDID" ]; then
-            XCODE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1 || echo "")
-            if [ -n "$XCODE_DEST" ]; then
-              echo "Found destination by UDID: $XCODE_DEST"
-              break
-            fi
+          if [ $i -ge $MAX ]; then
+            echo "Simulator failed to boot within timeout" | tee -a $LOG_DIR/boot.log
+            # dump simctl list
+            xcrun simctl list devices | tee -a $LOG_DIR/boot.log || true
+            exit 5
           fi
 
-          # If not found by UDID, try by name
-          if [ -z "$XCODE_DEST" ] && [ -n "$SIMULATOR_NAME" ]; then
-            XCODE_DEST=$(echo "$DEST_OUTPUT" | grep -i "platform=iOS Simulator" | grep -i "$SIMULATOR_NAME" | head -1 || echo "")
-            if [ -n "$XCODE_DEST" ]; then
-              echo "Found destination by name: $XCODE_DEST"
-              break
-            fi
-          fi
+          echo "booted_udid=$UDID" >> $GITHUB_OUTPUT
 
-          # If still not found, try to get any available iOS Simulator destination
-          if [ -z "$XCODE_DEST" ]; then
-            XCODE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 || echo "")
-            if [ -n "$XCODE_DEST" ]; then
-              echo "Found any available iOS Simulator destination: $XCODE_DEST"
-              # Extract UDID from the found destination
-              FOUND_UDID=$(echo "$XCODE_DEST" | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}' | head -1)
-              if [ -n "$FOUND_UDID" ]; then
-                SIMULATOR_UDID="$FOUND_UDID"
-                echo "Updated UDID to: $SIMULATOR_UDID"
-              fi
-              break
-            fi
-          fi
-
-          if [ -z "$XCODE_DEST" ]; then
-            ATTEMPT=$((ATTEMPT + 1))
-            if [ $ATTEMPT -eq 1 ] || [ $((ATTEMPT % 5)) -eq 0 ]; then
-              echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
-              echo "Debug: xcodebuild output (first 30 lines):"
-              echo "$DEST_OUTPUT" | head -30 || true
-              echo "Debug: Simulator status:"
-              xcrun simctl list devices | grep "$SIMULATOR_UDID" || true
-            else
-              echo "Waiting for simulator to be accessible via xcodebuild... ($ATTEMPT/$MAX_ATTEMPTS)"
-            fi
-            sleep 2
-          fi
-        done
-
-        # If xcodebuild still doesn't return destinations, construct destination manually
-        if [ -z "$XCODE_DEST" ]; then
-          echo "Warning: xcodebuild -showdestinations did not return iOS Simulator destinations after $MAX_ATTEMPTS attempts"
-          echo "Full xcodebuild output (last attempt):"
-          echo "$DEST_OUTPUT"
-          echo ""
-          echo "Attempting to construct destination manually from simulator info..."
-
-          # Verify simulator is still booted
-          SIMULATOR_LINE=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | head -1 || echo "")
-          if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
-            echo "Simulator is booted, constructing destination string manually..."
-            echo "Simulator line: $SIMULATOR_LINE"
-
-            # Construct destination string manually (without OS version for better compatibility)
-            # xcodebuild will auto-detect the OS version from the simulator
-            if [ -n "$SIMULATOR_UDID" ]; then
-              # Use UDID only (no OS version) for better compatibility
-              XCODE_DEST="platform=iOS Simulator,id=$SIMULATOR_UDID"
-              echo "Constructed destination without OS version: $XCODE_DEST"
-            else
-              echo "Error: Cannot construct destination - missing UDID"
-              echo "Available destinations:"
-              xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
-              exit 1
-            fi
-          else
-            echo "Error: Simulator is not booted"
-            echo "Simulator line: $SIMULATOR_LINE"
-            echo "Available destinations:"
-            xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true
-            exit 1
-          fi
-        fi
-
-        # Use the destination found via xcodebuild or constructed manually
-        DEST_STRING=$(echo "$XCODE_DEST" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-        echo "Using destination: $DEST_STRING"
-        echo "destination=$DEST_STRING" >> $GITHUB_OUTPUT
-        echo "udid=$SIMULATOR_UDID" >> $GITHUB_OUTPUT
-        echo "name=$SIMULATOR_NAME" >> $GITHUB_OUTPUT
-
-    - name: List Xcode schemes
-      run: |
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          xcodebuild -list -project s2j-about-window.xcodeproj
-        else
-          echo "Error: Xcode project not found after generation"
-          exit 1
-        fi
-
-    - name: Debug xcodebuild destinations
-      run: |
-        set -x
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          echo "=== Checking available simulators ==="
-          xcrun simctl list devices available | head -20 || true
-          echo ""
-          echo "=== Checking scheme file for TestAction destination ==="
-          if [ -f "s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme" ]; then
-            echo "Looking for destination in TestAction..."
-            grep -A 30 "TestAction" s2j-about-window.xcodeproj/xcshareddata/xcschemes/S2JAboutWindow-iOS.xcscheme | grep -i "destination\|platform" || echo "No destination found in TestAction"
-          fi
-          echo ""
-          echo "=== Full xcodebuild -showdestinations output (with SDK) ==="
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1)
-          echo "$DEST_OUTPUT"
-          echo "$DEST_OUTPUT" > /tmp/destinations-with-sdk.txt || true
-          echo ""
-          echo "=== Full xcodebuild -showdestinations output (without SDK) ==="
-          DEST_OUTPUT_NO_SDK=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1)
-          echo "$DEST_OUTPUT_NO_SDK"
-          echo "$DEST_OUTPUT_NO_SDK" > /tmp/destinations-without-sdk.txt || true
-          echo ""
-          echo "=== Checking scheme build destinations ==="
-          echo "$DEST_OUTPUT_NO_SDK" | grep -i "simulator" || echo "No simulator destinations found"
-          echo ""
-          echo "=== Checking scheme test destinations ==="
-          echo "$DEST_OUTPUT" | grep -i "simulator" || echo "No simulator destinations found for test"
-          echo ""
-          echo "=== Checking scheme configuration ==="
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showBuildSettings 2>&1 | grep -i "sdk\|platform" | head -10 || true
-          echo "=== End of destinations output ==="
-        else
-          echo "Error: Xcode project not found"
-          exit 1
-        fi
-
-    - name: Build for iOS (verify compilation)
-      run: |
-        set -e
-        # Get iOS SDK path
-        IOS_SDK_PATH=$(xcrun --show-sdk-path --sdk iphonesimulator)
-        echo "iOS SDK Path: $IOS_SDK_PATH"
-
-        # Build with Xcode project (should exist after generation step)
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          echo "Building with Xcode project..."
-
-          # Try multiple approaches
-          # Approach 1: Try building target directly (no scheme)
-          echo "=== Attempting build with target directly (no scheme) ==="
-          set +e
-          if xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -target S2JAboutWindow-iOS \
-            -sdk iphonesimulator \
-            -arch arm64 2>&1; then
-            echo "✅ Build succeeded with target directly (arm64)"
-            exit 0
-          elif xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -target S2JAboutWindow-iOS \
-            -sdk iphonesimulator \
-            -arch x86_64 2>&1; then
-            echo "✅ Build succeeded with target directly (x86_64)"
-            exit 0
-          else
-            echo "❌ Build failed with target directly, trying with scheme..."
-            set -e
-          fi
-
-          # Approach 2: Try with SDK and architecture (no destination)
-          echo "=== Attempting build with SDK and architecture (no destination) ==="
-          set +e
-          if xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
-            -sdk iphonesimulator \
-            -arch arm64 2>&1; then
-            echo "✅ Build succeeded with SDK and arm64 architecture"
-            exit 0
-          elif xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
-            -sdk iphonesimulator \
-            -arch x86_64 2>&1; then
-            echo "✅ Build succeeded with SDK and x86_64 architecture"
-            exit 0
-          else
-            echo "❌ Build failed with SDK and architecture, trying with destination..."
-            set -e
-          fi
-
-          # Approach 3: Try with destination from previous step
-          DESTINATION="${{ steps.simulator.outputs.destination }}"
-          if [ -n "$DESTINATION" ]; then
-            echo "=== Attempting build with destination: $DESTINATION ==="
-            set +e
-            if xcodebuild build \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "$DESTINATION" \
-              -sdk iphonesimulator 2>&1; then
-              echo "✅ Build succeeded with specific destination"
-              exit 0
-            else
-              echo "❌ Build failed with specific destination, trying generic destination..."
-              set -e
-            fi
-          fi
-
-          # Approach 4: Try with generic platform destination
-          echo "=== Attempting build with generic platform destination ==="
-          xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -scheme S2JAboutWindow-iOS \
-            -destination "platform=iOS Simulator" \
-            -sdk iphonesimulator
-        else
-          echo "Error: Xcode project not found. iOS builds require an Xcode project."
-          exit 1
-        fi
-
-    - name: Run tests on iOS Simulator
-      run: |
-        set -e
-        # Run tests with Xcode project (should exist after generation step)
-        if [ -f "s2j-about-window.xcodeproj/project.pbxproj" ]; then
-          echo "Running tests with Xcode project..."
-
-          # Get simulator information from previous step
-          DESTINATION="${{ steps.simulator.outputs.destination }}"
-          SIMULATOR_UDID="${{ steps.simulator.outputs.udid }}"
-          SIMULATOR_NAME="${{ steps.simulator.outputs.name }}"
-
-          if [ -z "$DESTINATION" ]; then
-            echo "Warning: Destination not found from simulator step"
-            echo "Attempting to reconstruct destination from simulator info..."
-
-            # Try to get UDID and name from previous step outputs
-            if [ -z "$SIMULATOR_UDID" ]; then
-              echo "Error: Simulator UDID not found from simulator step"
-              echo "Attempting to get destination from xcodebuild..."
-              DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
-              DESTINATION=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
-              # Remove OS= parameter if present
-              if [ -n "$DESTINATION" ]; then
-                DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-              fi
-
-              if [ -z "$DESTINATION" ]; then
-                echo "Error: No iOS Simulator destination found"
-                echo "Available destinations:"
-                echo "$DEST_OUTPUT" | grep "platform=" || true
-                exit 1
-              fi
-              echo "Found destination: $DESTINATION"
-            else
-              # Reconstruct destination from UDID (prefer id=UDID only, more reliable)
-              if [ -n "$SIMULATOR_UDID" ]; then
-                DESTINATION="platform=iOS Simulator,id=$SIMULATOR_UDID"
-              else
-                echo "Error: Cannot reconstruct destination - missing UDID"
-                exit 1
-              fi
-              echo "Reconstructed destination: $DESTINATION"
-            fi
-          else
-            echo "Using destination from simulator step: $DESTINATION"
-          fi
-
-          # Verify simulator is still booted (instead of relying on xcodebuild -showdestinations)
-          echo "Verifying simulator is still booted..."
-          if [ -n "$SIMULATOR_UDID" ]; then
-            SIMULATOR_LINE=$(xcrun simctl list devices | grep "$SIMULATOR_UDID" | head -1 || echo "")
-            if echo "$SIMULATOR_LINE" | grep -q "Booted"; then
-              echo "Simulator is booted: $SIMULATOR_LINE"
-            else
-              echo "Warning: Simulator may not be booted, but continuing with destination: $DESTINATION"
-              echo "Simulator line: $SIMULATOR_LINE"
-            fi
-          else
-            echo "Warning: Simulator UDID not available, skipping boot verification"
-          fi
-
-          # Build test target first (for faster test execution)
-          echo "=== Building test target ==="
-          TEST_BUILD_SUCCESS=false
-          set +e
-          if xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -target S2JAboutWindowTests-iOS \
-            -sdk iphonesimulator \
-            -arch arm64 2>&1; then
-            echo "✅ Test target built successfully (arm64)"
-            TEST_BUILD_SUCCESS=true
-          elif xcodebuild build \
-            -project s2j-about-window.xcodeproj \
-            -target S2JAboutWindowTests-iOS \
-            -sdk iphonesimulator \
-            -arch x86_64 2>&1; then
-            echo "✅ Test target built successfully (x86_64)"
-            TEST_BUILD_SUCCESS=true
-          else
-            echo "⚠️  Test target build failed, will build during test execution"
-          fi
+      # ----- Sanity: show xcodebuild -showdestinations and save xcresult path var -----
+      - name: Debug destinations & showBuildSettings
+        run: |
           set -e
+          mkdir -p $LOG_DIR
+          echo "=== showdestinations (no -sdk) ===" > $LOG_DIR/destinations.txt
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | tee -a $LOG_DIR/destinations.txt || true
+          echo "=== showdestinations (with -sdk iphonesimulator) ===" >> $LOG_DIR/destinations.txt
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 | tee -a $LOG_DIR/destinations.txt || true
+          echo "=== showBuildSettings ===" >> $LOG_DIR/destinations.txt
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showBuildSettings 2>&1 | tee -a $LOG_DIR/destinations.txt || true
 
-          # Run tests with the verified destination
-          echo "=== Running tests with destination: $DESTINATION ==="
+      # ----- Build & Test: try multiple strategies (test-without-building / test) -----
+      - name: Build + Run tests (multi-strategy)
+        id: run_tests
+        run: |
+          set -euo pipefail
+          LOG_DIR=${LOG_DIR:-/tmp/gha-ios-logs}
+          mkdir -p $LOG_DIR
+          UDID="${{ steps.boot.outputs.booted_udid }}"
+          DEST="platform=iOS Simulator,id=$UDID"
+          echo "Using destination: $DEST" | tee -a $LOG_DIR/test-run.txt
 
-          # Ensure destination uses id=UDID format (remove name= if present)
-          if echo "$DESTINATION" | grep -q "name="; then
-            echo "Removing name= from destination string for better compatibility..."
-            DESTINATION=$(echo "$DESTINATION" | sed 's/,name=[^,]*//' | sed 's/name=[^,]*,\?//')
-            echo "Updated destination: $DESTINATION"
-          fi
+          # produce result bundle path for debugging
+          RESULT_BUNDLE="$LOG_DIR/result.xcresult"
 
-          # Remove OS version from destination if present (causes issues with xcodebuild)
-          # xcodebuild should auto-detect the OS version from the simulator
-          if echo "$DESTINATION" | grep -q "OS="; then
-            echo "Removing OS= parameter from destination (xcodebuild will auto-detect)..."
-            DESTINATION=$(echo "$DESTINATION" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-            echo "Updated destination without OS version: $DESTINATION"
-          fi
-
-          # Debug: Show what xcodebuild sees (without -sdk flag for better compatibility)
-          echo "Debug: Checking available destinations with xcodebuild..."
-          # Try without -sdk flag first (better compatibility)
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1)
-          echo "Full xcodebuild -showdestinations output (without -sdk):"
-          echo "$DEST_OUTPUT" | head -50
-
-          # Check if xcodebuild returns any iOS Simulator destinations
-          if echo "$DEST_OUTPUT" | grep -q "platform=iOS Simulator"; then
-            echo "Found iOS Simulator destinations in xcodebuild output"
-            # Try to find a destination that matches our UDID
-            MATCHING_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | grep "$SIMULATOR_UDID" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
-            if [ -n "$MATCHING_DEST" ]; then
-              echo "Found matching destination: $MATCHING_DEST"
-              # Remove OS= parameter if present
-              MATCHING_DEST=$(echo "$MATCHING_DEST" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-              DESTINATION="$MATCHING_DEST"
-            else
-              # Use any available iOS Simulator destination
-              AVAILABLE_DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
-              if [ -n "$AVAILABLE_DEST" ]; then
-                echo "Using available iOS Simulator destination: $AVAILABLE_DEST"
-                # Remove OS= parameter if present
-                AVAILABLE_DEST=$(echo "$AVAILABLE_DEST" | sed 's/,OS=[^,]*//' | sed 's/OS=[^,]*,\?//')
-                DESTINATION="$AVAILABLE_DEST"
-              fi
-            fi
+          # Strategy A: Attempt test-without-building if we can build test target earlier
+          echo "Attempting xcodebuild test-without-building..." | tee -a $LOG_DIR/test-run.txt
+          if xcodebuild test-without-building \
+            -project s2j-about-window.xcodeproj \
+            -scheme S2JAboutWindow-iOS \
+            -destination "$DEST" \
+            -enableCodeCoverage YES \
+            -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+            echo "test-without-building succeeded" | tee -a $LOG_DIR/test-run.txt
           else
-            echo "Warning: xcodebuild -showdestinations did not return any iOS Simulator destinations"
-            echo "This may indicate that xcodebuild cannot see the simulator"
-            echo "Will use manually constructed destination: $DESTINATION"
-          fi
-
-          # Try multiple approaches to run tests
-          set +e
-          TEST_SUCCESS=false
-
-          # Try multiple approaches to run tests (without -sdk flag for better compatibility)
-          if [ "$TEST_BUILD_SUCCESS" = true ]; then
-            # Approach 1: Use test-without-building if we successfully built the test target
-            echo "Attempting test-without-building (test target already built)..."
-            if xcodebuild test-without-building \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "$DESTINATION" \
-              -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed with test-without-building"
-              TEST_SUCCESS=true
-            else
-              echo "⚠️  test-without-building failed, trying test (build and test together)..."
-            fi
-          fi
-
-          if [ "$TEST_SUCCESS" = false ]; then
-            # Approach 2: Build and test together
-            echo "Building and testing together..."
+            echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
+            # Strategy B: Build & test
             if xcodebuild test \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
-              -destination "$DESTINATION" \
-              -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed with test (build and test together)"
-              TEST_SUCCESS=true
+              -destination "$DEST" \
+              -enableCodeCoverage YES \
+              -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+              echo "xcodebuild test succeeded" | tee -a $LOG_DIR/test-run.txt
             else
-              echo "❌ Tests failed with both approaches"
-              # Try with generic destination as last resort
-              echo "Attempting with generic destination as last resort..."
+              echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
+              # Last resort: generic platform
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
                 -scheme S2JAboutWindow-iOS \
                 -destination "platform=iOS Simulator" \
-                -enableCodeCoverage YES 2>&1; then
-                echo "✅ Tests passed with generic destination"
-                TEST_SUCCESS=true
+                -enableCodeCoverage YES \
+                -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                echo "succeeded with generic platform" | tee -a $LOG_DIR/test-run.txt
+              else
+                echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
+                # Save logs for debug (artifact step will upload)
+                exit 10
               fi
             fi
           fi
 
-          # If xcodebuild still fails, try using destination with just id=UDID (no platform=)
-          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
-            echo "⚠️  xcodebuild failed, trying alternative destination format (id=UDID only)..."
-            if xcodebuild test-without-building \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "id=$SIMULATOR_UDID" \
-              -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed with id=UDID only destination"
-              TEST_SUCCESS=true
-            else
-              echo "⚠️  id=UDID only destination also failed"
-            fi
+          # Try to export xcresult and produce some coverage / summary
+          if [ -d "$RESULT_BUNDLE" ]; then
+            echo "Result bundle exists at $RESULT_BUNDLE"
+            # produce summary
+            xcrun xcresulttool get --path "$RESULT_BUNDLE" --format json > "$LOG_DIR/result-xcresult.json" || true
+            # produce xccov report (human-readable)
+            xcrun xccov view --report "$RESULT_BUNDLE" > "$LOG_DIR/xccov-report.txt" || true
+            # optionally generate travis-cobertura-like xml if available tooling exists (skip otherwise)
+          else
+            echo "No result bundle generated (test-without-building path or failure)" | tee -a $LOG_DIR/test-run.txt
           fi
 
-          # Last resort: try with -sdk flag (in case removing it caused issues)
-          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
-            echo "⚠️  Trying with -sdk flag as last resort..."
-            if xcodebuild test-without-building \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -sdk iphonesimulator \
-              -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
-              -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed with -sdk flag"
-              TEST_SUCCESS=true
-            else
-              echo "⚠️  With -sdk flag also failed"
-            fi
-          fi
+      # ----- Upload diagnostics as artifact so you can inspect next run logs -----
+      - name: Upload diagnostics artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-test-diagnostics
+          path: ${{ env.LOG_DIR }}
 
-          # Final fallback: try restarting simulator and xcodebuild
-          if [ "$TEST_SUCCESS" = false ] && [ -n "$SIMULATOR_UDID" ]; then
-            echo "⚠️  Trying simulator restart as final fallback..."
-            echo "Shutting down simulator..."
-            xcrun simctl shutdown "$SIMULATOR_UDID" 2>&1 || true
-            sleep 3
-            echo "Booting simulator again..."
-            xcrun simctl boot "$SIMULATOR_UDID" 2>&1 || true
-            sleep 5
-            echo "Trying xcodebuild test again after restart..."
-            if xcodebuild test \
-              -project s2j-about-window.xcodeproj \
-              -scheme S2JAboutWindow-iOS \
-              -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
-              -enableCodeCoverage YES 2>&1; then
-              echo "✅ Tests passed after simulator restart"
-              TEST_SUCCESS=true
-            else
-              echo "⚠️  Tests still failed after simulator restart"
-            fi
-          fi
-
-          set -e
-
-          if [ "$TEST_SUCCESS" = false ]; then
-            echo "Error: All test execution approaches failed"
-            echo "Final debug: Simulator status:"
-            xcrun simctl list devices | grep "$SIMULATOR_UDID" || true
-            echo ""
-            echo "Debug: Available simulators:"
-            xcrun simctl list devices available | head -20 || true
-            echo ""
-            echo "Debug: xcodebuild -showsdks:"
-            xcodebuild -showsdks 2>&1 | grep -i simulator || true
-            exit 1
-          fi
-        else
-          echo "Error: Xcode project not found. iOS tests require an Xcode project."
-          exit 1
-        fi
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: .build/coverage/coverage.xml
-        flags: ios
-        name: ios-coverage
-        fail_ci_if_error: false
+      # ----- Attempt to upload coverage to Codecov (no-fail) -----
+      - name: Upload coverage to Codecov (iOS) (best-effort)
+        if: ${{ always() }}
+        uses: codecov/codecov-action@v3
+        with:
+          file: .build/coverage/coverage.xml
+          flags: ios
+          name: ios-coverage
+          fail_ci_if_error: false
 
   build-release:
     runs-on: macos-latest
