@@ -303,6 +303,16 @@ jobs:
           # produce result bundle path for debugging
           RESULT_BUNDLE="$LOG_DIR/result.xcresult"
 
+          # Remove existing result bundle if it exists (xcodebuild fails if path exists)
+          rm -rf "$RESULT_BUNDLE" || true
+          echo "Cleaned up existing result bundle if any" | tee -a $LOG_DIR/test-run.txt
+
+          # Debug: Check if simulator is still available
+          echo "Debug: Checking simulator status..." | tee -a $LOG_DIR/test-run.txt
+          xcrun simctl list devices | grep "$UDID" | tee -a $LOG_DIR/test-run.txt || true
+          echo "Debug: Available destinations from xcodebuild..." | tee -a $LOG_DIR/test-run.txt
+          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | grep -i "simulator" | head -10 | tee -a $LOG_DIR/test-run.txt || true
+
           # Strategy A: Attempt test-without-building if we can build test target earlier
           echo "Attempting xcodebuild test-without-building..." | tee -a $LOG_DIR/test-run.txt
           if xcodebuild test-without-building \
@@ -314,6 +324,8 @@ jobs:
             echo "test-without-building succeeded" | tee -a $LOG_DIR/test-run.txt
           else
             echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
+            # Remove result bundle again before retry
+            rm -rf "$RESULT_BUNDLE" || true
             # Strategy B: Build & test
             if xcodebuild test \
               -project s2j-about-window.xcodeproj \
@@ -324,6 +336,8 @@ jobs:
               echo "xcodebuild test succeeded" | tee -a $LOG_DIR/test-run.txt
             else
               echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
+              # Remove result bundle again before retry
+              rm -rf "$RESULT_BUNDLE" || true
               # Last resort: generic platform
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
