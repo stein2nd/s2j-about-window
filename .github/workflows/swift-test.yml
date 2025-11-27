@@ -322,6 +322,14 @@ jobs:
           RUNTIME_SECTION=$(xcrun simctl list devices available | grep -B 50 "$UDID" | grep "^--" | tail -1 | sed 's/^-- //' | sed 's/ --$//' || echo "")
           echo "Runtime section: $RUNTIME_SECTION" | tee -a $LOG_DIR/test-run.txt
 
+          # Extract runtime version from RUNTIME_SECTION (e.g., "iOS 26.0" -> "26.0")
+          RUNTIME_VERSION=$(echo "$RUNTIME_SECTION" | sed -E 's/.*iOS ([0-9]+\.[0-9]+).*/\1/' || echo "")
+          if [ -z "$RUNTIME_VERSION" ]; then
+            # Try alternative format (e.g., "iOS 26.0" -> "26.0")
+            RUNTIME_VERSION=$(echo "$RUNTIME_SECTION" | grep -oE '[0-9]+\.[0-9]+' | head -1 || echo "")
+          fi
+          echo "Runtime version: $RUNTIME_VERSION" | tee -a $LOG_DIR/test-run.txt
+
           # Debug: Check scheme information
           echo "Debug: Checking scheme information..." | tee -a $LOG_DIR/test-run.txt
           xcodebuild -list -project s2j-about-window.xcodeproj 2>&1 | tee -a $LOG_DIR/test-run.txt || true
@@ -356,18 +364,25 @@ jobs:
             fi
           fi
 
-          # If still not found, construct destination manually
+          # If still not found, construct destination manually with runtime version
           if [ -z "$DEST" ] && [ -n "$UDID" ]; then
             echo "Debug: Constructing destination manually..." | tee -a $LOG_DIR/test-run.txt
-            # Try multiple formats
-            if [ -n "$DEVICE_NAME" ]; then
-              # Try with device name first
-              DEST="platform=iOS Simulator,name=$DEVICE_NAME"
-              echo "Trying destination with device name: $DEST" | tee -a $LOG_DIR/test-run.txt
-            else
+            # Prefer UDID with runtime version (most reliable)
+            if [ -n "$RUNTIME_VERSION" ]; then
+              DEST="platform=iOS Simulator,id=$UDID,OS=$RUNTIME_VERSION"
+              echo "Trying destination with UDID and OS version: $DEST" | tee -a $LOG_DIR/test-run.txt
+            elif [ -n "$DEVICE_NAME" ] && [ -n "$RUNTIME_VERSION" ]; then
+              # Try with device name and runtime version
+              DEST="platform=iOS Simulator,name=$DEVICE_NAME,OS=$RUNTIME_VERSION"
+              echo "Trying destination with device name and OS version: $DEST" | tee -a $LOG_DIR/test-run.txt
+            elif [ -n "$UDID" ]; then
               # Fallback to UDID only
               DEST="platform=iOS Simulator,id=$UDID"
               echo "Using destination with UDID only: $DEST" | tee -a $LOG_DIR/test-run.txt
+            elif [ -n "$DEVICE_NAME" ]; then
+              # Last resort: device name only
+              DEST="platform=iOS Simulator,name=$DEVICE_NAME"
+              echo "Using destination with device name only: $DEST" | tee -a $LOG_DIR/test-run.txt
             fi
           fi
 
@@ -457,6 +472,7 @@ jobs:
 
       # ----- Upload diagnostics as artifact so you can inspect next run logs -----
       - name: Upload diagnostics artifact
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ios-test-diagnostics
