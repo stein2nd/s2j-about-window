@@ -170,26 +170,37 @@
     * `xcodebuild -showBuildSettings` でビルド設定を確認します。
     * ログに保存します。
 
-13. **ビルドとテスト実行 (マルチ・ストラテジー)**
+13. **ランタイムバージョンの抽出と SDK の自動検出**
+    * シミュレーターのランタイム・バージョンを抽出します (例: `iOS 26.0` → `26.0`)。
+    * `xcodebuild -showsdks` で利用可能な iOS Simulator SDK を確認します。
+    * ランタイム・バージョンと一致する SDK を自動検出します (例: `iphonesimulator26.0` for iOS 26.0)。
+    * 完全一致が見つからない場合は、メジャー・バージョンで一致する SDK を検索します。
+    * それでも見つからない場合は、任意の `iphonesimulator` SDK を使用します。
+
+14. **デスティネーションの構築**
+    * `xcodebuild -showdestinations` の出力から、UDID に一致するデスティネーションを検索します。
+    * 見つからない場合は、デスティネーションを手動で構築します。
+    * **重要**: OS バージョンを指定せず、UDID のみを使用します (`platform=iOS Simulator,id=<UDID>`)。
+      * これにより、xcodebuild が自動的に適切な SDK/ランタイムをマッチングします。
+      * SDK とランタイムのバージョン不一致の問題を回避します。
+
+15. **ビルドとテスト実行 (マルチ・ストラテジー)**
     * 複数のアプローチでテストを実行します。
-    * **ストラテジー A**: `xcodebuild test-without-building` (SDK 指定なし)
+    * **ストラテジー A**: `xcodebuild test-without-building` (SDK 指定なし、xcodebuild が自動選択)
       * 成功した場合は終了します。
       * 失敗した場合は、ストラテジー A-2 に進みます。
-    * **ストラテジー A-2**: `xcodebuild test-without-building` (`-sdk iphonesimulator` 指定)
+    * **ストラテジー A-2**: `xcodebuild test-without-building` (検出された SDK を明示的に指定)
       * 成功した場合は終了します。
       * 失敗した場合は、ストラテジー B に進みます。
-    * **ストラテジー B**: `xcodebuild test` (SDK 指定なし)
+    * **ストラテジー B**: `xcodebuild test` (SDK 指定なし、xcodebuild が自動選択)
       * 成功した場合は終了します。
       * 失敗した場合は、ストラテジー B-2 に進みます。
-    * **ストラテジー B-2**: `xcodebuild test` (`-sdk iphonesimulator` 指定)
+    * **ストラテジー B-2**: `xcodebuild test` (検出された SDK を明示的に指定)
       * 成功した場合は終了します。
-      * 失敗した場合は、ストラテジー C に進みます。
-    * **ストラテジー C**: `xcodebuild test` (汎用プラットフォーム指定)
-      * `platform=iOS Simulator` のみを指定してテストを実行します。
     * **共通設定**:
       * `-project s2j-about-window.xcodeproj`
       * `-scheme S2JAboutWindow-iOS`
-      * `-destination`: 選択されたデバイス (UDID または名前)
+      * `-destination`: 選択されたデバイス (UDID のみ、OS バージョンは指定しない)
       * `-enableCodeCoverage YES`
       * `-resultBundlePath`: `$LOG_DIR/result.xcresult`
     * **結果バンドルの処理**:
@@ -197,12 +208,13 @@
         * `xcrun xcresulttool get --path "$RESULT_BUNDLE" --format json`: JSON 形式の結果
         * `xcrun xccov view --report "$RESULT_BUNDLE"`: カバレッジ・レポート
 
-14. **診断情報のアップロード (アーティファクト)**
+16. **診断情報のアップロード (アーティファクト)**
     * `actions/upload-artifact@v4` を使用して、診断情報をアーティファクトとしてアップロードします。
     * **アーティファクト名**: `ios-test-diagnostics`
     * **パス**: `$LOG_DIR` (すべてのログファイルを含む)
+    * **条件**: `if: ${{ always() }}` (テストが失敗しても実行)
 
-15. **カバレッジのアップロード (Codecov) (ベスト・エフォート)**
+17. **カバレッジのアップロード (Codecov) (ベスト・エフォート)**
     * `codecov/codecov-action@v3` を使用して、テスト・カバレッジを Codecov にアップロードします。
     * **設定**:
       * `file`: `.build/coverage/coverage.xml`
@@ -222,8 +234,11 @@
 * **Xcode バージョンのフォールバック**: 複数の Xcode バージョンを試行し、利用可能な最初のバージョンを使用します。
 * **シミュレーター・ランタイムのフォールバック**: 複数の iOS ランタイムを試行し、利用可能な最初のランタイムを使用します。
 * **デバイス選択のフォールバック**: 複数のデバイス名を試行し、利用可能な最初のデバイスを使用します。
-* **テスト実行のマルチ・ストラテジー**: 複数のアプローチでテストを実行し、いずれかが成功すれば CI を継続します。
+* **SDK とランタイムの自動マッチング**: ランタイム・バージョンと一致する SDK を自動検出し、SDK とランタイムのバージョン不一致の問題を回避します。
+* **デスティネーション構築の改善**: OS バージョンを指定せず、UDID のみを使用することで、xcodebuild が自動的に適切な SDK/ランタイムをマッチングします。
+* **テスト実行のマルチ・ストラテジー**: 複数のアプローチでテストを実行し、いずれかが成功すれば CI を継続します。SDK を指定せずに実行を優先し、xcodebuild の自動選択を活用します。
 * **詳細なログ記録**: すべてのステップでログを記録し、アーティファクトとして保存します。
+* **診断情報の常時アップロード**: テストが失敗しても診断情報をアップロードし、問題の特定を容易にします。
 
 ### 2.3. `build-release` ジョブ
 
@@ -397,6 +412,10 @@
   * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了・テスト成功)
   * `test-macos` ジョブ: macOS 向けテスト実行とカバレッジ収集
   * `test-ios` ジョブ: iOS/iPadOS 向けテスト実行とカバレッジ収集
+    * ランタイム・バージョンの抽出と SDK の自動検出機能 (✅実装完了)
+    * デスティネーション構築の改善 (OS バージョンを指定せず、UDID のみを使用) (✅実装完了)
+    * テスト実行の優先順位の最適化 (SDK を指定せずに実行を優先) (✅実装完了)
+    * 診断情報の常時アップロード (`if: always()` を追加) (✅実装完了)
   * `build-release` ジョブ: リリースビルド生成
 * **ローカルテスト・スクリプト**:
   * `scripts/test-local.sh`: コミット前に CI/CD と同じテストをローカルで実行 (✅100% 実装完了)
