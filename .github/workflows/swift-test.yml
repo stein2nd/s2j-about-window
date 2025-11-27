@@ -297,8 +297,6 @@ jobs:
           LOG_DIR=${LOG_DIR:-/tmp/gha-ios-logs}
           mkdir -p $LOG_DIR
           UDID="${{ steps.boot.outputs.booted_udid }}"
-          DEST="platform=iOS Simulator,id=$UDID"
-          echo "Using destination: $DEST" | tee -a $LOG_DIR/test-run.txt
 
           # produce result bundle path for debugging
           RESULT_BUNDLE="$LOG_DIR/result.xcresult"
@@ -310,8 +308,72 @@ jobs:
           # Debug: Check if simulator is still available
           echo "Debug: Checking simulator status..." | tee -a $LOG_DIR/test-run.txt
           xcrun simctl list devices | grep "$UDID" | tee -a $LOG_DIR/test-run.txt || true
-          echo "Debug: Available destinations from xcodebuild..." | tee -a $LOG_DIR/test-run.txt
-          xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 | grep -i "simulator" | head -10 | tee -a $LOG_DIR/test-run.txt || true
+
+          # Get available destinations from xcodebuild and find matching destination
+          echo "Debug: Getting available destinations from xcodebuild..." | tee -a $LOG_DIR/test-run.txt
+          # Try with SDK first (more reliable for simulators)
+          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
+          if [ -z "$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator")" ]; then
+            # If no simulator destinations found, try without SDK
+            echo "No simulator destinations found with -sdk, trying without SDK..." | tee -a $LOG_DIR/test-run.txt
+            DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
+          fi
+          echo "$DEST_OUTPUT" | tee -a $LOG_DIR/test-run.txt
+
+          # Try to find destination by UDID first
+          DEST=""
+          if [ -n "$UDID" ]; then
+            DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | grep "$UDID" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+            if [ -n "$DEST" ]; then
+              echo "Found destination by UDID: $DEST" | tee -a $LOG_DIR/test-run.txt
+            fi
+          fi
+
+          # If not found by UDID, try to get any available iOS Simulator destination
+          if [ -z "$DEST" ]; then
+            DEST=$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator" | head -1 | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' || echo "")
+            if [ -n "$DEST" ]; then
+              echo "Using first available iOS Simulator destination: $DEST" | tee -a $LOG_DIR/test-run.txt
+            fi
+          fi
+
+          # If still not found, construct destination manually from UDID
+          if [ -z "$DEST" ] && [ -n "$UDID" ]; then
+            echo "Debug: Constructing destination manually from UDID..." | tee -a $LOG_DIR/test-run.txt
+            # Get simulator device info to find runtime
+            SIM_DEVICE_INFO=$(xcrun simctl list devices available | grep "$UDID" || echo "")
+            if [ -n "$SIM_DEVICE_INFO" ]; then
+              echo "Simulator device info: $SIM_DEVICE_INFO" | tee -a $LOG_DIR/test-run.txt
+              # Try to get runtime from the section header (e.g., "-- iOS 26.1 --")
+              # We need to find which runtime section this device belongs to
+              RUNTIME_SECTION=$(xcrun simctl list devices available | grep -B 20 "$UDID" | grep "^--" | tail -1 | sed 's/^-- //' | sed 's/ --$//' || echo "")
+              if [ -n "$RUNTIME_SECTION" ] && echo "$RUNTIME_SECTION" | grep -q "iOS"; then
+                # Extract iOS version (e.g., "iOS 26.1" -> "26.1")
+                IOS_VERSION=$(echo "$RUNTIME_SECTION" | grep -oE '[0-9]+(\.[0-9]+)?' | head -1 || echo "")
+                if [ -n "$IOS_VERSION" ]; then
+                  DEST="platform=iOS Simulator,id=$UDID,OS=$IOS_VERSION"
+                  echo "Constructed destination with OS version $IOS_VERSION: $DEST" | tee -a $LOG_DIR/test-run.txt
+                else
+                  DEST="platform=iOS Simulator,id=$UDID"
+                  echo "Constructed destination without OS version: $DEST" | tee -a $LOG_DIR/test-run.txt
+                fi
+              else
+                DEST="platform=iOS Simulator,id=$UDID"
+                echo "Constructed destination (fallback, no runtime found): $DEST" | tee -a $LOG_DIR/test-run.txt
+              fi
+            else
+              # Last resort: just use UDID without OS version
+              DEST="platform=iOS Simulator,id=$UDID"
+              echo "Constructed destination (last resort): $DEST" | tee -a $LOG_DIR/test-run.txt
+            fi
+          fi
+
+          if [ -z "$DEST" ]; then
+            echo "Error: Could not determine destination" | tee -a $LOG_DIR/test-run.txt
+            exit 1
+          fi
+
+          echo "Using destination: $DEST" | tee -a $LOG_DIR/test-run.txt
 
           # Strategy A: Attempt test-without-building if we can build test target earlier
           echo "Attempting xcodebuild test-without-building..." | tee -a $LOG_DIR/test-run.txt
