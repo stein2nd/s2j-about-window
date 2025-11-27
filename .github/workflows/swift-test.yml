@@ -309,16 +309,27 @@ jobs:
           echo "Debug: Checking simulator status..." | tee -a $LOG_DIR/test-run.txt
           xcrun simctl list devices | grep "$UDID" | tee -a $LOG_DIR/test-run.txt || true
 
+          # Get simulator runtime information
+          echo "Debug: Getting simulator runtime information..." | tee -a $LOG_DIR/test-run.txt
+          SIM_DEVICE_LINE=$(xcrun simctl list devices available | grep "$UDID" || echo "")
+          echo "Simulator device line: $SIM_DEVICE_LINE" | tee -a $LOG_DIR/test-run.txt
+
+          # Find the runtime section this device belongs to
+          RUNTIME_SECTION=$(xcrun simctl list devices available | grep -B 50 "$UDID" | grep "^--" | tail -1 | sed 's/^-- //' | sed 's/ --$//' || echo "")
+          echo "Runtime section: $RUNTIME_SECTION" | tee -a $LOG_DIR/test-run.txt
+
           # Get available destinations from xcodebuild and find matching destination
-          echo "Debug: Getting available destinations from xcodebuild..." | tee -a $LOG_DIR/test-run.txt
-          # Try with SDK first (more reliable for simulators)
-          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
-          if [ -z "$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator")" ]; then
-            # If no simulator destinations found, try without SDK
-            echo "No simulator destinations found with -sdk, trying without SDK..." | tee -a $LOG_DIR/test-run.txt
-            DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
-          fi
+          echo "Debug: Getting available destinations from xcodebuild (without SDK first)..." | tee -a $LOG_DIR/test-run.txt
+          # Try without SDK first (xcodebuild will auto-select appropriate SDK)
+          DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations 2>&1 || true)
           echo "$DEST_OUTPUT" | tee -a $LOG_DIR/test-run.txt
+
+          # Check if we got any simulator destinations
+          if [ -z "$(echo "$DEST_OUTPUT" | grep "platform=iOS Simulator")" ]; then
+            echo "No simulator destinations found without SDK, trying with -sdk iphonesimulator..." | tee -a $LOG_DIR/test-run.txt
+            DEST_OUTPUT=$(xcodebuild -project s2j-about-window.xcodeproj -scheme S2JAboutWindow-iOS -showdestinations -sdk iphonesimulator 2>&1 || true)
+            echo "$DEST_OUTPUT" | tee -a $LOG_DIR/test-run.txt
+          fi
 
           # Try to find destination by UDID first
           DEST=""
@@ -353,46 +364,67 @@ jobs:
 
           echo "Using destination: $DEST" | tee -a $LOG_DIR/test-run.txt
 
-          # Strategy A: Attempt test-without-building if we can build test target earlier
-          echo "Attempting xcodebuild test-without-building..." | tee -a $LOG_DIR/test-run.txt
+          # Strategy A: Try test-without-building first (without SDK, let xcodebuild auto-select)
+          echo "Attempting xcodebuild test-without-building (without -sdk)..." | tee -a $LOG_DIR/test-run.txt
           if xcodebuild test-without-building \
             -project s2j-about-window.xcodeproj \
             -scheme S2JAboutWindow-iOS \
-            -sdk iphonesimulator \
             -destination "$DEST" \
             -enableCodeCoverage YES \
             -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
             echo "test-without-building succeeded" | tee -a $LOG_DIR/test-run.txt
           else
-            echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
-            # Remove result bundle again before retry
+            echo "test-without-building failed, trying with -sdk iphonesimulator..." | tee -a $LOG_DIR/test-run.txt
             rm -rf "$RESULT_BUNDLE" || true
-            # Strategy B: Build & test
-            if xcodebuild test \
+            if xcodebuild test-without-building \
               -project s2j-about-window.xcodeproj \
               -scheme S2JAboutWindow-iOS \
               -sdk iphonesimulator \
               -destination "$DEST" \
               -enableCodeCoverage YES \
               -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-              echo "xcodebuild test succeeded" | tee -a $LOG_DIR/test-run.txt
+              echo "test-without-building succeeded with -sdk" | tee -a $LOG_DIR/test-run.txt
             else
-              echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
+              echo "test-without-building failed, falling back to xcodebuild test (build & test)..." | tee -a $LOG_DIR/test-run.txt
               # Remove result bundle again before retry
               rm -rf "$RESULT_BUNDLE" || true
-              # Last resort: generic platform with SDK
+              # Strategy B: Build & test (without SDK first)
               if xcodebuild test \
                 -project s2j-about-window.xcodeproj \
                 -scheme S2JAboutWindow-iOS \
-                -sdk iphonesimulator \
-                -destination "platform=iOS Simulator" \
+                -destination "$DEST" \
                 -enableCodeCoverage YES \
                 -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
-                echo "succeeded with generic platform" | tee -a $LOG_DIR/test-run.txt
+                echo "xcodebuild test succeeded" | tee -a $LOG_DIR/test-run.txt
               else
-                echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
-                # Save logs for debug (artifact step will upload)
-                exit 10
+                echo "xcodebuild test failed without SDK, trying with -sdk iphonesimulator..." | tee -a $LOG_DIR/test-run.txt
+                rm -rf "$RESULT_BUNDLE" || true
+                if xcodebuild test \
+                  -project s2j-about-window.xcodeproj \
+                  -scheme S2JAboutWindow-iOS \
+                  -sdk iphonesimulator \
+                  -destination "$DEST" \
+                  -enableCodeCoverage YES \
+                  -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                  echo "xcodebuild test succeeded with -sdk" | tee -a $LOG_DIR/test-run.txt
+                else
+                  echo "xcodebuild test failed. Trying last-resort destinations..." | tee -a $LOG_DIR/test-run.txt
+                  # Remove result bundle again before retry
+                  rm -rf "$RESULT_BUNDLE" || true
+                  # Last resort: generic platform without SDK
+                  if xcodebuild test \
+                    -project s2j-about-window.xcodeproj \
+                    -scheme S2JAboutWindow-iOS \
+                    -destination "platform=iOS Simulator" \
+                    -enableCodeCoverage YES \
+                    -resultBundlePath "$RESULT_BUNDLE" 2>&1 | tee -a $LOG_DIR/test-run.txt; then
+                    echo "succeeded with generic platform" | tee -a $LOG_DIR/test-run.txt
+                  else
+                    echo "All xcodebuild attempts failed" | tee -a $LOG_DIR/test-run.txt
+                    # Save logs for debug (artifact step will upload)
+                    exit 10
+                  fi
+                fi
               fi
             fi
           fi
