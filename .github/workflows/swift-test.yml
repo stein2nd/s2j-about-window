@@ -309,14 +309,22 @@ jobs:
           echo "Debug: Checking simulator status..." | tee -a $LOG_DIR/test-run.txt
           xcrun simctl list devices | grep "$UDID" | tee -a $LOG_DIR/test-run.txt || true
 
-          # Get simulator runtime information
+          # Get simulator runtime information and device name
           echo "Debug: Getting simulator runtime information..." | tee -a $LOG_DIR/test-run.txt
           SIM_DEVICE_LINE=$(xcrun simctl list devices available | grep "$UDID" || echo "")
           echo "Simulator device line: $SIM_DEVICE_LINE" | tee -a $LOG_DIR/test-run.txt
 
+          # Extract device name from the line (e.g., "iPhone 17 Pro")
+          DEVICE_NAME=$(echo "$SIM_DEVICE_LINE" | sed -E 's/^[[:space:]]*([^(]+) \(.*/\1/' | xargs || echo "")
+          echo "Device name: $DEVICE_NAME" | tee -a $LOG_DIR/test-run.txt
+
           # Find the runtime section this device belongs to
           RUNTIME_SECTION=$(xcrun simctl list devices available | grep -B 50 "$UDID" | grep "^--" | tail -1 | sed 's/^-- //' | sed 's/ --$//' || echo "")
           echo "Runtime section: $RUNTIME_SECTION" | tee -a $LOG_DIR/test-run.txt
+
+          # Debug: Check scheme information
+          echo "Debug: Checking scheme information..." | tee -a $LOG_DIR/test-run.txt
+          xcodebuild -list -project s2j-about-window.xcodeproj 2>&1 | tee -a $LOG_DIR/test-run.txt || true
 
           # Get available destinations from xcodebuild and find matching destination
           echo "Debug: Getting available destinations from xcodebuild (without SDK first)..." | tee -a $LOG_DIR/test-run.txt
@@ -348,13 +356,19 @@ jobs:
             fi
           fi
 
-          # If still not found, construct destination manually from UDID (without OS version)
-          # Note: xcodebuild should auto-detect OS version from simulator
+          # If still not found, construct destination manually
           if [ -z "$DEST" ] && [ -n "$UDID" ]; then
-            echo "Debug: Constructing destination manually from UDID (without OS version)..." | tee -a $LOG_DIR/test-run.txt
-            # Use UDID only - xcodebuild will auto-detect OS version
-            DEST="platform=iOS Simulator,id=$UDID"
-            echo "Constructed destination: $DEST" | tee -a $LOG_DIR/test-run.txt
+            echo "Debug: Constructing destination manually..." | tee -a $LOG_DIR/test-run.txt
+            # Try multiple formats
+            if [ -n "$DEVICE_NAME" ]; then
+              # Try with device name first
+              DEST="platform=iOS Simulator,name=$DEVICE_NAME"
+              echo "Trying destination with device name: $DEST" | tee -a $LOG_DIR/test-run.txt
+            else
+              # Fallback to UDID only
+              DEST="platform=iOS Simulator,id=$UDID"
+              echo "Using destination with UDID only: $DEST" | tee -a $LOG_DIR/test-run.txt
+            fi
           fi
 
           if [ -z "$DEST" ]; then
