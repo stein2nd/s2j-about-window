@@ -67,7 +67,7 @@ jobs:
         run: |
           mkdir -p $LOG_DIR
 
-      - name: Environment detection: Xcode / SDKs / Simulators (save logs)
+      - name: 'Environment detection: Xcode / SDKs / Simulators (save logs)'
         id: detect
         run: |
           set -euo pipefail
