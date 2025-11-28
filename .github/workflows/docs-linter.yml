@@ -67,12 +67,15 @@ jobs:
         echo "=== Target files ==="
         echo "Target files: ${TARGET_FILES[*]}"
 
-        # textlint実行（tools/docs-linterディレクトリをカレントディレクトリとして実行）
+        # textlint実行（設定ファイルのディレクトリをカレントディレクトリとして実行）
         echo ""
         echo "=== Running textlint ==="
-        cd "$DOCS_LINTER_DIR"
+
+        # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
+        cd "$DOCS_LINTER_DIR/swift"
 
         # 対象ファイルのパスを調整（プロジェクトルートからの相対パス）
+        # tools/docs-linter/swift から見て、プロジェクトルートは ../../ です
         LINT_TARGETS=()
         if [ -f "../../README.md" ]; then
           LINT_TARGETS+=("../../README.md")
@@ -88,4 +91,6 @@ jobs:
           exit 0
         fi
 
-        NODE_PATH=$PWD/node_modules:$NODE_PATH npx textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
+        # NODE_PATHを設定（tools/docs-linter/node_modulesを優先）
+        NODE_PATH="$(cd .. && pwd)/node_modules:${NODE_PATH:-}"
+        NODE_PATH="$NODE_PATH" npx textlint --config ./.textlintrc.swift.json "${LINT_TARGETS[@]}"
