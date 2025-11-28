@@ -33,6 +33,17 @@ jobs:
         cd "$DOCS_LINTER_DIR"
         npm ci
         npm run build
+        # 依存関係の確認
+        echo "=== Checking installed packages ==="
+        ls -la node_modules | head -20
+        echo "=== Checking textlint ==="
+        ./node_modules/.bin/textlint --version || echo "textlint not found"
+        echo "=== Checking textlint rules ==="
+        ls -d node_modules/textlint-rule-* 2>/dev/null | head -10 || echo "No textlint rules found"
+        echo "=== Checking preset packages ==="
+        ls -d node_modules/textlint-rule-preset-* 2>/dev/null || echo "No preset packages found"
+        echo "=== Checking swift-docs-ja preset ==="
+        ls -d node_modules/textlint-rule-preset-swift-docs-ja 2>/dev/null || echo "swift-docs-ja preset not found"
 
     - name: Show textlint config
       run: |
@@ -52,7 +63,7 @@ jobs:
         fi
         if [ -n "$TARGET_FILE" ]; then
           echo "=== Debug extends resolving ==="
-          NODE_PATH=./node_modules npx textlint --debug --config ./swift/.textlintrc.swift.json "$TARGET_FILE" || true
+          NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --debug --config ./swift/.textlintrc.swift.json "$TARGET_FILE" || true
         fi
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
@@ -80,11 +91,45 @@ jobs:
         echo "=== START textlint ==="
         echo "Target files: ${LINT_TARGETS[*]}"
         
+        # 設定ファイルの存在確認
+        echo "=== Checking config file ==="
+        if [ -f ./swift/.textlintrc.swift.json ]; then
+          echo "Config file exists: ./swift/.textlintrc.swift.json"
+          cat ./swift/.textlintrc.swift.json
+        else
+          echo "ERROR: Config file not found: ./swift/.textlintrc.swift.json"
+          exit 1
+        fi
+        
+        # ベース設定ファイルの存在確認
+        echo "=== Checking base config file ==="
+        if [ -f ./base/.textlintrc.base.json ]; then
+          echo "Base config file exists: ./base/.textlintrc.base.json"
+          echo "Base config content:"
+          cat ./base/.textlintrc.base.json
+        else
+          echo "ERROR: Base config file not found: ./base/.textlintrc.base.json"
+          exit 1
+        fi
+        
+        # 現在のディレクトリとNODE_PATHの確認
+        echo "=== Current directory ==="
+        pwd
+        echo "=== NODE_PATH ==="
+        echo "NODE_PATH will be set to: $(pwd)/node_modules"
+        
+        # textlintの設定解決を確認
+        echo "=== Testing textlint config resolution ==="
+        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --print-config --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
+        
         # package.jsonのlint:swiftスクリプトと同じように実行
         # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
         # extends は設定ファイル（swift/.textlintrc.swift.json）基準で解決されるため、
         # 実行対象のMarkdownのパスは docs-linter/ からの相対パスにする必要がある
-        NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
+        echo "=== Running textlint ==="
+        # NODE_PATHを設定してtextlintを実行
+        # node_modules/.bin/textlintを直接使用することで、NODE_PATHが正しく機能する
+        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
     - name: Log summary
