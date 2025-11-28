@@ -31,4 +31,4 @@ jobs:
     - name: Run docs linter
       run: |
         cd tools/docs-linter
-        npm run lint
+        npx textlint --config .textlintrc '**/*.md'
