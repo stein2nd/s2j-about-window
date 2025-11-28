@@ -27,8 +27,25 @@ jobs:
       run: |
         cd tools/docs-linter
         npm ci
+        npm run build
 
     - name: Run docs linter
       run: |
         cd tools/docs-linter
-        NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json ../../README.md ../../docs/**/*.md
+        shopt -s globstar nullglob
+        CONFIG_FILE="./swift/.textlintrc.swift.json"
+        TARGET_FILES=()
+        if [ -f "../../README.md" ]; then
+          TARGET_FILES+=("../../README.md")
+        fi
+        if [ -d "../../docs" ]; then
+          for file in ../../docs/**/*.md; do
+            [ -f "$file" ] && TARGET_FILES+=("$file")
+          done
+        fi
+        if [ ${#TARGET_FILES[@]} -eq 0 ]; then
+          echo "No target files found"
+          exit 0
+        fi
+        echo "Target files: ${TARGET_FILES[*]}"
+        NODE_PATH=$PWD/node_modules npx textlint --config "$CONFIG_FILE" "${TARGET_FILES[@]}"
