@@ -67,9 +67,8 @@ jobs:
         fi
         if [ -n "$TARGET_FILE" ]; then
           echo "=== Debug extends resolving ==="
-          export NODE_PATH="$(pwd)/node_modules"
           CONFIG_PATH="./swift/.textlintrc.swift.json"
-          npx textlint --print-config --config "$CONFIG_PATH" "$TARGET_FILE" 2>&1 | head -100 || true
+          NODE_PATH=./node_modules npx textlint --print-config --config "$CONFIG_PATH" "$TARGET_FILE" 2>&1 | head -100 || true
         fi
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
@@ -136,9 +135,9 @@ jobs:
         echo "=== Testing textlint config resolution ==="
         # package.jsonのlint:swiftスクリプトと同じ方法で実行
         # NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json
-        export NODE_PATH="$NODE_MODULES_PATH"
+        # 相対パスを使用することで、package.jsonのスクリプトと同じ動作になる
         CONFIG_PATH="./swift/.textlintrc.swift.json"
-        npx textlint --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
+        NODE_PATH=./node_modules npx textlint --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
         
         # package.jsonのlint:swiftスクリプトと同じように実行
         # NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json
@@ -146,9 +145,8 @@ jobs:
         # 実行対象のMarkdownのパスは docs-linter/ からの相対パスにする必要がある
         echo "=== Running textlint ==="
         # package.jsonのlint:swiftスクリプトと同じ方法で実行
-        # NODE_PATHを環境変数として設定することで、ルールパッケージが見つけられるようになる
-        export NODE_PATH="$NODE_MODULES_PATH"
-        npx textlint --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
+        # NODE_PATHをコマンドの前に直接設定することで、ルールパッケージが見つけられるようになる
+        NODE_PATH=./node_modules npx textlint --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
     - name: Log summary
