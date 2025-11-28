@@ -239,11 +239,11 @@ jobs:
         echo "=== textlint info ==="
         "$TEXTLINT_BIN" --version || true
         echo "Printing config from swift directory:"
-        # 絶対パスで設定ファイルを指定（run-textlint.tsと同じ方法）
-        # textlintは設定ファイルのディレクトリを基準にextendsの相対パスを解決する
-        "$TEXTLINT_BIN" --config "$CONFIG_FILE_ABS" --print-config 2>&1 | head -100 || true
+        # 相対パスで設定ファイルを指定（ローカル環境と同じ方法）
+        # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
+        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
-        # 絶対パスで設定ファイルを指定して実行
+        # 相対パスで設定ファイルを指定して実行
         # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
         # カレントディレクトリはswiftのまま（設定ファイルのディレクトリ）
-        "$TEXTLINT_BIN" --config "$CONFIG_FILE_ABS" "${LINT_TARGETS[@]}"
+        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" "${LINT_TARGETS[@]}"
