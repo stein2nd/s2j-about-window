@@ -158,37 +158,85 @@ jobs:
 
         # NODE_PATHを設定（docs-linter/node_modulesを優先）
         export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        # PATHにdocs-linter/node_modules/.binを追加（textlintが見つけやすくするため）
+        export PATH="$DOCS_LINTER_DIR_ABS/node_modules/.bin:$PATH"
 
         # デバッグ: 設定ファイルの内容を確認
         echo ""
         echo "=== Config file content ==="
-        cat "$CONFIG_FILE_ABS" | head -20
+        cat "$CONFIG_FILE_ABS"
+
+        # docs-linterディレクトリに移動（node_modulesを見つけやすくするため）
+        cd "$DOCS_LINTER_DIR_ABS"
+        echo ""
+        echo "=== Changed to docs-linter directory ==="
+        echo "Current directory: $(pwd)"
+        echo "NODE_PATH: $NODE_PATH"
+        echo "PATH: $PATH"
+
+        # 対象ファイルのパスを調整（docs-linterディレクトリからの相対パス）
+        # プロジェクトルートへの相対パスを計算
+        IFS='/' read -ra SEGMENTS <<< "$DOCS_LINTER_DIR"
+        DEPTH=${#SEGMENTS[@]}
+        RELATIVE_TO_ROOT=""
+        for ((i=0; i<DEPTH; i++)); do
+          RELATIVE_TO_ROOT="../$RELATIVE_TO_ROOT"
+        done
+        RELATIVE_TO_ROOT="${RELATIVE_TO_ROOT%/}"
+
+        LINT_TARGETS=()
+        if [ -f "$PROJECT_ROOT/README.md" ]; then
+          LINT_TARGETS+=("$RELATIVE_TO_ROOT/README.md")
+        fi
+        if [ -d "$PROJECT_ROOT/docs" ]; then
+          for file in "$PROJECT_ROOT"/docs/**/*.md; do
+            if [ -f "$file" ]; then
+              FILE_REL=$(echo "$file" | sed "s|^$PROJECT_ROOT/||")
+              LINT_TARGETS+=("$RELATIVE_TO_ROOT/$FILE_REL")
+            fi
+          done
+        fi
+
+        if [ ${#LINT_TARGETS[@]} -eq 0 ]; then
+          echo "No target files found"
+          exit 0
+        fi
+
+        # デバッグ: ルールパッケージの存在確認
+        echo ""
+        echo "=== Rule packages check ==="
+        echo "preset-ja-technical-writing: $(test -d "node_modules/textlint-rule-preset-ja-technical-writing" && echo 'found' || echo 'NOT FOUND')"
+        echo "preset-jtf-style: $(test -d "node_modules/textlint-rule-preset-jtf-style" && echo 'found' || echo 'NOT FOUND')"
+        echo "preset-swift-docs-ja: $(test -d "node_modules/textlint-rule-preset-swift-docs-ja" && echo 'found' || echo 'NOT FOUND')"
+        echo "no-dead-link: $(test -d "node_modules/textlint-rule-no-dead-link" && echo 'found' || echo 'NOT FOUND')"
+
+        # デバッグ: ベース設定ファイルの内容確認
+        echo ""
+        echo "=== Base config file content ==="
+        if [ -f "base/.textlintrc.base.json" ]; then
+          cat "base/.textlintrc.base.json" || true
+        else
+          echo "Base config file not found at base/.textlintrc.base.json"
+        fi
 
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
         "$TEXTLINT_BIN" --version || true
-        echo "Printing config from current directory:"
-        "$TEXTLINT_BIN" --print-config .textlintrc.swift.json 2>&1 || true
+        echo "Printing config from docs-linter directory:"
+        # --print-configは設定ファイルを指定せずに実行すると、自動的に設定ファイルを探す
+        # または、--configで指定した設定ファイルの内容を表示する
+        "$TEXTLINT_BIN" --config "swift/.textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
-        # デバッグ: ベース設定ファイルの内容確認
-        echo ""
-        echo "=== Base config file content ==="
-        if [ -f "$BASE_CONFIG_REL" ]; then
-          cat "$BASE_CONFIG_REL" || true
-        else
-          echo "Base config file not found at $BASE_CONFIG_REL"
-        fi
-
-        # textlint実行（設定ファイルのディレクトリにいるので、相対パスで指定）
+        # textlint実行（docs-linterディレクトリから実行し、設定ファイルを相対パスで指定）
         echo ""
         echo "=== Running textlint ==="
         echo "Current directory: $(pwd)"
-        echo "Config file: .textlintrc.swift.json"
+        echo "Config file: swift/.textlintrc.swift.json"
         echo "Target files: ${LINT_TARGETS[*]}"
         echo "textlint binary: $TEXTLINT_BIN"
         echo "NODE_PATH: $NODE_PATH"
 
         # textlintは設定ファイルのディレクトリからの相対パスでextendsを解決する
-        # --configで明示的に指定する必要がある
-        "$TEXTLINT_BIN" --config .textlintrc.swift.json "${LINT_TARGETS[@]}"
+        # docs-linterディレクトリから実行することで、node_modulesを見つけやすくする
+        "$TEXTLINT_BIN" --config "swift/.textlintrc.swift.json" "${LINT_TARGETS[@]}"
