@@ -192,19 +192,19 @@ jobs:
         # NODE_PATHを設定（package.jsonのlint:swiftスクリプトを参考）
         # package.jsonのlint:swift: "NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json '**/*.md'"
         # これはdocs-linterディレクトリからの相対パスなので、./node_modulesはdocs-linter/node_modulesを指す
-        export NODE_PATH="./node_modules:${NODE_PATH:-}"
+        # ただし、textlintがルールパッケージを見つけるためには、絶対パスが必要な可能性がある
+        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:./node_modules:${NODE_PATH:-}"
         echo "NODE_PATH: $NODE_PATH"
 
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
-        # package.jsonのlint:swiftスクリプトと同じようにnpxを使用
-        npx --yes textlint --version || "$TEXTLINT_BIN" --version || true
+        "$TEXTLINT_BIN" --version || true
         echo "Printing config from docs-linter directory:"
         # package.jsonのlint:swiftスクリプトと同じように実行
-        # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
-        NODE_PATH="./node_modules" npx --yes textlint --config "./swift/.textlintrc.swift.json" --print-config 2>&1 | head -100 || true
+        # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
+        "$TEXTLINT_BIN" --config "./swift/.textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
         # package.jsonのlint:swiftスクリプトと同じように実行
-        # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
-        NODE_PATH="./node_modules" npx --yes textlint --config "./swift/.textlintrc.swift.json" "${LINT_TARGETS_REL[@]}"
+        # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
+        "$TEXTLINT_BIN" --config "./swift/.textlintrc.swift.json" "${LINT_TARGETS_REL[@]}"
