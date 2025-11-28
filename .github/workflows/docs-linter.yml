@@ -30,5 +30,6 @@ jobs:
     
     - name: Run docs linter
       run: |
-        cd tools/docs-linter
-        npx textlint --config .textlintrc '**/*.md'
+        export PATH="$PWD/tools/docs-linter/node_modules/.bin:$PATH"
+        export NODE_PATH="$PWD/tools/docs-linter/node_modules"
+        textlint --config ./tools/docs-linter/swift/.textlintrc.swift.json README.md docs/**/*.md
