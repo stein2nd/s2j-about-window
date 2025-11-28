@@ -87,6 +87,9 @@ jobs:
         # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
         echo "Config dir: $CONFIG_DIR_ABS"
         echo "Config dir exists: $(test -d "$CONFIG_DIR_ABS" && echo 'yes' || echo 'no')"
+        CONFIG_FILE_ABS="$CONFIG_DIR_ABS/.textlintrc.swift.json"
+        echo "Config file abs: $CONFIG_FILE_ABS"
+        echo "Config file abs exists: $(test -f "$CONFIG_FILE_ABS" && echo 'yes' || echo 'no')"
         cd "$CONFIG_DIR_ABS"
 
         # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
@@ -136,4 +139,22 @@ jobs:
 
         # NODE_PATHを設定（docs-linter/node_modulesを優先）
         NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
-        NODE_PATH="$NODE_PATH" npx textlint --config ./.textlintrc.swift.json "${LINT_TARGETS[@]}"
+
+        # デバッグ: 設定ファイルの内容を確認
+        echo ""
+        echo "=== Config file content ==="
+        cat "$CONFIG_FILE_ABS" | head -20
+
+        # デバッグ: textlintのバージョンと設定確認
+        echo ""
+        echo "=== textlint info ==="
+        NODE_PATH="$NODE_PATH" npx textlint --version || true
+        NODE_PATH="$NODE_PATH" npx textlint --print-config "$CONFIG_FILE_ABS" || true
+
+        # textlint実行（設定ファイルのディレクトリにいるので、相対パスで指定）
+        echo ""
+        echo "=== Running textlint ==="
+        echo "Current directory: $(pwd)"
+        echo "Config file: .textlintrc.swift.json"
+        echo "Target files: ${LINT_TARGETS[*]}"
+        NODE_PATH="$NODE_PATH" npx textlint --config .textlintrc.swift.json "${LINT_TARGETS[@]}"
