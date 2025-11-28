@@ -10,10 +10,10 @@ jobs:
   docs-linter:
     runs-on: ubuntu-latest
     env:
-      # docs-linter のディレクトリパス（環境変数で上書き可能）
-      DOCS_LINTER_DIR: ${DOCS_LINTER_DIR:-tools/docs-linter}
+      # docs-linter のディレクトリパス
+      DOCS_LINTER_DIR: tools/docs-linter
       # プロジェクトルート（GitHub Actions のワークスペース）
-      PROJECT_ROOT: ${GITHUB_WORKSPACE:-$PWD}
+      PROJECT_ROOT: ${{ github.workspace }}
 
     steps:
     - name: Checkout
@@ -35,9 +35,6 @@ jobs:
         npm run build
 
     - name: Run docs linter
-      env:
-        DOCS_LINTER_DIR: ${{ env.DOCS_LINTER_DIR }}
-        PROJECT_ROOT: ${{ github.workspace }}
       run: |
         shopt -s globstar nullglob
 
