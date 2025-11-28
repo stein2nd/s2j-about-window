@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: ${{ env.DOCS_LINTER_DIR }}/package-lock.json
+        cache-dependency-path: tools/docs-linter/package-lock.json
 
     - name: Install dependencies
       run: |
