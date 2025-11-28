@@ -146,23 +146,23 @@ jobs:
           exit 0
         fi
 
-        # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
-        # textlintは設定ファイルのディレクトリを基準にextendsの相対パスを解決する
-        cd "$CONFIG_DIR_ABS"
+        # docs-linterディレクトリに移動（package.jsonのlint:swiftスクリプトを参考）
+        # package.jsonのlint:swift: "NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json '**/*.md'"
+        cd "$DOCS_LINTER_DIR_ABS"
         echo ""
-        echo "=== Changed to config directory ==="
+        echo "=== Changed to docs-linter directory ==="
         echo "Current directory: $(pwd)"
-        echo "Config file: .textlintrc.swift.json"
+        echo "Config file: swift/.textlintrc.swift.json"
         echo "textlint binary: $TEXTLINT_BIN"
 
-        # 対象ファイルのパスを調整（swiftディレクトリからの相対パス）
+        # 対象ファイルのパスを調整（docs-linterディレクトリからの相対パス）
         # プロジェクトルートへの相対パスを計算
-        # swiftディレクトリは tools/docs-linter/swift なので、プロジェクトルートへの相対パスは ../../../
+        # docs-linterディレクトリは tools/docs-linter なので、プロジェクトルートへの相対パスは ../../
         IFS='/' read -ra SEGMENTS <<< "$DOCS_LINTER_DIR"
         DEPTH=${#SEGMENTS[@]}
-        # swiftディレクトリが追加されるので、プロジェクトルートへの相対パスは DEPTH+1 個の ../
+        # プロジェクトルートへの相対パスは DEPTH 個の ../
         RELATIVE_TO_ROOT=""
-        for ((i=0; i<=DEPTH; i++)); do
+        for ((i=0; i<DEPTH; i++)); do
           RELATIVE_TO_ROOT="../$RELATIVE_TO_ROOT"
         done
         RELATIVE_TO_ROOT="${RELATIVE_TO_ROOT%/}"
@@ -187,22 +187,22 @@ jobs:
 
         echo "Target files: ${LINT_TARGETS_REL[*]}"
 
-        # NODE_PATHを設定（親ディレクトリのnode_modulesを見つけやすくする）
-        # swiftディレクトリから見て、../node_modules が docs-linter/node_modules になる
-        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        # NODE_PATHを設定（package.jsonのlint:swiftスクリプトを参考）
+        # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
+        export NODE_PATH="./node_modules:${NODE_PATH:-}"
         echo "NODE_PATH: $NODE_PATH"
 
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
         "$TEXTLINT_BIN" --version || true
-        echo "Printing config from swift directory:"
-        # 設定ファイルのディレクトリ（swift）から実行し、設定ファイル名を直接指定
-        # textlintは設定ファイルのディレクトリを基準にextendsの相対パスを解決する
+        echo "Printing config from docs-linter directory:"
+        # docs-linterディレクトリから実行し、設定ファイルのパスを相対パスで指定（package.jsonのlint:swiftスクリプトを参考）
+        # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
         # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" --print-config 2>&1 | head -100 || true
+        "$TEXTLINT_BIN" --config "swift/.textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
-        # 設定ファイルのディレクトリ（swift）から実行し、設定ファイル名を直接指定
-        # textlintは設定ファイルのディレクトリを基準にextendsの相対パスを解決する
+        # docs-linterディレクトリから実行し、設定ファイルのパスを相対パスで指定（package.jsonのlint:swiftスクリプトを参考）
+        # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
         # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" "${LINT_TARGETS_REL[@]}"
+        "$TEXTLINT_BIN" --config "swift/.textlintrc.swift.json" "${LINT_TARGETS_REL[@]}"
