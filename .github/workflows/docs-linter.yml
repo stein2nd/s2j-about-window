@@ -148,8 +148,16 @@ jobs:
           exit 0
         fi
 
+        # textlintの実行パス（docs-linter/node_modules/.bin/textlintを直接使用）
+        TEXTLINT_BIN="$DOCS_LINTER_DIR_ABS/node_modules/.bin/textlint"
+
+        if [ ! -f "$TEXTLINT_BIN" ]; then
+          echo "::error::textlint binary not found at $TEXTLINT_BIN"
+          exit 1
+        fi
+
         # NODE_PATHを設定（docs-linter/node_modulesを優先）
-        NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
 
         # デバッグ: 設定ファイルの内容を確認
         echo ""
@@ -159,9 +167,18 @@ jobs:
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
-        NODE_PATH="$NODE_PATH" npx textlint --version || true
-        echo "Printing config from current directory with relative path:"
-        NODE_PATH="$NODE_PATH" npx textlint --print-config .textlintrc.swift.json || true
+        "$TEXTLINT_BIN" --version || true
+        echo "Printing config from current directory:"
+        "$TEXTLINT_BIN" --print-config .textlintrc.swift.json 2>&1 || true
+
+        # デバッグ: ベース設定ファイルの内容確認
+        echo ""
+        echo "=== Base config file content ==="
+        if [ -f "$BASE_CONFIG_REL" ]; then
+          cat "$BASE_CONFIG_REL" || true
+        else
+          echo "Base config file not found at $BASE_CONFIG_REL"
+        fi
 
         # textlint実行（設定ファイルのディレクトリにいるので、相対パスで指定）
         echo ""
@@ -169,7 +186,9 @@ jobs:
         echo "Current directory: $(pwd)"
         echo "Config file: .textlintrc.swift.json"
         echo "Target files: ${LINT_TARGETS[*]}"
+        echo "textlint binary: $TEXTLINT_BIN"
+        echo "NODE_PATH: $NODE_PATH"
 
         # textlintは設定ファイルのディレクトリからの相対パスでextendsを解決する
         # --configで明示的に指定する必要がある
-        NODE_PATH="$NODE_PATH" npx textlint --config .textlintrc.swift.json "${LINT_TARGETS[@]}"
+        "$TEXTLINT_BIN" --config .textlintrc.swift.json "${LINT_TARGETS[@]}"
