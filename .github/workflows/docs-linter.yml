@@ -92,6 +92,10 @@ jobs:
           exit 1
         fi
 
+        # npxを使用する場合のパス設定
+        # package.jsonのlint:swiftスクリプトでは npx textlint を使用している
+        # npxはnode_modules/.binを自動的に探すので、PATHに追加する必要がある
+
         # デバッグ: 設定ファイルの内容を確認
         echo ""
         echo "=== Config file content ==="
@@ -185,27 +189,22 @@ jobs:
 
         echo "Target files: ${LINT_TARGETS_REL[*]}"
 
-        # NODE_PATHを設定（run-textlint.tsを参考に絶対パスで設定）
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
-        # run-textlint.tsでは resolve(__dirname, "../node_modules") を使用している
-        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        # NODE_PATHを設定（package.jsonのlint:swiftスクリプトを参考）
+        # package.jsonのlint:swift: "NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json '**/*.md'"
+        # これはdocs-linterディレクトリからの相対パスなので、./node_modulesはdocs-linter/node_modulesを指す
+        export NODE_PATH="./node_modules:${NODE_PATH:-}"
         echo "NODE_PATH: $NODE_PATH"
-
-        # 設定ファイルの絶対パス
-        CONFIG_FILE_ABS="$DOCS_LINTER_DIR_ABS/swift/.textlintrc.swift.json"
 
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
-        "$TEXTLINT_BIN" --version || true
+        # package.jsonのlint:swiftスクリプトと同じようにnpxを使用
+        npx --yes textlint --version || "$TEXTLINT_BIN" --version || true
         echo "Printing config from docs-linter directory:"
-        echo "Config file (absolute): $CONFIG_FILE_ABS"
-        # 設定ファイルを絶対パスで指定することで、textlintが正しく設定を読み込めるようになる
-        # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config "$CONFIG_FILE_ABS" --print-config 2>&1 | head -100 || true
+        # package.jsonのlint:swiftスクリプトと同じように実行
+        # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
+        NODE_PATH="./node_modules" npx --yes textlint --config "./swift/.textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
-        # 設定ファイルを絶対パスで指定することで、textlintが正しく設定を読み込めるようになる
-        # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config "$CONFIG_FILE_ABS" "${LINT_TARGETS_REL[@]}"
+        # package.jsonのlint:swiftスクリプトと同じように実行
+        # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
+        NODE_PATH="./node_modules" npx --yes textlint --config "./swift/.textlintrc.swift.json" "${LINT_TARGETS_REL[@]}"
