@@ -9,6 +9,11 @@ on:
 jobs:
   docs-linter:
     runs-on: ubuntu-latest
+    env:
+      # docs-linter のディレクトリパス（環境変数で上書き可能）
+      DOCS_LINTER_DIR: ${DOCS_LINTER_DIR:-tools/docs-linter}
+      # プロジェクトルート（GitHub Actions のワークスペース）
+      PROJECT_ROOT: ${GITHUB_WORKSPACE:-$PWD}
 
     steps:
     - name: Checkout
@@ -21,41 +26,48 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: tools/docs-linter/package-lock.json
+        cache-dependency-path: ${{ env.DOCS_LINTER_DIR }}/package-lock.json
 
     - name: Install dependencies
       run: |
-        cd tools/docs-linter
+        cd "$DOCS_LINTER_DIR"
         npm ci
         npm run build
 
     - name: Run docs linter
+      env:
+        DOCS_LINTER_DIR: ${{ env.DOCS_LINTER_DIR }}
+        PROJECT_ROOT: ${{ github.workspace }}
       run: |
         shopt -s globstar nullglob
 
-        # プロジェクトルートから実行
-        DOCS_LINTER_DIR="tools/docs-linter"
+        # プロジェクトルートに移動
+        cd "$PROJECT_ROOT"
+
+        # 設定ファイルのパス
         CONFIG_FILE="$DOCS_LINTER_DIR/swift/.textlintrc.swift.json"
 
         # デバッグ情報
         echo "=== Debug Information ==="
         echo "Current directory: $(pwd)"
+        echo "Project root: $PROJECT_ROOT"
+        echo "Docs linter directory: $DOCS_LINTER_DIR"
         echo "Config file: $CONFIG_FILE"
         echo "Config file exists: $(test -f "$CONFIG_FILE" && echo 'yes' || echo 'no')"
-        echo "Base config exists: $(test -f $DOCS_LINTER_DIR/base/.textlintrc.base.json && echo 'yes' || echo 'no')"
-        echo "Node modules exists: $(test -d $DOCS_LINTER_DIR/node_modules && echo 'yes' || echo 'no')"
-        echo "textlint installed: $(test -f $DOCS_LINTER_DIR/node_modules/.bin/textlint && echo 'yes' || echo 'no')"
-        echo "preset-swift-docs-ja installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-swift-docs-ja && echo 'yes' || echo 'no')"
-        echo "preset-jtf-style installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-jtf-style && echo 'yes' || echo 'no')"
-        echo "preset-ja-technical-writing installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-ja-technical-writing && echo 'yes' || echo 'no')"
+        echo "Base config exists: $(test -f "$DOCS_LINTER_DIR/base/.textlintrc.base.json" && echo 'yes' || echo 'no')"
+        echo "Node modules exists: $(test -d "$DOCS_LINTER_DIR/node_modules" && echo 'yes' || echo 'no')"
+        echo "textlint installed: $(test -f "$DOCS_LINTER_DIR/node_modules/.bin/textlint" && echo 'yes' || echo 'no')"
+        echo "preset-swift-docs-ja installed: $(test -d "$DOCS_LINTER_DIR/node_modules/textlint-rule-preset-swift-docs-ja" && echo 'yes' || echo 'no')"
+        echo "preset-jtf-style installed: $(test -d "$DOCS_LINTER_DIR/node_modules/textlint-rule-preset-jtf-style" && echo 'yes' || echo 'no')"
+        echo "preset-ja-technical-writing installed: $(test -d "$DOCS_LINTER_DIR/node_modules/textlint-rule-preset-ja-technical-writing" && echo 'yes' || echo 'no')"
 
-        # 対象ファイルの準備
+        # 対象ファイルの準備（プロジェクトルートから）
         TARGET_FILES=()
-        if [ -f "README.md" ]; then
-          TARGET_FILES+=("README.md")
+        if [ -f "$PROJECT_ROOT/README.md" ]; then
+          TARGET_FILES+=("$PROJECT_ROOT/README.md")
         fi
-        if [ -d "docs" ]; then
-          for file in docs/**/*.md; do
+        if [ -d "$PROJECT_ROOT/docs" ]; then
+          for file in "$PROJECT_ROOT"/docs/**/*.md; do
             [ -f "$file" ] && TARGET_FILES+=("$file")
           done
         fi
@@ -72,17 +84,46 @@ jobs:
         echo "=== Running textlint ==="
 
         # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
-        cd "$DOCS_LINTER_DIR/swift"
+        CONFIG_DIR="$DOCS_LINTER_DIR/swift"
+        cd "$CONFIG_DIR"
 
-        # 対象ファイルのパスを調整（プロジェクトルートからの相対パス）
-        # tools/docs-linter/swift から見て、プロジェクトルートは ../../ です
+        # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
+        # DOCS_LINTER_DIR のパスセグメント数を数えて、適切な数の ../ を生成
+        # 例: tools/docs-linter -> 2セグメント -> ../../ (swiftディレクトリ分で+1)
+        # 例: docs-linter -> 1セグメント -> ../ (swiftディレクトリ分で+1)
+        # 注意: 既に CONFIG_DIR (DOCS_LINTER_DIR/swift) に移動しているので、
+        # プロジェクトルートへの相対パスは DOCS_LINTER_DIR の深さ+1 個の ../
+        # (DOCS_LINTER_DIR の各セグメント + swift ディレクトリ)
+        IFS='/' read -ra SEGMENTS <<< "$DOCS_LINTER_DIR"
+        DEPTH=${#SEGMENTS[@]}
+        # swiftディレクトリが追加されるので、プロジェクトルートへの相対パスは DEPTH+1 個の ../
+        # 例: tools/docs-linter (DEPTH=2) -> ../../ (DEPTH+1=3個ではなく、DEPTH+1個の ../)
+        # 実際には: tools/docs-linter/swift から見て ../../ なので、DEPTH+1 個の ../ が必要
+        # ただし、DEPTH=2 の場合、../../ は2個の ../ なので、DEPTH 個で正しい
+        # しかし、swift ディレクトリが追加されるので、DEPTH+1 個が必要
+        # 実際の計算: tools/docs-linter/swift -> ../../ (2個の ../)
+        # DEPTH=2 の場合、DEPTH+1=3 個の ../ は間違い。正しくは DEPTH+1 個だが、実際には DEPTH 個で十分
+        # 修正: DEPTH 個の ../ で十分（swift ディレクトリは既に移動済み）
+        RELATIVE_PATH=""
+        for ((i=0; i<DEPTH; i++)); do
+          RELATIVE_PATH="../$RELATIVE_PATH"
+        done
+        # 末尾の / を削除（../ の連続を整理）
+        RELATIVE_PATH="${RELATIVE_PATH%/}"
+
         LINT_TARGETS=()
-        if [ -f "../../README.md" ]; then
-          LINT_TARGETS+=("../../README.md")
+        if [ -f "$PROJECT_ROOT/README.md" ]; then
+          # 相対パスで指定
+          REL_README="$RELATIVE_PATH/README.md"
+          LINT_TARGETS+=("$REL_README")
         fi
-        if [ -d "../../docs" ]; then
-          for file in ../../docs/**/*.md; do
-            [ -f "$file" ] && LINT_TARGETS+=("$file")
+        if [ -d "$PROJECT_ROOT/docs" ]; then
+          for file in "$PROJECT_ROOT"/docs/**/*.md; do
+            if [ -f "$file" ]; then
+              # ファイルの相対パスを計算
+              FILE_REL=$(echo "$file" | sed "s|^$PROJECT_ROOT/||")
+              LINT_TARGETS+=("$RELATIVE_PATH/$FILE_REL")
+            fi
           done
         fi
 
@@ -91,6 +132,6 @@ jobs:
           exit 0
         fi
 
-        # NODE_PATHを設定（tools/docs-linter/node_modulesを優先）
-        NODE_PATH="$(cd .. && pwd)/node_modules:${NODE_PATH:-}"
+        # NODE_PATHを設定（docs-linter/node_modulesを優先）
+        NODE_PATH="$(cd "$DOCS_LINTER_DIR" && pwd)/node_modules:${NODE_PATH:-}"
         NODE_PATH="$NODE_PATH" npx textlint --config ./.textlintrc.swift.json "${LINT_TARGETS[@]}"
