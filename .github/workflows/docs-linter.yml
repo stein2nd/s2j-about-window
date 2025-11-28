@@ -234,6 +234,13 @@ jobs:
 
         echo "Target files: ${LINT_TARGETS[*]}"
 
+        # NODE_PATHを明示的に設定（swiftディレクトリから見た相対パス）
+        # textlintがルールパッケージを見つけられるようにする
+        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        echo ""
+        echo "=== NODE_PATH in swift directory ==="
+        echo "NODE_PATH: $NODE_PATH"
+
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
@@ -241,9 +248,11 @@ jobs:
         echo "Printing config from swift directory:"
         # 相対パスで設定ファイルを指定（ローカル環境と同じ方法）
         # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
+        # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
         "$TEXTLINT_BIN" --config ".textlintrc.swift.json" --print-config 2>&1 | head -100 || true
 
         # 相対パスで設定ファイルを指定して実行
         # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
         # カレントディレクトリはswiftのまま（設定ファイルのディレクトリ）
+        # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
         "$TEXTLINT_BIN" --config ".textlintrc.swift.json" "${LINT_TARGETS[@]}"
