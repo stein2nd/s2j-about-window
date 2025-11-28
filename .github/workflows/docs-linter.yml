@@ -80,73 +80,9 @@ jobs:
         echo "=== Target files ==="
         echo "Target files: ${TARGET_FILES[*]}"
 
-        # textlint実行（設定ファイルのディレクトリをカレントディレクトリとして実行）
+        # textlint実行（VSCode設定を参考にプロジェクトルートから実行）
         echo ""
         echo "=== Running textlint ==="
-
-        # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
-        echo "Config dir: $CONFIG_DIR_ABS"
-        echo "Config dir exists: $(test -d "$CONFIG_DIR_ABS" && echo 'yes' || echo 'no')"
-        CONFIG_FILE_ABS="$CONFIG_DIR_ABS/.textlintrc.swift.json"
-        echo "Config file abs: $CONFIG_FILE_ABS"
-        echo "Config file abs exists: $(test -f "$CONFIG_FILE_ABS" && echo 'yes' || echo 'no')"
-
-        # ベース設定ファイルの存在確認（設定ファイルのディレクトリからの相対パス）
-        BASE_CONFIG_REL="../base/.textlintrc.base.json"
-        BASE_CONFIG_ABS="$DOCS_LINTER_DIR_ABS/base/.textlintrc.base.json"
-        echo "Base config rel: $BASE_CONFIG_REL"
-        echo "Base config abs: $BASE_CONFIG_ABS"
-        echo "Base config exists (rel): $(test -f "$BASE_CONFIG_REL" && echo 'yes' || echo 'no')"
-        echo "Base config exists (abs): $(test -f "$BASE_CONFIG_ABS" && echo 'yes' || echo 'no')"
-
-        cd "$CONFIG_DIR_ABS"
-        echo "After cd, current directory: $(pwd)"
-        echo "Base config exists from here: $(test -f "$BASE_CONFIG_REL" && echo 'yes' || echo 'no')"
-
-        # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
-        # DOCS_LINTER_DIR のパスセグメント数を数えて、適切な数の ../ を生成
-        # 例: tools/docs-linter -> 2セグメント -> ../../ (swiftディレクトリ分で+1)
-        # 例: docs-linter -> 1セグメント -> ../ (swiftディレクトリ分で+1)
-        # 注意: 既に CONFIG_DIR (DOCS_LINTER_DIR/swift) に移動しているので、
-        # プロジェクトルートへの相対パスは DOCS_LINTER_DIR の深さ+1 個の ../
-        # (DOCS_LINTER_DIR の各セグメント + swift ディレクトリ)
-        IFS='/' read -ra SEGMENTS <<< "$DOCS_LINTER_DIR"
-        DEPTH=${#SEGMENTS[@]}
-        # swiftディレクトリが追加されるので、プロジェクトルートへの相対パスは DEPTH+1 個の ../
-        # 例: tools/docs-linter (DEPTH=2) -> ../../ (DEPTH+1=3個ではなく、DEPTH+1個の ../)
-        # 実際には: tools/docs-linter/swift から見て ../../ なので、DEPTH+1 個の ../ が必要
-        # ただし、DEPTH=2 の場合、../../ は2個の ../ なので、DEPTH 個で正しい
-        # しかし、swift ディレクトリが追加されるので、DEPTH+1 個が必要
-        # 実際の計算: tools/docs-linter/swift -> ../../ (2個の ../)
-        # DEPTH=2 の場合、DEPTH+1=3 個の ../ は間違い。正しくは DEPTH+1 個だが、実際には DEPTH 個で十分
-        # 修正: DEPTH 個の ../ で十分（swift ディレクトリは既に移動済み）
-        RELATIVE_PATH=""
-        for ((i=0; i<DEPTH; i++)); do
-          RELATIVE_PATH="../$RELATIVE_PATH"
-        done
-        # 末尾の / を削除（../ の連続を整理）
-        RELATIVE_PATH="${RELATIVE_PATH%/}"
-
-        LINT_TARGETS=()
-        if [ -f "$PROJECT_ROOT/README.md" ]; then
-          # 相対パスで指定
-          REL_README="$RELATIVE_PATH/README.md"
-          LINT_TARGETS+=("$REL_README")
-        fi
-        if [ -d "$PROJECT_ROOT/docs" ]; then
-          for file in "$PROJECT_ROOT"/docs/**/*.md; do
-            if [ -f "$file" ]; then
-              # ファイルの相対パスを計算
-              FILE_REL=$(echo "$file" | sed "s|^$PROJECT_ROOT/||")
-              LINT_TARGETS+=("$RELATIVE_PATH/$FILE_REL")
-            fi
-          done
-        fi
-
-        if [ ${#LINT_TARGETS[@]} -eq 0 ]; then
-          echo "No target files found"
-          exit 0
-        fi
 
         # textlintの実行パス（docs-linter/node_modules/.bin/textlintを直接使用）
         TEXTLINT_BIN="$DOCS_LINTER_DIR_ABS/node_modules/.bin/textlint"
@@ -156,73 +92,51 @@ jobs:
           exit 1
         fi
 
-        # NODE_PATHを設定（docs-linter/node_modulesを優先）
-        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
-        # PATHにdocs-linter/node_modules/.binを追加（textlintが見つけやすくするため）
-        export PATH="$DOCS_LINTER_DIR_ABS/node_modules/.bin:$PATH"
-
         # デバッグ: 設定ファイルの内容を確認
         echo ""
         echo "=== Config file content ==="
-        cat "$CONFIG_FILE_ABS"
+        cat "$CONFIG_FILE"
 
-        # docs-linterディレクトリに移動（node_modulesを見つけやすくするため）
-        cd "$DOCS_LINTER_DIR_ABS"
+        # プロジェクトルートにいることを確認
+        cd "$PROJECT_ROOT"
         echo ""
-        echo "=== Changed to docs-linter directory ==="
+        echo "=== Current directory ==="
         echo "Current directory: $(pwd)"
+
+        # NODE_PATHを設定（docs-linter/node_modulesを優先、VSCode設定を参考）
+        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
+        # PATHにdocs-linter/node_modules/.binを追加（textlintが見つけやすくするため）
+        export PATH="$DOCS_LINTER_DIR_ABS/node_modules/.bin:$PATH"
         echo "NODE_PATH: $NODE_PATH"
         echo "PATH: $PATH"
 
         # デバッグ: ルールパッケージの存在確認
         echo ""
         echo "=== Rule packages check ==="
-        echo "preset-ja-technical-writing: $(test -d "node_modules/textlint-rule-preset-ja-technical-writing" && echo 'found' || echo 'NOT FOUND')"
-        echo "preset-jtf-style: $(test -d "node_modules/textlint-rule-preset-jtf-style" && echo 'found' || echo 'NOT FOUND')"
-        echo "preset-swift-docs-ja: $(test -d "node_modules/textlint-rule-preset-swift-docs-ja" && echo 'found' || echo 'NOT FOUND')"
-        echo "no-dead-link: $(test -d "node_modules/textlint-rule-no-dead-link" && echo 'found' || echo 'NOT FOUND')"
+        echo "preset-ja-technical-writing: $(test -d "$DOCS_LINTER_DIR_ABS/node_modules/textlint-rule-preset-ja-technical-writing" && echo 'found' || echo 'NOT FOUND')"
+        echo "preset-jtf-style: $(test -d "$DOCS_LINTER_DIR_ABS/node_modules/textlint-rule-preset-jtf-style" && echo 'found' || echo 'NOT FOUND')"
+        echo "preset-swift-docs-ja: $(test -d "$DOCS_LINTER_DIR_ABS/node_modules/textlint-rule-preset-swift-docs-ja" && echo 'found' || echo 'NOT FOUND')"
+        echo "no-dead-link: $(test -d "$DOCS_LINTER_DIR_ABS/node_modules/textlint-rule-no-dead-link" && echo 'found' || echo 'NOT FOUND')"
 
         # デバッグ: ベース設定ファイルの内容確認
         echo ""
         echo "=== Base config file content ==="
-        if [ -f "base/.textlintrc.base.json" ]; then
-          cat "base/.textlintrc.base.json" || true
+        if [ -f "$DOCS_LINTER_DIR_ABS/base/.textlintrc.base.json" ]; then
+          cat "$DOCS_LINTER_DIR_ABS/base/.textlintrc.base.json" || true
         else
-          echo "Base config file not found at base/.textlintrc.base.json"
+          echo "Base config file not found at $DOCS_LINTER_DIR_ABS/base/.textlintrc.base.json"
         fi
 
-        # textlint実行（設定ファイルのディレクトリに移動してから実行）
-        # textlintは設定ファイルのディレクトリからの相対パスでextendsを解決するため、
-        # swiftディレクトリに移動してから実行する必要がある
-        echo ""
-        echo "=== Running textlint ==="
-        cd "$CONFIG_DIR_ABS"
-        echo "Current directory: $(pwd)"
-        echo "Config file: .textlintrc.swift.json"
-        echo "textlint binary: $TEXTLINT_BIN"
-        echo "NODE_PATH: $NODE_PATH"
-
-        # 対象ファイルのパスを調整（swiftディレクトリからの相対パス）
-        # プロジェクトルートへの相対パスを計算
-        # swiftディレクトリは tools/docs-linter/swift なので、プロジェクトルートへの相対パスは ../../../
-        IFS='/' read -ra SEGMENTS <<< "$DOCS_LINTER_DIR"
-        DEPTH=${#SEGMENTS[@]}
-        # swiftディレクトリが追加されるので、プロジェクトルートへの相対パスは DEPTH+1 個の ../
-        RELATIVE_TO_ROOT=""
-        for ((i=0; i<=DEPTH; i++)); do
-          RELATIVE_TO_ROOT="../$RELATIVE_TO_ROOT"
-        done
-        RELATIVE_TO_ROOT="${RELATIVE_TO_ROOT%/}"
-
+        # 対象ファイルのパス（プロジェクトルートからの相対パス）
         LINT_TARGETS=()
         if [ -f "$PROJECT_ROOT/README.md" ]; then
-          LINT_TARGETS+=("$RELATIVE_TO_ROOT/README.md")
+          LINT_TARGETS+=("README.md")
         fi
         if [ -d "$PROJECT_ROOT/docs" ]; then
           for file in "$PROJECT_ROOT"/docs/**/*.md; do
             if [ -f "$file" ]; then
               FILE_REL=$(echo "$file" | sed "s|^$PROJECT_ROOT/||")
-              LINT_TARGETS+=("$RELATIVE_TO_ROOT/$FILE_REL")
+              LINT_TARGETS+=("$FILE_REL")
             fi
           done
         fi
@@ -232,27 +146,24 @@ jobs:
           exit 0
         fi
 
-        echo "Target files: ${LINT_TARGETS[*]}"
-
-        # NODE_PATHを明示的に設定（swiftディレクトリから見た相対パス）
-        # textlintがルールパッケージを見つけられるようにする
-        export NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
         echo ""
-        echo "=== NODE_PATH in swift directory ==="
-        echo "NODE_PATH: $NODE_PATH"
+        echo "=== Running textlint ==="
+        echo "Current directory: $(pwd)"
+        echo "Config file: $CONFIG_FILE (VSCode設定と同じパス)"
+        echo "textlint binary: $TEXTLINT_BIN"
+        echo "Target files: ${LINT_TARGETS[*]}"
 
         # デバッグ: textlintのバージョンと設定確認
         echo ""
         echo "=== textlint info ==="
         "$TEXTLINT_BIN" --version || true
-        echo "Printing config from swift directory:"
-        # 相対パスで設定ファイルを指定（ローカル環境と同じ方法）
+        echo "Printing config from project root:"
+        # プロジェクトルートから実行し、設定ファイルのパスをVSCode設定と同じ相対パスで指定
         # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
         # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" --print-config 2>&1 | head -100 || true
+        "$TEXTLINT_BIN" --config "$CONFIG_FILE" --print-config 2>&1 | head -100 || true
 
-        # 相対パスで設定ファイルを指定して実行
+        # プロジェクトルートから実行し、設定ファイルのパスをVSCode設定と同じ相対パスで指定
         # textlintは設定ファイルのディレクトリ（swift）を基準にextendsの相対パスを解決する
-        # カレントディレクトリはswiftのまま（設定ファイルのディレクトリ）
         # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
-        "$TEXTLINT_BIN" --config ".textlintrc.swift.json" "${LINT_TARGETS[@]}"
+        "$TEXTLINT_BIN" --config "$CONFIG_FILE" "${LINT_TARGETS[@]}"
