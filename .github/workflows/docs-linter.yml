@@ -81,7 +81,9 @@ jobs:
         echo "=== Running textlint ==="
 
         # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
-        CONFIG_DIR="$DOCS_LINTER_DIR/swift"
+        CONFIG_DIR="$PROJECT_ROOT/$DOCS_LINTER_DIR/swift"
+        echo "Config dir: $CONFIG_DIR"
+        echo "Config dir exists: $(test -d "$CONFIG_DIR" && echo 'yes' || echo 'no')"
         cd "$CONFIG_DIR"
 
         # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
