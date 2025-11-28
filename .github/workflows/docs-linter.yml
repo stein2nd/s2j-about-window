@@ -30,6 +30,7 @@ jobs:
     
     - name: Run docs linter
       run: |
-        export PATH="$PWD/tools/docs-linter/node_modules/.bin:$PATH"
-        export NODE_PATH="$PWD/tools/docs-linter/node_modules"
-        textlint --config ./tools/docs-linter/swift/.textlintrc.swift.json README.md docs/**/*.md
+        cd tools/docs-linter
+        export PATH="$PWD/node_modules/.bin:$PATH"
+        export NODE_PATH="$PWD/node_modules"
+        textlint --config ./swift/.textlintrc.swift.json ../../README.md ../../docs/**/*.md
