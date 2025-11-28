@@ -67,8 +67,9 @@ jobs:
         fi
         if [ -n "$TARGET_FILE" ]; then
           echo "=== Debug extends resolving ==="
-          CONFIG_PATH="$(pwd)/swift/.textlintrc.swift.json"
-          NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --print-config --config "$CONFIG_PATH" "$TARGET_FILE" 2>&1 | head -100 || true
+          export NODE_PATH="$(pwd)/node_modules"
+          CONFIG_PATH="./swift/.textlintrc.swift.json"
+          npx textlint --print-config --config "$CONFIG_PATH" "$TARGET_FILE" 2>&1 | head -100 || true
         fi
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
@@ -121,24 +122,33 @@ jobs:
         echo "=== Current directory ==="
         pwd
         echo "=== NODE_PATH ==="
-        echo "NODE_PATH will be set to: $(pwd)/node_modules"
+        NODE_MODULES_PATH="$(pwd)/node_modules"
+        echo "NODE_PATH will be set to: $NODE_MODULES_PATH"
+        echo "=== Verifying node_modules exists ==="
+        ls -la "$NODE_MODULES_PATH" | head -5 || echo "node_modules not found"
+        echo "=== Verifying rule packages exist ==="
+        ls -d "$NODE_MODULES_PATH"/textlint-rule-preset-* 2>/dev/null | head -5 || echo "No preset packages found"
+        echo "=== Testing rule package resolution ==="
+        export NODE_PATH="$NODE_MODULES_PATH"
+        node -e "console.log(require.resolve('textlint-rule-preset-jtf-style'))" 2>&1 || echo "Cannot resolve preset-jtf-style"
         
         # textlintの設定解決を確認
         echo "=== Testing textlint config resolution ==="
-        # textlintは設定ファイルの場所から親ディレクトリを遡ってnode_modulesを探す
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
-        CONFIG_PATH="$(pwd)/swift/.textlintrc.swift.json"
-        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
+        # package.jsonのlint:swiftスクリプトと同じ方法で実行
+        # NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json
+        export NODE_PATH="$NODE_MODULES_PATH"
+        CONFIG_PATH="./swift/.textlintrc.swift.json"
+        npx textlint --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
         
         # package.jsonのlint:swiftスクリプトと同じように実行
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
+        # NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json
         # extends は設定ファイル（swift/.textlintrc.swift.json）基準で解決されるため、
         # 実行対象のMarkdownのパスは docs-linter/ からの相対パスにする必要がある
         echo "=== Running textlint ==="
         # package.jsonのlint:swiftスクリプトと同じ方法で実行
-        # NODE_PATHを絶対パスで設定することで、ルールパッケージが見つけられるようになる
-        # ./node_modules/.bin/textlint を直接使用することで、npx の問題を回避
-        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
+        # NODE_PATHを環境変数として設定することで、ルールパッケージが見つけられるようになる
+        export NODE_PATH="$NODE_MODULES_PATH"
+        npx textlint --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
     - name: Log summary
