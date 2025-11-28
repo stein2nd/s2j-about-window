@@ -90,7 +90,18 @@ jobs:
         CONFIG_FILE_ABS="$CONFIG_DIR_ABS/.textlintrc.swift.json"
         echo "Config file abs: $CONFIG_FILE_ABS"
         echo "Config file abs exists: $(test -f "$CONFIG_FILE_ABS" && echo 'yes' || echo 'no')"
+
+        # ベース設定ファイルの存在確認（設定ファイルのディレクトリからの相対パス）
+        BASE_CONFIG_REL="../base/.textlintrc.base.json"
+        BASE_CONFIG_ABS="$DOCS_LINTER_DIR_ABS/base/.textlintrc.base.json"
+        echo "Base config rel: $BASE_CONFIG_REL"
+        echo "Base config abs: $BASE_CONFIG_ABS"
+        echo "Base config exists (rel): $(test -f "$BASE_CONFIG_REL" && echo 'yes' || echo 'no')"
+        echo "Base config exists (abs): $(test -f "$BASE_CONFIG_ABS" && echo 'yes' || echo 'no')"
+
         cd "$CONFIG_DIR_ABS"
+        echo "After cd, current directory: $(pwd)"
+        echo "Base config exists from here: $(test -f "$BASE_CONFIG_REL" && echo 'yes' || echo 'no')"
 
         # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
         # DOCS_LINTER_DIR のパスセグメント数を数えて、適切な数の ../ を生成
@@ -149,7 +160,8 @@ jobs:
         echo ""
         echo "=== textlint info ==="
         NODE_PATH="$NODE_PATH" npx textlint --version || true
-        NODE_PATH="$NODE_PATH" npx textlint --print-config "$CONFIG_FILE_ABS" || true
+        echo "Printing config from current directory with relative path:"
+        NODE_PATH="$NODE_PATH" npx textlint --print-config .textlintrc.swift.json || true
 
         # textlint実行（設定ファイルのディレクトリにいるので、相対パスで指定）
         echo ""
@@ -157,4 +169,7 @@ jobs:
         echo "Current directory: $(pwd)"
         echo "Config file: .textlintrc.swift.json"
         echo "Target files: ${LINT_TARGETS[*]}"
+
+        # textlintは設定ファイルのディレクトリからの相対パスでextendsを解決する
+        # --configで明示的に指定する必要がある
         NODE_PATH="$NODE_PATH" npx textlint --config .textlintrc.swift.json "${LINT_TARGETS[@]}"
