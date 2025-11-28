@@ -44,6 +44,10 @@ jobs:
         ls -d node_modules/textlint-rule-preset-* 2>/dev/null || echo "No preset packages found"
         echo "=== Checking swift-docs-ja preset ==="
         ls -d node_modules/textlint-rule-preset-swift-docs-ja 2>/dev/null || echo "swift-docs-ja preset not found"
+        echo "=== Checking if rules can be resolved ==="
+        node -e "console.log(require.resolve('textlint-rule-preset-jtf-style'))" 2>&1 || echo "Cannot resolve preset-jtf-style"
+        echo "=== Checking NODE_PATH ==="
+        NODE_PATH=./node_modules node -e "console.log(require.resolve('textlint-rule-preset-jtf-style'))" 2>&1 || echo "Cannot resolve with NODE_PATH"
 
     - name: Show textlint config
       run: |
@@ -120,16 +124,18 @@ jobs:
         
         # textlintの設定解決を確認
         echo "=== Testing textlint config resolution ==="
-        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --print-config --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
+        # textlintは設定ファイルの場所から親ディレクトリを遡ってnode_modulesを探す
+        # そのため、NODE_PATHを設定しなくても動作する可能性がある
+        npx textlint --print-config --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
         
         # package.jsonのlint:swiftスクリプトと同じように実行
         # NODE_PATH=./node_modules を設定することで、ルールパッケージが見つけられるようになる
         # extends は設定ファイル（swift/.textlintrc.swift.json）基準で解決されるため、
         # 実行対象のMarkdownのパスは docs-linter/ からの相対パスにする必要がある
         echo "=== Running textlint ==="
-        # NODE_PATHを設定してtextlintを実行
-        # node_modules/.bin/textlintを直接使用することで、NODE_PATHが正しく機能する
-        NODE_PATH="$(pwd)/node_modules" ./node_modules/.bin/textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
+        # package.jsonのlint:swiftスクリプトと同じ方法で実行
+        # NODE_PATHを設定することで、ルールパッケージが見つけられるようになる
+        NODE_PATH=./node_modules npx textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
     - name: Log summary
