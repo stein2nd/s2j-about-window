@@ -41,6 +41,10 @@ jobs:
         # プロジェクトルートに移動
         cd "$PROJECT_ROOT"
 
+        # 絶対パスをシェル変数に格納（環境変数は相対パスのまま）
+        DOCS_LINTER_DIR_ABS="$PROJECT_ROOT/$DOCS_LINTER_DIR"
+        CONFIG_DIR_ABS="$DOCS_LINTER_DIR_ABS/swift"
+
         # 設定ファイルのパス
         CONFIG_FILE="$DOCS_LINTER_DIR/swift/.textlintrc.swift.json"
 
@@ -81,10 +85,9 @@ jobs:
         echo "=== Running textlint ==="
 
         # 設定ファイルのディレクトリに移動（extendsの相対パス解決のため）
-        CONFIG_DIR="$PROJECT_ROOT/$DOCS_LINTER_DIR/swift"
-        echo "Config dir: $CONFIG_DIR"
-        echo "Config dir exists: $(test -d "$CONFIG_DIR" && echo 'yes' || echo 'no')"
-        cd "$CONFIG_DIR"
+        echo "Config dir: $CONFIG_DIR_ABS"
+        echo "Config dir exists: $(test -d "$CONFIG_DIR_ABS" && echo 'yes' || echo 'no')"
+        cd "$CONFIG_DIR_ABS"
 
         # 対象ファイルのパスを調整（設定ファイルディレクトリからの相対パス）
         # DOCS_LINTER_DIR のパスセグメント数を数えて、適切な数の ../ を生成
@@ -132,5 +135,5 @@ jobs:
         fi
 
         # NODE_PATHを設定（docs-linter/node_modulesを優先）
-        NODE_PATH="$(cd "$DOCS_LINTER_DIR" && pwd)/node_modules:${NODE_PATH:-}"
+        NODE_PATH="$DOCS_LINTER_DIR_ABS/node_modules:${NODE_PATH:-}"
         NODE_PATH="$NODE_PATH" npx textlint --config ./.textlintrc.swift.json "${LINT_TARGETS[@]}"
