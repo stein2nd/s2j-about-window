@@ -31,15 +31,31 @@ jobs:
 
     - name: Run docs linter
       run: |
-        cd tools/docs-linter
         shopt -s globstar nullglob
-        CONFIG_FILE="./swift/.textlintrc.swift.json"
+
+        # プロジェクトルートから実行
+        DOCS_LINTER_DIR="tools/docs-linter"
+        CONFIG_FILE="$DOCS_LINTER_DIR/swift/.textlintrc.swift.json"
+
+        # デバッグ情報
+        echo "=== Debug Information ==="
+        echo "Current directory: $(pwd)"
+        echo "Config file: $CONFIG_FILE"
+        echo "Config file exists: $(test -f "$CONFIG_FILE" && echo 'yes' || echo 'no')"
+        echo "Base config exists: $(test -f $DOCS_LINTER_DIR/base/.textlintrc.base.json && echo 'yes' || echo 'no')"
+        echo "Node modules exists: $(test -d $DOCS_LINTER_DIR/node_modules && echo 'yes' || echo 'no')"
+        echo "textlint installed: $(test -f $DOCS_LINTER_DIR/node_modules/.bin/textlint && echo 'yes' || echo 'no')"
+        echo "preset-swift-docs-ja installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-swift-docs-ja && echo 'yes' || echo 'no')"
+        echo "preset-jtf-style installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-jtf-style && echo 'yes' || echo 'no')"
+        echo "preset-ja-technical-writing installed: $(test -d $DOCS_LINTER_DIR/node_modules/textlint-rule-preset-ja-technical-writing && echo 'yes' || echo 'no')"
+
+        # 対象ファイルの準備
         TARGET_FILES=()
-        if [ -f "../../README.md" ]; then
-          TARGET_FILES+=("../../README.md")
+        if [ -f "README.md" ]; then
+          TARGET_FILES+=("README.md")
         fi
-        if [ -d "../../docs" ]; then
-          for file in ../../docs/**/*.md; do
+        if [ -d "docs" ]; then
+          for file in docs/**/*.md; do
             [ -f "$file" ] && TARGET_FILES+=("$file")
           done
         fi
@@ -47,5 +63,29 @@ jobs:
           echo "No target files found"
           exit 0
         fi
+        echo ""
+        echo "=== Target files ==="
         echo "Target files: ${TARGET_FILES[*]}"
-        NODE_PATH=$PWD/node_modules npx textlint --config "$CONFIG_FILE" "${TARGET_FILES[@]}"
+
+        # textlint実行（tools/docs-linterディレクトリをカレントディレクトリとして実行）
+        echo ""
+        echo "=== Running textlint ==="
+        cd "$DOCS_LINTER_DIR"
+
+        # 対象ファイルのパスを調整（プロジェクトルートからの相対パス）
+        LINT_TARGETS=()
+        if [ -f "../../README.md" ]; then
+          LINT_TARGETS+=("../../README.md")
+        fi
+        if [ -d "../../docs" ]; then
+          for file in ../../docs/**/*.md; do
+            [ -f "$file" ] && LINT_TARGETS+=("$file")
+          done
+        fi
+
+        if [ ${#LINT_TARGETS[@]} -eq 0 ]; then
+          echo "No target files found"
+          exit 0
+        fi
+
+        NODE_PATH=$PWD/node_modules:$NODE_PATH npx textlint --config ./swift/.textlintrc.swift.json "${LINT_TARGETS[@]}"
