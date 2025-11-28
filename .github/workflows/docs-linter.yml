@@ -138,14 +138,34 @@ jobs:
         # NODE_PATHは絶対パスで指定する必要がある
         CONFIG_PATH="./swift/.textlintrc.swift.json"
         export NODE_PATH="$NODE_MODULES_PATH"
-        npx textlint --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
+        # node_modules/.bin/textlintを直接実行することで、NODE_PATHが正しく機能する
+        TEXTLINT_BIN="./node_modules/.bin/textlint"
+        if [ ! -f "$TEXTLINT_BIN" ]; then
+          echo "ERROR: textlint binary not found at $TEXTLINT_BIN"
+          exit 1
+        fi
+        
+        # textlintがルールを解決できるかテスト
+        echo "=== Testing rule resolution with NODE_PATH ==="
+        export NODE_PATH="$NODE_MODULES_PATH"
+        node -e "console.log('NODE_PATH:', process.env.NODE_PATH); console.log('Resolved preset-jtf-style:', require.resolve('textlint-rule-preset-jtf-style')); console.log('Resolved preset-ja-technical-writing:', require.resolve('textlint-rule-preset-ja-technical-writing'));" 2>&1 || echo "Rule resolution test failed"
+        
+        # textlint v15では、--rules-base-directoryオプションを使用することで、
+        # ルール、プリセット、プラグインを読み込むベースディレクトリを指定できる
+        RULES_BASE_DIR="$(pwd)"
+        "$TEXTLINT_BIN" --rules-base-directory "$RULES_BASE_DIR" --print-config --config "$CONFIG_PATH" "${LINT_TARGETS[0]}" 2>&1 | head -50 || echo "Config resolution test failed"
         
         # extends は設定ファイル（swift/.textlintrc.swift.json）基準で解決されるため、
         # 実行対象のMarkdownのパスは docs-linter/ からの相対パスにする必要がある
         echo "=== Running textlint ==="
-        # NODE_PATHを環境変数として設定することで、ルールパッケージが見つけられるようになる
+        # NODE_PATHを環境変数として設定し、node_modules/.bin/textlintを直接実行することで、
+        # ルールパッケージが見つけられるようになる
+        # textlint v15では、--rules-base-directoryオプションを使用することで、
+        # ルール、プリセット、プラグインを読み込むベースディレクトリを指定できる
         export NODE_PATH="$NODE_MODULES_PATH"
-        npx textlint --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
+        RULES_BASE_DIR="$(pwd)"
+        echo "Rules base directory: $RULES_BASE_DIR"
+        "$TEXTLINT_BIN" --rules-base-directory "$RULES_BASE_DIR" --config "$CONFIG_PATH" "${LINT_TARGETS[@]}"
       working-directory: ${{ env.DOCS_LINTER_DIR }}
 
     - name: Log summary
