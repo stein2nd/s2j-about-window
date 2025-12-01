@@ -24,9 +24,17 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: tools/docs-linter/package-lock.json
+        node-version: '20'
+
+    # npm キャッシュの最適化 (実行速度が約3倍になる、パッケージ破損防止にも効果的)
+    - name: Cache npm dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+        key: ${{ runner.os }}-npm-${{ hashFiles('tools/docs-linter/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-
 
     - name: Install dependencies
       run: |
@@ -67,7 +75,7 @@ jobs:
         fi
         if [ -n "$TARGET_FILE" ]; then
           echo "=== Debug extends resolving ==="
-          CONFIG_PATH="./swift/.textlintrc.swift.json"
+          CONFIG_PATH="./presets/swift/.textlintrc.swift.json"
           NODE_PATH=./node_modules npx textlint --print-config --config "$CONFIG_PATH" "$TARGET_FILE" 2>&1 | head -100 || true
         fi
       working-directory: ${{ env.DOCS_LINTER_DIR }}
@@ -76,7 +84,7 @@ jobs:
       run: |
         shopt -s globstar nullglob
         
-        # 対象ファイルのパスを調整（docs-linterディレクトリからの相対パス）
+        # 対象ファイルのパスを調整（docs-linter ディレクトリからの相対パス）
         # docs-linterディレクトリは tools/docs-linter なので、プロジェクトルートへの相対パスは ../../
         LINT_TARGETS=()
         if [ -f ../../README.md ]; then
@@ -98,22 +106,22 @@ jobs:
         
         # 設定ファイルの存在確認
         echo "=== Checking config file ==="
-        if [ -f ./swift/.textlintrc.swift.json ]; then
-          echo "Config file exists: ./swift/.textlintrc.swift.json"
-          cat ./swift/.textlintrc.swift.json
+        if [ -f ./presets/swift/.textlintrc.swift.json ]; then
+          echo "Config file exists: ./presets/swift/.textlintrc.swift.json"
+          cat ./presets/swift/.textlintrc.swift.json
         else
-          echo "ERROR: Config file not found: ./swift/.textlintrc.swift.json"
+          echo "ERROR: Config file not found: ./presets/swift/.textlintrc.swift.json"
           exit 1
         fi
         
         # ベース設定ファイルの存在確認
         echo "=== Checking base config file ==="
-        if [ -f ./base/.textlintrc.base.json ]; then
-          echo "Base config file exists: ./base/.textlintrc.base.json"
+        if [ -f ./presets/base/.textlintrc.base.json ]; then
+          echo "Base config file exists: ./presets/base/.textlintrc.base.json"
           echo "Base config content:"
-          cat ./base/.textlintrc.base.json
+          cat ./presets/base/.textlintrc.base.json
         else
-          echo "ERROR: Base config file not found: ./base/.textlintrc.base.json"
+          echo "ERROR: Base config file not found: ./presets/base/.textlintrc.base.json"
           exit 1
         fi
         
@@ -136,7 +144,7 @@ jobs:
         # textlintの設定解決を確認
         echo "=== Testing textlint config resolution ==="
         # NODE_PATHは絶対パスで指定する必要がある
-        CONFIG_PATH="./swift/.textlintrc.swift.json"
+        CONFIG_PATH="./presets/swift/.textlintrc.swift.json"
         export NODE_PATH="$NODE_MODULES_PATH"
         # node_modules/.bin/textlintを直接実行することで、NODE_PATHが正しく機能する
         TEXTLINT_BIN="./node_modules/.bin/textlint"
