@@ -6,11 +6,11 @@
 * 本プロジェクトの CI/CD 設計は、以下の共通 SPEC に準拠します。
     * [Swift/SwiftUI プロジェクト向け共通仕様｜CI/CD workflow](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC_CICD.md)
 * 以下は、本プロジェクト固有の CI/CD 仕様をまとめたものです。
-* 詳細な実装状況については、[SPEC.md](./SPEC.md) を参照してください。
+* 詳細な実装状況については、[SPEC.md](./SPEC.md) を参照。
 
 ## 1. 概要
 
-本プロジェクトでは、GitHub Actions を使用して CI/CD パイプラインを構築しています。
+本プロジェクトでは、GitHub Actions を使用して CI/CD パイプラインを構築します。
 
 ### 1.1. 実装状況
 
@@ -18,7 +18,7 @@
 
 ### 1.2. 基本方針
 
-* Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外とします。
+* Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外です。
 * Universal Binary 化は SwiftPM のビルド・フェーズで自動処理されます。
 * リリース用ビルドは GitHub Actions の CI ワークフローで生成し、Artifacts として管理します。
 * CI/CD 環境 (GitHub Actions など) では bash が標準シェルとして使用されます。
@@ -30,6 +30,10 @@
 * **実行環境**: `macos-latest` (GitHub Actions の macOS Runner)
 * **その他のワークフロー**:
   * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter)
+    * **ワークフローファイル**: `.github/workflows/docs-linter.yml`
+    * **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
+    * **実行環境**: `ubuntu-latest` (GitHub Actions の Ubuntu Runner)
+    * **実装状況**: ✅ **完全実装済み・テスト成功** - Docs Linter ワークフローが正常に動作し、すべてのチェックが成功
 
 ### 1.4. ジョブ構成
 
@@ -71,8 +75,8 @@
 
 #### 2.1.3. 期待される結果
 
-* すべての macOS 向けユニットテストが成功すること。
-* テスト・カバレッジが Codecov に正常にアップロードされること。
+* macOS 向けユニットテスト: すべて成功します。
+* テスト・カバレッジ: Codecov に正常にアップロードされます。
 
 ### 2.2. `test-ios` ジョブ
 
@@ -225,9 +229,9 @@
 
 #### 2.2.3. 期待される結果
 
-* すべての iOS/iPadOS 向けユニットテストが成功すること。
-* テストカバレッジが Codecov に正常にアップロードされること (失敗しても CI は継続)。
-* 診断情報がアーティファクトとして保存されること。
+* iOS/iPadOS 向けユニットテスト: すべて成功します。
+* テスト・カバレッジ: Codecov に正常にアップロードされます (失敗しても CI は継続)。
+* 診断情報: アーティファクトとして保存されます。
 
 #### 2.2.4. 堅牢性の特徴
 
@@ -235,7 +239,7 @@
 * **シミュレーター・ランタイムのフォールバック**: 複数の iOS ランタイムを試行し、利用可能な最初のランタイムを使用します。
 * **デバイス選択のフォールバック**: 複数のデバイス名を試行し、利用可能な最初のデバイスを使用します。
 * **SDK とランタイムの自動マッチング**: ランタイム・バージョンと一致する SDK を自動検出し、SDK とランタイムのバージョン不一致の問題を回避します。
-* **デスティネーション構築の改善**: OS バージョンを指定せず、UDID のみを使用することで、xcodebuild が自動的に適切な SDK/ランタイムをマッチングします。
+* **デスティネーション構築の改善**: OS バージョンを指定せず、UDID のみを使用することで、xcodebuild が自動的に適切な SDK/ランタイムをマッチングできるようにします。
 * **テスト実行のマルチ・ストラテジー**: 複数のアプローチでテストを実行し、いずれかが成功すれば CI を継続します。SDK を指定せずに実行を優先し、xcodebuild の自動選択を活用します。
 * **詳細なログ記録**: すべてのステップでログを記録し、アーティファクトとして保存します。
 * **診断情報の常時アップロード**: テストが失敗しても診断情報をアップロードし、問題の特定を容易にします。
@@ -267,8 +271,89 @@
 
 #### 2.3.3. 期待される結果
 
-* リリース用の Universal Binary が正常にビルドされること。
-* ビルド成果物がアーティファクトとして保存されること。
+* リリース用: Universal Binary が正常にビルドされます。
+* ビルド成果物: アーティファクトとして保存されます。
+
+### 2.4. `docs-linter` ジョブ
+
+#### 2.4.1. 概要
+
+* **目的**: Markdown ドキュメントの表記揺れ、用語統一、文体チェックを実行します。
+* **実行環境**: `ubuntu-latest`
+* **依存関係**: なし (独立実行が可能)
+* **環境変数**:
+  * `DOCS_LINTER_DIR`: `tools/docs-linter` (docs-linter のディレクトリ・パス)
+  * `PROJECT_ROOT`: `${{ github.workspace }}` (プロジェクト・ルート)
+
+#### 2.4.2. 実行ステップ
+
+1. **Checkout**
+   * `actions/checkout@v4` を使用してリポジトリをチェック・アウトします。
+   * **設定**: `submodules: recursive` (docs-linter を Git サブモジュールとして取得)
+
+2. **Setup Node.js**
+   * `actions/setup-node@v4` を使用して Node.js をセットアップします。
+   * **Node.js バージョン**: `20`
+
+3. **Cache npm dependencies**
+   * `actions/cache@v4` を使用して npm 依存関係をキャッシュします。
+   * **パス**: `~/.npm`
+   * **キー**: `${{ runner.os }}-npm-${{ hashFiles('tools/docs-linter/package-lock.json') }}`
+   * **目的**: 実行速度の向上 (約3倍) とパッケージ破損防止
+
+4. **Install dependencies**
+   * `tools/docs-linter` ディレクトリに移動します。
+   * `npm ci` を実行して依存関係をインストールします。
+   * `npm run build` を実行して TypeScript をビルドします。
+   * 依存関係の確認ログを出力します。
+
+5. **Show textlint config**
+   * textlint の設定ファイルを確認します。
+   * 対象ファイルを1つ選んで設定を確認します (`README.md` または `docs/**/*.md` の最初のファイル)。
+   * `npx textlint --print-config` を実行して設定内容を表示します。
+
+6. **Run docs linter**
+   * 対象ファイルを検出します:
+     * `README.md` (存在する場合)
+     * `docs/**/*.md` (存在する場合)
+   * textlint を実行します:
+     * **設定ファイル**: `./presets/swift/.textlintrc.swift.json`
+     * **NODE_PATH**: `$(pwd)/node_modules` (絶対パス)
+     * **実行方法**: `./node_modules/.bin/textlint --config <設定ファイル> <対象ファイル>`
+   * 検出された問題をレポートします。
+
+7. **Log summary**
+   * `if: always()` 条件で、常に実行されます。
+   * textlint の終了コードをログに出力します。
+
+#### 2.4.3. 対象ファイル
+
+* `README.md` (プロジェクト・ルート)
+* `docs/**/*.md` (すべての Markdown ファイル)
+
+#### 2.4.4. 使用する textlint 設定
+
+* **設定ファイル**: `tools/docs-linter/presets/swift/.textlintrc.swift.json`
+* **ベース設定**: `tools/docs-linter/presets/base/.textlintrc.base.json`
+* **ルール**:
+  * `preset-jtf-style`: JTF スタイルガイドに準拠したチェック
+  * `preset-swift-docs-ja`: Swift ドキュメント向け日本語ルール
+  * `preset-ja-technical-writing`: 日本語技術文書向けルール (ベース設定で有効、Swift 設定で無効化)
+  * `no-dead-link`: リンク切れチェック (ベース設定で有効)
+
+#### 2.4.5. 期待される結果
+
+* Markdown ファイル: すべて textlint でチェックされます。
+* 検出対象: 表記揺れ、用語統一、文体の問題が検出されます。
+* 検出された問題: 警告として表示され、CI は継続します (エラーは発生しません)。
+
+#### 2.4.6. 実装状況
+
+**実装状況**: ✅ **完全実装済み・テスト成功** - Docs Linter ワークフローが正常に動作し、すべてのチェックが成功
+
+* GitHub Actions「Docs Linter」ワークフローが正常に動作し、すべてのステップが成功
+* textlint がルールを正しく解決し、Markdown ファイルをチェック
+* NODE_PATH を使用したルール解決が正常に機能
 
 ## 3. ローカルテスト・スクリプト
 
@@ -326,24 +411,24 @@
 
 #### 3.7.1. Swift Package テスト (macOS)
 
-* `swift test --enable-code-coverage` を実行
+* `swift test --enable-code-coverage` を実行します。
 
 #### 3.7.2. Xcode プロジェクトの生成とテスト (オプション)
 
 `project.yml` が存在する場合に実行されます。
 
-* `xcodegen generate` で Xcode プロジェクトを生成
+* `xcodegen generate` で Xcode プロジェクトを生成します。
 * **プラットフォーム専用スキームの自動選択**:
-  * macOS テスト実行時: `S2JAboutWindow-macOS` スキームが存在する場合は自動選択 (macOS ターゲットのみをビルド・テスト)
-  * iOS テスト実行時: `S2JAboutWindow-iOS` スキームが存在する場合は自動選択 (iOS ターゲットのみをビルド・テスト)
-  * 専用スキームが存在しない場合は、統合スキーム (`S2JAboutWindow`) を使用
-* `xcodebuild test -project <project> -scheme <scheme> -destination 'platform=macOS'` でテスト実行
+  * macOS テスト実行時: `S2JAboutWindow-macOS` スキームが存在する場合は自動選択します (macOS ターゲットのみをビルド・テスト)。
+  * iOS テスト実行時: `S2JAboutWindow-iOS` スキームが存在する場合は自動選択します (iOS ターゲットのみをビルド・テスト)。
+  * 専用スキームが存在しない場合: 統合スキーム (`S2JAboutWindow`) を使用します。
+* `xcodebuild test -project <project> -scheme <scheme> -destination 'platform=macOS'` でテストを実行します。
 
 #### 3.7.3. iOS/iPadOS シミュレーターの確認とテスト (オプション)
 
-* 利用可能なシミュレーターを確認
+* 利用可能なシミュレーターを確認します。
 * **デバイス ID の取得**: UUID 形式 (8-4-4-4-12) で正しく抽出
-* **シミュレーターの起動**: 既に起動済みの場合はスキップ、未起動の場合は自動起動
+* **シミュレーターの起動**: 既に起動済みの場合はスキップ、未起動の場合は自動起動します。
 * iOS/iPadOS 向けビルドの確認 (`swift build -Xswiftc -sdk ... -Xswiftc -target ...`)
 * Swift Package として `xcodebuild test` を試行
 * Xcode プロジェクトが存在する場合は、Xcode プロジェクトとしても `xcodebuild test` を試行 (プラットフォーム専用スキームを自動選択)
@@ -354,8 +439,8 @@
 
 ### 3.8. CI/CD との整合性
 
-* **macOS テスト**: `swift test --enable-code-coverage` を実行 (CI/CD と同じ)
-* **iOS テスト**: Xcode プロジェクトの生成、シミュレーターの起動、`xcodebuild test` の実行 (CI/CD と同じ)
+* **macOS テスト**: `swift test --enable-code-coverage` を実行します (CI/CD と同じ)。
+* **iOS テスト**: Xcode プロジェクトの生成、シミュレーターの起動、`xcodebuild test` の実行を実施します (CI/CD と同じ)。
 
 ## 4. テスト・カバレッジ
 
@@ -417,6 +502,11 @@
     * テスト実行の優先順位の最適化 (SDK を指定せずに実行を優先) (✅実装完了)
     * 診断情報の常時アップロード (`if: always()` を追加) (✅実装完了)
   * `build-release` ジョブ: リリースビルド生成
+  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (✅100% 実装完了・テスト成功)
+    * `docs-linter` ジョブ: Markdown ファイルの textlint チェック
+    * NODE_PATH を使用したルール解決 (✅実装完了)
+    * npm キャッシュの最適化 (✅実装完了)
+    * Git サブモジュールとして docs-linter を取得 (✅実装完了)
 * **ローカルテスト・スクリプト**:
   * `scripts/test-local.sh`: コミット前に CI/CD と同じテストをローカルで実行 (✅100% 実装完了)
   * 汎用的で、他の Swift Package Manager プロジェクトでも使用可能
@@ -429,6 +519,7 @@
 
 * GitHub Actions ワークフローとローカルテスト・スクリプトの実装完了
 * GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
+* GitHub Actions「Docs Linter」ワークフローが正常に動作し、すべてのチェックが成功
 
 ## 8. 今後の改善予定
 
