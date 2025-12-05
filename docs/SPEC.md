@@ -105,82 +105,82 @@
 
 * **要件レベル**: **Must (必須)**
 * **プラットフォーム対応**:
-  * macOS v12.0以上で動作すること。
-  * iPadOS v15.0以上で動作すること。
+  * macOS: v12.0以上で動作すること。
+  * iPadOS: v15.0以上で動作すること。
 * **Swift バージョン**:
-  * Swift v5.9以上でビルド可能であること。
+  * Swift: v5.9以上でビルド可能であること。
 * **Xcode バージョン**:
-  * Xcode v14.0以上でビルド可能であること。
+  * Xcode: v14.0以上でビルド可能であること。
 
 #### 2.2.3. 信頼性
 
 * **要件レベル**: **Must (必須)**
-* **エラーハンドリング**:
-  * Markdown パース失敗時は、プレーンテキストとして表示するフォールバック処理を実装すること。
-  * 不正なコンテンツ形式が渡された場合でも、アプリケーションがクラッシュしないこと。
+* **エラー・ハンドリング**:
+  * Markdown パースに失敗した場合: フォールバック処理を実装し、プレーンテキストとして表示します。
+  * 不正なコンテンツ形式が渡された場合: アプリケーションがクラッシュしないようにします。
 * **堅牢性**:
-  * nil 値が渡された場合でも、適切なデフォルト値を表示すること。
-  * リソースファイル (`AboutDefault.md`、`Localizable.strings`) が存在しない場合でも、エラーを発生させずに動作すること。
+  * nil 値が渡された場合: 適切なデフォルト値を表示します。
+  * リソースファイル (`AboutDefault.md`、`Localizable.strings`) が存在しない場合: エラーを発生させずに動作します。
 
 #### 2.2.4. 保守性
 
 * **要件レベル**: **Must (必須)**
 * **コード品質**:
-  * MVVM パターンに準拠した設計とします。
-  * 主要なクラス・メソッドに JSDoc スタイルのコメントを記載すること。
-  * プラットフォーム固有のコードは `#if os(macOS)` / `#if os(iOS)` で適切に分離すること。
+  * 設計: MVVM パターンに準拠します。
+  * 主要なクラス・メソッド: JSDoc スタイルのコメントを記載します。
+  * プラットフォーム固有のコード: `#if os(macOS)` / `#if os(iOS)` で適切に分離します。
 * **テスト容易性**:
-  * ユニットテストが容易に記述できる設計とします。
-  * Xcode Preview に対応すること。
+  * 設計: ユニットテストが容易に記述できるようにします。
+  * Xcode Preview に対応します。
 
 #### 2.2.5. セキュリティ
 
 * **要件レベル**: **Should (推奨)**
 * **コンテンツの安全性**:
-  * Markdown コンテンツに含まれるスクリプトや危険なリンクを適切に処理すること。
-  * ユーザーが入力したコンテンツを表示する際は、XSS などの脆弱性を考慮すること。
+  * Markdown コンテンツに含まれるスクリプトや危険なリンク: 適切に処理します。
+  * ユーザーが入力したコンテンツを表示する際: XSS などの脆弱性を、考慮します。
 
 #### 2.2.6. ユーザビリティ
 
 * **要件レベル**: **Must (必須)**
 * **UI / UX**:
-  * 直感的で操作しやすい UI を提供すること。
-  * ウィンドウサイズは適切なデフォルト値 (400x500) を設定すること。
-  * コンテンツが長い場合は、スクロール可能にすること。
+  * 直感的で操作しやすい UI を、提供します。
+  * ウィンドウサイズ: 適切なデフォルト値 (400x500) を設定します。
+  * コンテンツが長い場合: スクロール可能にします。
 * **アクセシビリティ**:
-  * VoiceOver などのスクリーンリーダーに対応すること (**Should** - 推奨)。
-  * キーボード操作でウィンドウを閉じられること (macOS)。
+  * VoiceOver などのスクリーンリーダーに対応します (**Should** - 推奨)。
+  * キーボード操作で、ウィンドウを閉じることができるようにします (macOS)。
 
 #### 2.2.7. 開発者体験
 
 * **要件レベル**: **Should (推奨)**
 * **API の使いやすさ**:
-  * シンプルで直感的な API を提供すること。
-  * デフォルト値が適切に設定され、最小限のパラメータで動作すること。
+  * シンプルで直感的な API を提供します。
+  * デフォルト値が適切に設定され、最小限のパラメータで動作可能にします。
 * **ドキュメント**:
-  * README.md に使用方法を記載すること。
-  * API リファレンスを整備すること (**Could** - 可能であれば)。
+  * README.md に使用方法を記載します。
+  * API リファレンスを整備します (**Could** - 可能であれば)。
 
 #### 2.2.8. テスト・品質保証
 
 * **要件レベル**: **Must (必須)**
 * **テスト・カバレッジ**:
-  * 主要な機能 (AboutWindow、AboutView、AboutViewModel、MarkdownView) のユニットテストを実装すること。
-  * テスト・カバレッジは、70% 以上を目標とします。
+  * 主要な機能 (AboutWindow、AboutView、AboutViewModel、MarkdownView) のユニットテストを実装します。
+  * テスト・カバレッジ目標: 70% 以上です。
 * **UI テスト**:
-  * SnapshotTesting フレームワークを使用した UI テストを実装すること (**Should** - 推奨)。
-  * macOS と iPadOS それぞれのプラットフォームで UI テストを実施すること。
+  * SnapshotTesting フレームワークを使用した UI テストを実装します (**Should** - 推奨)。
+  * macOS と iPadOS それぞれのプラットフォームで、UI テストを実施します。
 * **CI/CD でのテスト実行**:
-  * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集すること。
+  * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
   * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
 
 #### 2.2.9. パッケージング
 
 * **要件レベル**: **Must (必須)**
 * **Swift Package Manager 対応**:
-  * Swift Package Manager で配布可能な形式とします。
-  * Universal Binary 形式でビルド可能とします。
-  * リソースファイル (`AboutDefault.md`、`Localizable.strings`、`Assets.xcassets`) を適切にパッケージングすること。
+  * Swift Package Manager で配布可能な形式にします。
+  * Universal Binary 形式でビルド可能にします。
+  * リソースファイル (`AboutDefault.md`、`Localizable.strings`、`Assets.xcassets`) を適切にパッケージングします。
 
 ## 3. 準拠仕様
 
@@ -369,8 +369,8 @@ aboutWindow.showAboutWindow(
 * テスト: ライセンス表示部分は SnapshotTesting を実施します。(⚠️ 実装中)
 
 **UI テスト環境**:
-* macOS: `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting。(⚠️ 実装中)
-* iPadOS: `.sheet` 表示を `XCTest` + `ViewInspector` で検証可能とします。(⚠️ 実装中)
+* macOS: `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting を実施します。(⚠️ 実装中)
+* iPadOS: `.sheet` 表示を `XCTest` + `ViewInspector` で検証可能にします。(⚠️ 実装中)
 
 **CI/CD でのテスト実行**:
 * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
@@ -378,18 +378,18 @@ aboutWindow.showAboutWindow(
 
 ## 9. CI / CD
 
-CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照してください。
+CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照。
 
 本セクションでは、CI/CD の概要のみを記載します。
 
-* Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外とします。
+* Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外です。
 * Universal Binary 化は SwiftPM のビルドフェーズで自動処理されます。
 * リリース用ビルドは GitHub Actions の CI ワークフローで生成し、Artifacts として管理します。
 * 本プロジェクトでは、以下の GitHub Actions ワークフローを導入します。
-  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter)
+  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter) (✅100% 実装完了・テスト成功)
   * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了・テスト成功)
 
-**実装状況**: ✅ **完全実装済み・テスト成功** - CI/CD ワークフローとローカルテスト・スクリプトの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
+**実装状況**: ✅ **完全実装済み・テスト成功** - CI/CD ワークフローとローカルテスト・スクリプトの実装完了、GitHub Actions「Swift Test」ワークフローと「Docs Linter」ワークフローが正常に動作し、すべてのテストとチェックが成功
 
 ## 10. 実装状況サマリー
 
@@ -401,7 +401,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 * コア機能
   * **AboutWindow.swift**:
-    * macOS 向け NSWindow 管理、`showAboutWindow()` / `closeWindow()` API の実装。
+    * macOS 向け NSWindow 管理、`showAboutWindow()` / `closeWindow()` API の実装です。
     * `NSHostingController` を使用して SwiftUI ビューを NSWindow に統合します。
     * ウィンドウサイズ: 400x500、スタイル: `.titled`、`.closable`、`.miniaturizable` を設定します。
     * ウィンドウタイトルは `NSLocalizedString("About.Title", bundle: .module)` を使用します。
@@ -410,7 +410,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `windowWillClose(_:)` メソッドを実装し、ウィンドウが閉じられた際に適切にクリーンアップします。
     * タイトルバーの閉じるボタン（×）と ESC キーの両方でウィンドウを閉じることができます。
   * **AboutView.swift**:
-    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合。
+    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合です。
     * `@StateObject` を使用して `AboutViewModel` を管理します。
     * アプリケーション・アイコン: 64x64、角丸矩形 (`RoundedRectangle(cornerRadius: 12)`)。
     * アプリケーション情報: アプリケーション名 (`.title2`、`.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
@@ -436,7 +436,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * **macOS 対応**:
     * `NSWindow` および `NSHostingController` を利用した独立ウィンドウ表示を実装します。
     * `#if os(macOS)` 条件分岐で macOS 専用コードを分離します。
-    * `NSApplication.shared.applicationIconImage` でアプリケーション・アイコンを取得。
+    * `NSApplication.shared.applicationIconImage` でアプリケーション・アイコンを取得します。
   * **iPadOS 対応**:
     * SwiftUI ネイティブ `.sheet` / `.popover` API によるモーダル表示を実装します。
     * `#if os(iOS)` 条件分岐で iOS/iPadOS 専用コードを分離します。
@@ -464,7 +464,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * macOS: `NSApplication.shared.applicationIconImage` を使用 (✅実装完了)。
     * iPadOS: `UIImage(named: "AppIcon")` を使用 (✅実装完了)。
   * **アプリケーション・メタデータ自動取得**:
-    * Bundle 拡張による `displayName`、`version`、`copyright` の自動取得。
+    * Bundle 拡張による `displayName`、`version`、`copyright` を自動取得します。
 * コンテンツ形式サポート
   * **Markdown 形式のコンテンツサポート**:
     * `MarkdownView.swift` で実装完了。
@@ -628,7 +628,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
 **補足**:
-* 本プロジェクトは Swift Package として他アプリケーションに組み込まれることを前提とするため、Xcode ウィザードで「App」テンプレートを選ぶ必要はありません。
+* 本プロジェクトは Swift Package として他アプリケーションに組み込まれることを前提としているため、Xcode ウィザードで「App」テンプレートを選ぶ必要はありません。
 * macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを .macOS (.v12)、.iOS (.v15) と指定します。
 * また、本リポジトリでは Git サブモジュール [Docs Linter](https://github.com/stein2nd/docs-linter) を導入し、ドキュメント品質 (表記揺れや用語統一) の検証を CI で実施します。
 
@@ -670,4 +670,4 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 **実装状況**: ✅ **完全実装済み・テスト成功** - CI ワークフローの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
 
-CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照してください。
+CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照。
