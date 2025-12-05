@@ -405,7 +405,7 @@ The project follows a standard Swift Package Manager structure:
 To set up the development environment for this project:
  -->
 
-このプロジェクトの開発環境をセットアップするには。
+このプロジェクトの開発環境をセットアップするには、以下の手順を実行してください。
 
 <!-- 
 1. Clone the repository:
@@ -469,7 +469,7 @@ To set up the development environment for this project:
 To build the project, use:
  -->
 
-プロジェクトをビルドするには。
+プロジェクトをビルドするには、以下のコマンドを実行してください。
 
 ```zsh
 swift build
@@ -478,7 +478,7 @@ swift build
 To run tests with code coverage:
  -->
 
-コード・カバレッジ付きでテストを実行するには。
+コード・カバレッジ付きでテストを実行するには、以下のコマンドを実行ししてください。
 
 ```zsh
 swift test --enable-code-coverage
