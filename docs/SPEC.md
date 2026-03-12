@@ -7,6 +7,7 @@
     * [Swift/SwiftUI 共通仕様](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md)
 * 以下は、本ツール固有の仕様をまとめたものです。
 * CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
+* **仕様の細分化**: プロジェクトの存在理由・コード構造・CI/CD などは別ドキュメントに分割しています。一覧は [specs.md](./specs.md) を参照してください。細分化の方針とベター・プラクティスは [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) に記載しています。
 
 ## 1. プロジェクト概要
 
@@ -247,6 +248,8 @@
 * 共有ロジック (ViewModel / Markdown パーサー) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。(✅100% 実装完了)
 
 ### 4.2. プロジェクト構成
+
+コード構造と各ファイルの責務の詳細は [architecture.md](./architecture.md) を参照してください。
 
 ```
 `s2j-about-window`/
