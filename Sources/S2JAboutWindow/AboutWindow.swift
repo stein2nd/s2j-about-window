@@ -4,7 +4,7 @@ import SwiftUI
 #if os(macOS)
 import AppKit
 
-@available(macOS 12.0, *)
+@available(macOS 14.0, *)
 /** 
 * @return AboutWindow
 */

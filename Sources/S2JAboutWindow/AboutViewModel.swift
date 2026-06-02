@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 #if canImport(SwiftUI)
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 15.0, *)
 /** 
 * @return AboutViewModel
 */

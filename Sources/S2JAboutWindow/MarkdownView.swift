@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 #if canImport(SwiftUI)
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 15.0, *)
 /**
 * MarkdownView
 * @return MarkdownView
@@ -60,7 +60,7 @@ public struct MarkdownView: View {
 }
 
 #if DEBUG
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 15.0, *)
 /**
 * MarkdownView_Previews
 * @return MarkdownView_Previews

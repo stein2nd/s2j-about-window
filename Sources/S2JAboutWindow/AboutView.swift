@@ -9,7 +9,7 @@ import AppKit
 import UIKit
 #endif
 
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 15.0, *)
 /**
 * AboutView
 * @return AboutView
