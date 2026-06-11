@@ -12,7 +12,7 @@
 * GitHub Actions（`swift-test.yml`）を Swift v6.3 / Xcode v26.3+ 向けに更新
     * runner を `macos-latest` から `macos-26` に変更
     * 全 job の Xcode バージョンを `26.3` に固定
-    * Swift v6.2 系 Xcode へのフォールバック（16.4.0 等）を削除
+    * Swift v6.2系 Xcode へのフォールバック（16.4.0 等）を削除
     * ツールチェーン確認ステップ（`swift --version`）を追加
 * `README.md` のバッジ表示を調整（Swift バッジの位置変更、iOS 表記を iPadOS に修正）
 
