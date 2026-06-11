@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 #if canImport(SwiftUI)
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 /**
 * MarkdownView
 * @return MarkdownView
@@ -36,10 +36,7 @@ public struct MarkdownView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
         }
-        .onAppear {
-            parseMarkdown()
-        }
-        .onChange(of: content) { _ in
+        .task(id: content) {
             parseMarkdown()
         }
     }
@@ -60,7 +57,7 @@ public struct MarkdownView: View {
 }
 
 #if DEBUG
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 /**
 * MarkdownView_Previews
 * @return MarkdownView_Previews

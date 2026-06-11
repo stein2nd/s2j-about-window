@@ -9,7 +9,7 @@ import AppKit
 import UIKit
 #endif
 
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 /**
 * AboutView
 * @return AboutView
@@ -144,7 +144,7 @@ public struct AboutView: View {
 }
 
 #if DEBUG
-@available(macOS 12.0, iOS 15.0, *)
+@available(macOS 12.0, iOS 17.0, *)
 /**
 * AboutView_Previews
 * @return AboutView_Previews

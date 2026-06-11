@@ -1,10 +1,10 @@
 {
   "name": "s2j-about-window",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Using SwiftUI, reimplementing the AppKit-based \"About Window\".",
   "type": "module",
   "author": "Koutarou ISHIKAWA",
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stein2nd/s2j-about-window.git"
@@ -29,9 +29,9 @@
   "scripts": {
     "lint:docs": "s2j-docs-linter ./README.md ./docs/**/*.md",
     "test:local": "./scripts/test-local.sh",
-    "test:local:iOSfull": "./scripts/test-local.sh --ios-device \"iPad Pro\" --ios-version \"15.0\" --enable-xcode-project --xcodegen-auto-install"
+    "test:local:iOSfull": "./scripts/test-local.sh --ios-device \"iPad Pro\" --ios-version \"17.0\" --enable-xcode-project --xcodegen-auto-install"
   },
   "devDependencies": {
-    "@s2j/docs-linter": "^1.0.15"
+    "@s2j/docs-linter": "^1.0.18"
   }
 }

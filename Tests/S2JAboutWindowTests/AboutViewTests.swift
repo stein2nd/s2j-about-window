@@ -2,7 +2,7 @@ import XCTest
 import SwiftUI
 @testable import S2JAboutWindow
 
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 final class AboutViewTests: XCTestCase {
     
     func testAboutViewModelInitialization() {
@@ -76,7 +76,7 @@ final class AboutViewTests: XCTestCase {
 }
 
 // MARK: - Snapshot Testing Support
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 extension AboutViewTests {
     
     func testAboutViewSnapshot() {

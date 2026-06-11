@@ -19,7 +19,7 @@
 # オプション:
 #   -s, --scheme-name <name>        Xcodeスキーム名
 #   -d, --ios-device <device>       iOS/iPadOSシミュレーターデバイス名 (デフォルト: "iPad Pro")
-#   -v, --ios-version <version>     iOS/iPadOS最小バージョン (デフォルト: "15.0")
+#   -v, --ios-version <version>     iOS/iPadOS最小バージョン (デフォルト: "17.0")
 #   --skip-ios                      iOS/iPadOSテストをスキップ
 #   --enable-xcode-project          Xcodeプロジェクト生成とテストを有効化
 #   --xcode-project-name <name>     Xcodeプロジェクト名
@@ -31,7 +31,7 @@
 # 環境変数でもカスタマイズ可能 (引数と自動検出が優先されます):
 #   - SCHEME_NAME: Xcodeスキーム名 (デフォルト: Package.swiftから自動検出)
 #   - IOS_DEVICE: iOS/iPadOSシミュレーターデバイス名 (デフォルト: "iPad Pro")
-#   - IOS_VERSION: iOS/iPadOS最小バージョン (デフォルト: "15.0")
+#   - IOS_VERSION: iOS/iPadOS最小バージョン (デフォルト: "17.0")
 #   - SKIP_IOS_TESTS: iOS/iPadOSテストをスキップする場合は "true" を設定
 #   - ENABLE_XCODE_PROJECT: Xcodeプロジェクト生成とテストを有効にする場合は "true" を設定 (デフォルト: project.ymlが存在する場合に自動有効化)
 #   - XCODE_PROJECT_NAME: Xcodeプロジェクト名 (デフォルト: Package.swiftから自動検出、またはパッケージ名)
@@ -118,7 +118,7 @@ show_help() {
 オプション:
   -s, --scheme-name <name>        Xcodeスキーム名
   -d, --ios-device <device>       iOS/iPadOSシミュレーターデバイス名 (デフォルト: "iPad Pro")
-  -v, --ios-version <version>     iOS/iPadOS最小バージョン (デフォルト: "15.0")
+  -v, --ios-version <version>     iOS/iPadOS最小バージョン (デフォルト: "17.0")
   --skip-ios                      iOS/iPadOSテストをスキップ
   --enable-xcode-project          Xcodeプロジェクト生成とテストを有効化
   --xcode-project-name <name>     Xcodeプロジェクト名
@@ -204,7 +204,7 @@ LIBRARY_NAME=$(get_library_name)
 # 優先順位: 1. コマンドライン引数 > 2. 自動検出 (Package.swift から) > 3. 環境変数 > 4. デフォルト値
 SCHEME_NAME="${ARG_SCHEME_NAME:-${LIBRARY_NAME:-${SCHEME_NAME:-${PACKAGE_NAME}}}}"
 IOS_DEVICE="${ARG_IOS_DEVICE:-${IOS_DEVICE:-iPad Pro}}"
-IOS_VERSION="${ARG_IOS_VERSION:-${IOS_VERSION:-15.0}}"
+IOS_VERSION="${ARG_IOS_VERSION:-${IOS_VERSION:-17.0}}"
 SKIP_IOS_TESTS="${ARG_SKIP_IOS_TESTS:-${SKIP_IOS_TESTS:-false}}"
 
 # Xcode プロジェクト関連の設定

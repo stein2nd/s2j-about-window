@@ -28,4 +28,4 @@ AboutView(content: "Your content here")
 
 ## License
 
-This library is provided under the MIT License. See the LICENSE file for more details.
+This library is provided under the GPL v3.0+ License. See the LICENSE file for more details.

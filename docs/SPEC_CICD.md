@@ -401,7 +401,7 @@
 
 * `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
 * `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
-* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "15.0")
+* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "17.0")
 * `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
 * `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効化 (デフォルト: `project.yml` が存在する場合に自動有効化)
 * `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)

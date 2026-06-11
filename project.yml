@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: com.s2j
   deploymentTarget:
     macOS: "12.0"
-    iOS: "15.0"
+    iOS: "17.0"
   developmentLanguage: en
   usesTabs: false
   indentWidth: 4
@@ -40,7 +40,7 @@ targets:
   S2JAboutWindow-iOS:
     type: framework
     platform: iOS
-    deploymentTarget: "15.0"
+    deploymentTarget: "17.0"
     sources:
       - path: Sources/S2JAboutWindow
         excludes:
@@ -56,7 +56,7 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic
-        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         SUPPORTS_MACCATALYST: false
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
       configs:
@@ -93,7 +93,7 @@ targets:
   S2JAboutWindowTests-iOS:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "15.0"
+    deploymentTarget: "17.0"
     sources:
       - path: Tests/S2JAboutWindowTests
     dependencies:
@@ -108,7 +108,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: ""
-        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         SUPPORTS_MACCATALYST: false
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
       configs:

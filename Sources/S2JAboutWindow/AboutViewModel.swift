@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 #if canImport(SwiftUI)
-@available(macOS 14.0, iOS 15.0, *)
+@available(macOS 14.0, iOS 17.0, *)
 /** 
 * @return AboutViewModel
 */
@@ -64,6 +64,7 @@ public class AboutViewModel: ObservableObject {
 }
 
 // MARK: - Bundle Extensions
+@available(macOS 14.0, iOS 17.0, *)
 extension Bundle {
     /** 
      * @return アプリ名

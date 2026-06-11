@@ -10,7 +10,7 @@
 * **Swift Package 名**: s2j-about-window
 * **元リポジトリ**: [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow)
 * **目的**: AppKit ベースの「About Window」を SwiftUI で再実装し、macOS および iPadOS アプリケーション向けの共通コンポーネントとして提供する。
-* **対応 OS**: macOS v12 以上、iPadOS v15 以上
+* **対応 OS**: macOS v12 以上、iPadOS v17 以上
 
 ## 準拠仕様
 
