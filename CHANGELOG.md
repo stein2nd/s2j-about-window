@@ -2,6 +2,20 @@
 
 ## unreleased
 
+## 2.0.2 - 2026-06-11
+
+### Changed
+
+* `project.yml` の Project Format を Xcode v26.3相当に更新
+    * `xcodeVersion` を v26.5から v26.3に変更
+    * `projectFormat: xcode16_3` を追加（生成される `objectVersion` を90に）
+* GitHub Actions（`swift-test.yml`）を Swift v6.3 / Xcode v26.3+ 向けに更新
+    * runner を `macos-latest` から `macos-26` に変更
+    * 全 job の Xcode バージョンを `26.3` に固定
+    * Swift v6.2 系 Xcode へのフォールバック（16.4.0 等）を削除
+    * ツールチェーン確認ステップ（`swift --version`）を追加
+* `README.md` のバッジ表示を調整（Swift バッジの位置変更、iOS 表記を iPadOS に修正）
+
 ## 2.0.1 - 2026-06-11
 
 ### Changed

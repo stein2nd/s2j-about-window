@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-macos:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     steps:
     - name: Checkout
@@ -17,7 +17,12 @@ jobs:
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: '26.3'
+
+    - name: Verify Swift toolchain
+      run: |
+        xcodebuild -version
+        swift --version
 
     - name: Run tests on macOS
       run: |
@@ -31,7 +36,7 @@ jobs:
         name: macos-coverage
 
   test-ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 60   # 長めに確保 (ビルド／シミュレータ起動で時間がかかる場合あり)
     env:
       # 出力ログ保存先
@@ -41,27 +46,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ----- Try to install/select Xcode versions in preferred order.
-      # Note: each setup step is allowed to fail (continue-on-error: true).
-      # We'll detect the selected Xcode with xcodebuild -version below and then
-      # use sudo xcode-select -s if specific path exists.
-      - name: Try setup Xcode 26.1
+      # Swift 6.3 (swift-tools-version: 6.3) requires Xcode 26.3+.
+      - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.1'
-        continue-on-error: true
-
-      - name: Try setup Xcode 26.0.1
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.0.1'
-        continue-on-error: true
-
-      - name: Try setup Xcode 16.4.0
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.4.0'
-        continue-on-error: true
+          xcode-version: '26.3'
 
       - name: Ensure log dir
         run: |
@@ -103,17 +92,17 @@ jobs:
           fi
 
       # ----- If a preferred Xcode app path exists on the runner, force select it -----
-      - name: Force-select Xcode app if present (26.1 -> 26.0.1 -> 16.4)
+      - name: Force-select Xcode app if present (26.5 -> 26.4.1 -> 26.3)
         run: |
           set -euo pipefail
           echo "Checking for known Xcode app paths and selecting first match..."
-          # Check candidate paths in priority order (user requested)
           CANDIDATES=(
-            "/Applications/Xcode_26.1.app/Contents/Developer"
-            "/Applications/Xcode_26.1.0.app/Contents/Developer"
-            "/Applications/Xcode.app/Contents/Developer"        # may be 26.0.1 or other
-            "/Applications/Xcode_26.0.app/Contents/Developer"
-            "/Applications/Xcode_16.4.0.app/Contents/Developer"
+            "/Applications/Xcode_26.5.app/Contents/Developer"
+            "/Applications/Xcode_26.4.1.app/Contents/Developer"
+            "/Applications/Xcode_26.4.app/Contents/Developer"
+            "/Applications/Xcode_26.3.app/Contents/Developer"
+            "/Applications/Xcode_26.3.0.app/Contents/Developer"
+            "/Applications/Xcode.app/Contents/Developer"
           )
           SELECTED=""
           for p in "${CANDIDATES[@]}"; do
@@ -135,10 +124,16 @@ jobs:
         run: |
           echo "Post-selection Xcode:" > $LOG_DIR/post_selection.txt
           xcodebuild -version >> $LOG_DIR/post_selection.txt 2>&1 || true
+          swift --version >> $LOG_DIR/post_selection.txt 2>&1 || true
           xcodebuild -showsdks >> $LOG_DIR/post_selection.txt 2>&1 || true
           xcrun simctl list runtimes >> $LOG_DIR/post_selection.txt 2>&1 || true
           xcrun simctl list devices available >> $LOG_DIR/post_selection.txt 2>&1 || true
           tail -n +1 $LOG_DIR/post_selection.txt | sed -n '1,200p'
+
+      - name: Verify Swift toolchain
+        run: |
+          xcodebuild -version
+          swift --version
 
       - name: Verify Swift Package
         run: |
@@ -512,7 +507,7 @@ jobs:
           fail_ci_if_error: false
 
   build-release:
-    runs-on: macos-latest
+    runs-on: macos-26
     needs: [test-macos, test-ios]
 
     steps:
@@ -522,7 +517,12 @@ jobs:
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: '26.3'
+
+    - name: Verify Swift toolchain
+      run: |
+        xcodebuild -version
+        swift --version
 
     - name: Build Universal Binary
       run: |
