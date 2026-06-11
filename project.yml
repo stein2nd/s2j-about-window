@@ -8,7 +8,7 @@ options:
   usesTabs: false
   indentWidth: 4
   tabWidth: 4
-  xcodeVersion: "15.0"
+  xcodeVersion: "26.5"
 
 targets:
   S2JAboutWindow-macOS:
@@ -25,7 +25,7 @@ targets:
       base:
         PRODUCT_NAME: S2JAboutWindow
         PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindow
-        SWIFT_VERSION: "5.9"
+        SWIFT_VERSION: "6.3"
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
@@ -51,7 +51,7 @@ targets:
       base:
         PRODUCT_NAME: S2JAboutWindow
         PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindow
-        SWIFT_VERSION: "5.9"
+        SWIFT_VERSION: "6.3"
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
@@ -78,7 +78,7 @@ targets:
       base:
         PRODUCT_NAME: S2JAboutWindowTests
         PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindowTests
-        SWIFT_VERSION: "5.9"
+        SWIFT_VERSION: "6.3"
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
@@ -102,7 +102,7 @@ targets:
       base:
         PRODUCT_NAME: S2JAboutWindowTests
         PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindowTests
-        SWIFT_VERSION: "5.9"
+        SWIFT_VERSION: "6.3"
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES

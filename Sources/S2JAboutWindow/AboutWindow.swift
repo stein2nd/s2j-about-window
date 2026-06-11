@@ -5,6 +5,7 @@ import SwiftUI
 import AppKit
 
 @available(macOS 14.0, *)
+@MainActor
 /** 
 * @return AboutWindow
 */

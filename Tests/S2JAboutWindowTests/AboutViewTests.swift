@@ -3,6 +3,7 @@ import SwiftUI
 @testable import S2JAboutWindow
 
 @available(macOS 14.0, iOS 17.0, *)
+@MainActor
 final class AboutViewTests: XCTestCase {
     
     func testAboutViewModelInitialization() {
