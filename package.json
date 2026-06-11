@@ -1,6 +1,6 @@
 {
   "name": "s2j-about-window",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Using SwiftUI, reimplementing the AppKit-based \"About Window\".",
   "type": "module",
   "author": "Koutarou ISHIKAWA",

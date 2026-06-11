@@ -2,6 +2,15 @@
 
 ## unreleased
 
+## 2.0.3 - 2026-06-11
+
+### Fixed
+
+* GitHub Actions の `test-macos` / `build-release` が Swift v6.2.4で失敗する問題を修正
+    * macos-26上の Xcode v26.3は Swift v6.2.4のため、CI ツールチェーンを Xcode v26.5（Swift v6.3.2+）に統一
+    * `test-ios` と同様の Xcode Force-select ステップを `test-macos` / `build-release` に追加
+    * ツールチェーン確認で Swift v6.2系を検出した場合に fail するガードを全 job に追加
+
 ## 2.0.2 - 2026-06-11
 
 ### Changed
