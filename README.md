@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.2")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.3")
 ]
 ```
 
