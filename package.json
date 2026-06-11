@@ -27,7 +27,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "lint:docs": "s2j-docs-linter ./README.md ./docs/**/*.md",
+    "lint:docs": "s2j-docs-linter ./README.md ./CHANGELOG.md ./docs/**/*.md",
     "test:local": "./scripts/test-local.sh",
     "test:local:iOSfull": "./scripts/test-local.sh --ios-device \"iPad Pro\" --ios-version \"17.0\" --enable-xcode-project --xcodegen-auto-install"
   },
