@@ -2,6 +2,8 @@
 
 ## unreleased
 
+## 2.0.4 - 2026-07-23
+
 ### Changed
 
 * `lint:docs` の対象に `CHANGELOG.md` を追加
