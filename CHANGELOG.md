@@ -2,6 +2,18 @@
 
 ## unreleased
 
+### Changed
+
+* `lint:docs` の対象に `CHANGELOG.md` を追加
+* `@s2j/docs-linter` を ^1.0.18 から ^1.0.21 に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.2 から v2.0.3 に更新
+
+### Fixed
+
+* npm 12+ で `npm install` が Git 依存の取得禁止（`EALLOWGIT`）により失敗する問題を修正
+    * `.npmrc` に `allow-git=all` を追加（`@s2j/docs-linter` の間接 GitHub 依存に対応）
+    * `legacy-peer-deps=true` を追加
+
 ## 2.0.3 - 2026-06-11
 
 ### Fixed
