@@ -2,12 +2,24 @@
 
 ## unreleased
 
+## 2.0.7 - 2026-10-02
+
+### Changed
+
+* `@s2j/docs-linter` を ^1.0.23から ^1.0.26に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.6から v2.0.7に更新
+* `.vscode/settings.json` で `json.schemaDownload.enable` を有効化
+
+### Fixed
+
+* 非推奨の `npm.enableScriptExplorer` を削除（NPM Script Explorer は Explorer の Views から利用できる）
+
 ## 2.0.6 - 2026-08-31
 
 ### Changed
 
-* `@s2j/docs-linter` を ^1.0.22 から ^1.0.23 に更新
-* `README.md` の `Package.swift` 依存指定を v2.0.3 から v2.0.6 に更新
+* `@s2j/docs-linter` を ^1.0.22から ^1.0.23に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.3から v2.0.6に更新
 
 ## 2.0.5 - 2026-08-10
 
@@ -21,8 +33,8 @@
 ### Changed
 
 * `lint:docs` の対象に `CHANGELOG.md` を追加
-* `@s2j/docs-linter` を ^1.0.18 から ^1.0.21 に更新
-* `README.md` の `Package.swift` 依存指定を v2.0.2 から v2.0.3 に更新
+* `@s2j/docs-linter` を ^1.0.18から ^1.0.21に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.2から v2.0.3に更新
 
 ### Fixed
 
