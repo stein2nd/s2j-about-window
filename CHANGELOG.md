@@ -2,6 +2,18 @@
 
 ## unreleased
 
+## 2.0.8 - 2026-11-06
+
+### Changed
+
+* `@s2j/docs-linter` を ^1.0.26から ^1.0.32に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.7から v2.0.8に更新
+* `package.json` に `overrides` を追加し、間接依存の `glob` / `minimatch` を修正版に固定
+
+### Fixed
+
+* `npm install` 時に報告されていた moderate severity vulnerabilities（5件）を解消
+
 ## 2.0.7 - 2026-10-02
 
 ### Changed

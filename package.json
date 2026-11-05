@@ -1,6 +1,6 @@
 {
   "name": "s2j-about-window",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "Using SwiftUI, reimplementing the AppKit-based \"About Window\".",
   "type": "module",
   "author": "Koutarou ISHIKAWA",
@@ -32,9 +32,13 @@
     "test:local:iOSfull": "./scripts/test-local.sh --ios-device \"iPad Pro\" --ios-version \"17.0\" --enable-xcode-project --xcodegen-auto-install"
   },
   "devDependencies": {
-    "@s2j/docs-linter": "^1.0.26"
+    "@s2j/docs-linter": "^1.0.32"
   },
   "allowScripts": {
     "@s2j/docs-linter": true
+  },
+  "overrides": {
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.4"
   }
 }
