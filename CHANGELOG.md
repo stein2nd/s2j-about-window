@@ -2,6 +2,22 @@
 
 ## unreleased
 
+## 2.0.9 - 2026-11-06
+
+### Changed
+
+* GitHub Actions (`swift-test.yml`、`docs-lint.yml`) の JavaScript アクションを Node.js v24対応版に更新
+    * `actions/checkout@v5`
+    * `actions/upload-artifact@v5`
+    * `codecov/codecov-action@v7` (`file` → `files`)
+    * Docs Lint の Node.js を v20から v24に変更
+* `README.md` の `Package.swift` 依存指定を v2.0.8から v2.0.9に更新
+* `docs/SPEC_CICD.md` の CI 記述を上記に合わせて更新
+
+### Fixed
+
+* GitHub Actions の Node.js v20非推奨 Annotation を解消
+
 ## 2.0.8 - 2026-11-06
 
 ### Changed
@@ -12,7 +28,7 @@
 
 ### Fixed
 
-* `npm install` 時に報告されていた moderate severity vulnerabilities（5件）を解消
+* `npm install` 時に報告されていた moderate severity vulnerabilities (5件) を解消
 
 ## 2.0.7 - 2026-10-02
 
@@ -24,7 +40,7 @@
 
 ### Fixed
 
-* 非推奨の `npm.enableScriptExplorer` を削除（NPM Script Explorer は Explorer の Views から利用できる）
+* 非推奨の `npm.enableScriptExplorer` を削除 (NPM Script Explorer は Explorer の Views から利用できる)
 
 ## 2.0.6 - 2026-08-31
 
@@ -50,8 +66,8 @@
 
 ### Fixed
 
-* npm 12+ で `npm install` が Git 依存の取得禁止（`EALLOWGIT`）により失敗する問題を修正
-    * `.npmrc` に `allow-git=all` を追加（`@s2j/docs-linter` の間接 GitHub 依存に対応）
+* npm 12+ で `npm install` が Git 依存の取得禁止 (`EALLOWGIT`) により失敗する問題を修正
+    * `.npmrc` に `allow-git=all` を追加 (`@s2j/docs-linter` の間接 GitHub 依存に対応)
     * `legacy-peer-deps=true` を追加
 
 ## 2.0.3 - 2026-06-11
@@ -59,7 +75,7 @@
 ### Fixed
 
 * GitHub Actions の `test-macos` / `build-release` が Swift v6.2.4で失敗する問題を修正
-    * macos-26上の Xcode v26.3は Swift v6.2.4のため、CI ツールチェーンを Xcode v26.5（Swift v6.3.2+）に統一
+    * macos-26上の Xcode v26.3は Swift v6.2.4のため、CI ツールチェーンを Xcode v26.5 (Swift v6.3.2+) に統一
     * `test-ios` と同様の Xcode Force-select ステップを `test-macos` / `build-release` に追加
     * ツールチェーン確認で Swift v6.2系を検出した場合に fail するガードを全 job に追加
 
@@ -69,13 +85,13 @@
 
 * `project.yml` の Project Format を Xcode v26.3相当に更新
     * `xcodeVersion` を v26.5から v26.3に変更
-    * `projectFormat: xcode16_3` を追加（生成される `objectVersion` を90に）
-* GitHub Actions（`swift-test.yml`）を Swift v6.3 / Xcode v26.3+ 向けに更新
+    * `projectFormat: xcode16_3` を追加 (生成される `objectVersion` を90に)
+* GitHub Actions (`swift-test.yml`) を Swift v6.3 / Xcode v26.3+ 向けに更新
     * runner を `macos-latest` から `macos-26` に変更
     * 全 job の Xcode バージョンを `26.3` に固定
-    * Swift v6.2系 Xcode へのフォールバック（16.4.0 等）を削除
-    * ツールチェーン確認ステップ（`swift --version`）を追加
-* `README.md` のバッジ表示を調整（Swift バッジの位置変更、iOS 表記を iPadOS に修正）
+    * Swift v6.2系 Xcode へのフォールバック (16.4.0等) を削除
+    * ツールチェーン確認ステップ (`swift --version`) を追加
+* `README.md` のバッジ表示を調整 (Swift バッジの位置変更、iOS 表記を iPadOS に修正)
 
 ## 2.0.1 - 2026-06-11
 
@@ -93,7 +109,7 @@
 
 ### Changed
 
-* ライセンスを GPL-2.0-or-later から GPL-3.0-or-later に更新（破壊的変更）
+* ライセンスを GPL-2.0-or-later から GPL-3.0-or-later に更新 (破壊的変更)
     * `LICENSE` を GPL v3全文に差し替え
     * `README.md` のライセンス表記とバッジを GPL v3に更新
-* iPadOS の最小対応バージョンを v15から v17に引き上げ（破壊的変更）
+* iPadOS の最小対応バージョンを v15から v17に引き上げ (破壊的変更)

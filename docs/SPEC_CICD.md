@@ -56,7 +56,7 @@
 #### 2.1.2. 実行ステップ
 
 1. **Checkout**
-   * `actions/checkout@v4` を使用してリポジトリをチェック・アウトします。
+   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
 
 2. **Setup Xcode**
    * `maxim-lobanov/setup-xcode@v1` を使用して Xcode をセットアップします。
@@ -67,7 +67,7 @@
    * テスト・カバレッジを有効化します。
 
 4. **Upload coverage to Codecov**
-   * `codecov/codecov-action@v3` を使用して、テスト・カバレッジを Codecov にアップロードします。
+   * `codecov/codecov-action@v7` を使用して、テスト・カバレッジを Codecov にアップロードします。
    * **設定**:
      * `file`: `.build/coverage/coverage.xml`
      * `flags`: `macos`
@@ -92,7 +92,7 @@
 #### 2.2.2. 実行ステップ
 
 1. **Checkout**
-   * `actions/checkout@v4` を使用してリポジトリをチェック・アウトします。
+   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
 
 2. **Xcode バージョンの選択 (フォールバック付き)**
    * 優先順位に従って、利用可能な Xcode バージョンを選択します。
@@ -213,13 +213,13 @@
         * `xcrun xccov view --report "$RESULT_BUNDLE"`: カバレッジ・レポート
 
 16. **診断情報のアップロード (アーティファクト)**
-    * `actions/upload-artifact@v4` を使用して、診断情報をアーティファクトとしてアップロードします。
+    * `actions/upload-artifact@v5` を使用して、診断情報をアーティファクトとしてアップロードします。
     * **アーティファクト名**: `ios-test-diagnostics`
     * **パス**: `$LOG_DIR` (すべてのログファイルを含む)
     * **条件**: `if: ${{ always() }}` (テストが失敗しても実行)
 
 17. **カバレッジのアップロード (Codecov) (ベスト・エフォート)**
-    * `codecov/codecov-action@v3` を使用して、テスト・カバレッジを Codecov にアップロードします。
+    * `codecov/codecov-action@v7` を使用して、テスト・カバレッジを Codecov にアップロードします。
     * **設定**:
       * `file`: `.build/coverage/coverage.xml`
       * `flags`: `ios`
@@ -255,7 +255,7 @@
 #### 2.3.2. 実行ステップ
 
 1. **Checkout**
-   * `actions/checkout@v4` を使用してリポジトリをチェック・アウトします。
+   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
 
 2. **Setup Xcode**
    * `maxim-lobanov/setup-xcode@v1` を使用して Xcode をセットアップします。
@@ -265,7 +265,7 @@
    * `swift build -c release` を実行して、リリース用の Universal Binary をビルドします。
 
 4. **Upload build artifacts**
-   * `actions/upload-artifact@v4` を使用して、ビルド成果物をアーティファクトとしてアップロードします。
+   * `actions/upload-artifact@v5` を使用して、ビルド成果物をアーティファクトとしてアップロードします。
    * **アーティファクト名**: `s2j-about-window-build`
    * **パス**: `.build/release/`
 
@@ -288,12 +288,12 @@
 #### 2.4.2. 実行ステップ
 
 1. **Checkout**
-   * `actions/checkout@v4` を使用してリポジトリをチェック・アウトします。
+   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
    * **設定**: `submodules: recursive` (docs-linter を Git サブモジュールとして取得)
 
 2. **Setup Node.js**
    * `actions/setup-node@v4` を使用して Node.js をセットアップします。
-   * **Node.js バージョン**: `20`
+   * **Node.js バージョン**: `24`
 
 3. **Cache npm dependencies**
    * `actions/cache@v4` を使用して npm 依存関係をキャッシュします。

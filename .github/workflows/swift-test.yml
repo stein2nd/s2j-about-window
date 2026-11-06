@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
@@ -61,9 +61,9 @@ jobs:
         swift test --enable-code-coverage
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v7
       with:
-        file: .build/coverage/coverage.xml
+        files: .build/coverage/coverage.xml
         flags: macos
         name: macos-coverage
 
@@ -76,7 +76,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # swift-tools-version: 6.3 requires Swift 6.3+.
       # On macos-26, Xcode 26.3 ships Swift 6.2.4; use 26.5 (Swift 6.3.2+).
@@ -529,7 +529,7 @@ jobs:
       # ----- Upload diagnostics as artifact so you can inspect next run logs -----
       - name: Upload diagnostics artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ios-test-diagnostics
           path: ${{ env.LOG_DIR }}
@@ -537,9 +537,9 @@ jobs:
       # ----- Attempt to upload coverage to Codecov (no-fail) -----
       - name: Upload coverage to Codecov (iOS) (best-effort)
         if: ${{ always() }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v7
         with:
-          file: .build/coverage/coverage.xml
+          files: .build/coverage/coverage.xml
           flags: ios
           name: ios-coverage
           fail_ci_if_error: false
@@ -550,7 +550,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Xcode
       uses: maxim-lobanov/setup-xcode@v1
@@ -599,7 +599,7 @@ jobs:
         swift build -c release
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: s2j-about-window-build
         path: .build/release/
