@@ -2,6 +2,18 @@
 
 ## unreleased
 
+## 2.0.10 - 2026-11-06
+
+### Changed
+
+* GitHub Actions (`swift-test.yml`) の `actions/upload-artifact` を v5から v6に更新
+* `README.md` の `Package.swift` 依存指定を v2.0.9から v2.0.10に更新
+* `docs/SPEC_CICD.md` の CI 記述を上記に合わせて更新
+
+### Fixed
+
+* `test-ios` / `build-release` の Node.js v20非推奨 Annotation (`upload-artifact@v5`) を解消
+
 ## 2.0.9 - 2026-11-06
 
 ### Changed
