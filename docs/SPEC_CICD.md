@@ -213,7 +213,7 @@
         * `xcrun xccov view --report "$RESULT_BUNDLE"`: カバレッジ・レポート
 
 16. **診断情報のアップロード (アーティファクト)**
-    * `actions/upload-artifact@v5` を使用して、診断情報をアーティファクトとしてアップロードします。
+    * `actions/upload-artifact@v6` を使用して、診断情報をアーティファクトとしてアップロードします。
     * **アーティファクト名**: `ios-test-diagnostics`
     * **パス**: `$LOG_DIR` (すべてのログファイルを含む)
     * **条件**: `if: ${{ always() }}` (テストが失敗しても実行)
@@ -265,7 +265,7 @@
    * `swift build -c release` を実行して、リリース用の Universal Binary をビルドします。
 
 4. **Upload build artifacts**
-   * `actions/upload-artifact@v5` を使用して、ビルド成果物をアーティファクトとしてアップロードします。
+   * `actions/upload-artifact@v6` を使用して、ビルド成果物をアーティファクトとしてアップロードします。
    * **アーティファクト名**: `s2j-about-window-build`
    * **パス**: `.build/release/`
 

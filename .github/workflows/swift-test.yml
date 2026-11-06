@@ -529,7 +529,7 @@ jobs:
       # ----- Upload diagnostics as artifact so you can inspect next run logs -----
       - name: Upload diagnostics artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ios-test-diagnostics
           path: ${{ env.LOG_DIR }}
@@ -599,7 +599,7 @@ jobs:
         swift build -c release
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: s2j-about-window-build
         path: .build/release/
