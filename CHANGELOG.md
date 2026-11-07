@@ -2,6 +2,16 @@
 
 ## unreleased
 
+## 2.0.12 - 2026-11-08
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v2.0.11から v2.0.12に更新
+
+### Fixed
+
+* `MarkdownView` で段落や箇条書きが1行に潰れる問題を修正（ブロックごとに `Text` を並べて表示）
+
 ## 2.0.11 - 2026-11-08
 
 ### Added

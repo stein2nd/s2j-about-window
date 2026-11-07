@@ -14,11 +14,6 @@ import SwiftUI
         let content: String
 
         /**
-         * @var attributedString: 表示するコンテンツ（AttributedString）
-         */
-        @State private var attributedString: AttributedString = .init()
-
-        /**
          * @param content: 表示するコンテンツ（Markdown）
          */
         public init(content: String) {
@@ -30,29 +25,62 @@ import SwiftUI
          * @return MarkdownViewの本体
          */
         public var body: some View {
+            let blocks = Self.markdownBlocks(from: content)
             ScrollView {
-                Text(attributedString)
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                        markdownBlockText(block)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+        }
+
+        @ViewBuilder
+        private func markdownBlockText(_ block: String) -> some View {
+            if let attributed = try? AttributedString(markdown: block) {
+                Text(attributed)
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-            }
-            .task(id: content) {
-                parseMarkdown()
+            } else {
+                Text(block)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
 
         /**
-         * Markdownを解析する
-         * @return void
+         * Markdown を表示用ブロックに分割する。
+         * `Text(AttributedString)` は段落間の改行を描画しないため、ブロックごとに `Text` を並べる。
          */
-        private func parseMarkdown() {
-            do {
-                // Markdownを解析してAttributedStringを作成
-                attributedString = try AttributedString(markdown: content)
-            } catch {
-                // Markdown解析に失敗した場合はプレーンテキストとして表示
-                attributedString = AttributedString(content)
+        static func markdownBlocks(from content: String) -> [String] {
+            var blocks: [String] = []
+
+            for section in content.components(separatedBy: "\n\n") {
+                let trimmedSection = section.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmedSection.isEmpty else { continue }
+
+                let lines = trimmedSection
+                    .split(separator: "\n", omittingEmptySubsequences: true)
+                    .map { String($0).trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
+
+                if lines.count > 1, lines.allSatisfy(isListLine) {
+                    blocks.append(contentsOf: lines)
+                } else {
+                    blocks.append(lines.joined(separator: "\n"))
+                }
             }
+
+            return blocks
+        }
+
+        private static func isListLine(_ line: String) -> Bool {
+            line.hasPrefix("- ")
+                || line.hasPrefix("* ")
+                || line.hasPrefix("+ ")
+                || line.range(of: #"^\d+\.\s"#, options: .regularExpression) != nil
         }
     }
 

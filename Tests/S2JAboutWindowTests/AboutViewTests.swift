@@ -39,6 +39,34 @@ final class AboutViewTests: XCTestCase {
         XCTAssertNotNil(markdownView)
     }
 
+    func testMarkdownBlocksSplitParagraphsAndListItems() {
+        let content = """
+        A modern SwiftUI app for managing Homebrew packages.
+
+        - [GitHub Repository](https://example.com/repo)
+        - [License](https://example.com/license)
+        """
+        let blocks = MarkdownView.markdownBlocks(from: content)
+
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertTrue(blocks[0].contains("Homebrew packages"))
+        XCTAssertTrue(blocks[1].contains("GitHub Repository"))
+        XCTAssertTrue(blocks[2].contains("License"))
+    }
+
+    func testMarkdownBlocksSplitBlankLineSeparatedLinks() {
+        let content = """
+        Description line.
+
+        [GitHub Repository](https://example.com/repo)
+
+        [License](https://example.com/license)
+        """
+        let blocks = MarkdownView.markdownBlocks(from: content)
+
+        XCTAssertEqual(blocks.count, 3)
+    }
+
     func testAboutViewCreation() {
         let aboutView = AboutView(
             content: "Test content",
