@@ -3,7 +3,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![Xcode](https://img.shields.io/badge/Xcode-26.5-blue?logo=xcode&logoColor=white)](https://developer.apple.com/xcode/)
 [![Swift](https://img.shields.io/badge/Swift-6.3-blue?logo=Swift&logoColor=white)](https://www.swift.org)
-[![macOS](https://img.shields.io/badge/macOS-14.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-14.6+-blue?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![iPadOS](https://img.shields.io/badge/iOS-17.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/ipados/)
 
 ## Description
@@ -29,7 +29,7 @@ S2J About Window は、macOS および iPadOS アプリケーション向けの�
 * **Easy Integration**: Simple API for host applications
  -->
 
-* **クロス・プラットフォーム**: macOS (v14以降) と iPadOS (v17以降) の両方で動作
+* **クロス・プラットフォーム**: macOS (v14.6以降) と iPadOS (v17.6以降) の両方で動作
 * **SwiftUI ネイティブ**: モダン UI を実現する SwiftUI 完全構築
 * **カスタマイズ可能なコンテンツ**: Markdown、JSON、RTF コンテンツに対応
 * **ローカライズ対応**: 複数言語 (英語、日本語) の組込みサポート
@@ -58,7 +58,7 @@ For support, feature requests, or bug reports, please visit the [GitHub Issues](
 
 ### Requirements
 
-* macOS v14.0+ / iPadOS v17.0+
+* macOS v14.6+ / iPadOS v17.6+
 * Xcode v26.5+
 * Swift v6.3+
 
@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.10")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.11")
 ]
 ```
 

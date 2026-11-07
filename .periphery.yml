@@ -1,0 +1,7 @@
+project: s2j-about-window.xcodeproj
+schemes:
+  - SampleApp
+retain_public: true
+retain_codable_properties: true
+retain_swift_ui_previews: true
+disable_redundant_public_analysis: true

@@ -1,6 +1,6 @@
 {
   "name": "s2j-about-window",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Using SwiftUI, reimplementing the AppKit-based \"About Window\".",
   "type": "module",
   "author": "Koutarou ISHIKAWA",
@@ -28,6 +28,17 @@
   ],
   "scripts": {
     "lint:docs": "s2j-docs-linter ./README.md ./CHANGELOG.md ./docs/**/*.md",
+
+    "lint:swift": "npm run lint:swiftlint && npm run lint:swiftformat && npm run lint:periphery",
+    "lint:swiftlint": "swiftlint lint --strict Sources Tests SampleApp.swift Package.swift",
+    "lint:swiftformat": "swiftformat --lint .",
+    "lint:periphery": "xcodegen generate && periphery scan --strict",
+    "format:swift": "swiftformat .",
+    "profile:swift": "xcrun xctrace version",
+
+    "lint:build": "xcodegen generate && xcodebuild build -project s2j-about-window.xcodeproj -scheme SampleApp -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO",
+    "analyze:swift": "xcodegen generate && xcodebuild analyze -project s2j-about-window.xcodeproj -scheme SampleApp -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO",
+
     "test:local": "./scripts/test-local.sh",
     "test:local:iOSfull": "./scripts/test-local.sh --ios-device \"iPad Pro\" --ios-version \"17.0\" --enable-xcode-project --xcodegen-auto-install"
   },

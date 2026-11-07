@@ -2,6 +2,27 @@
 
 ## unreleased
 
+## 2.0.11 - 2026-11-08
+
+### Added
+
+* `package.json` に Swift 向け npm スクリプトを追加 (`lint:swiftlint`、`lint:swiftformat`、`lint:periphery`、`format:swift`、`profile:swift`、`lint:build`、`analyze:swift`、`lint:swift`)
+* Swift リンター／フォーマッター用の設定ファイルを追加 (`.swiftlint.yml`、`.swiftformat`、`.swift-version`、`.periphery.yml`)
+* `project.yml` に macOS サンプル・アプリ `SampleApp` ターゲットとスキームを追加
+
+### Changed
+
+* 最小 OS を macOS v14.6 / iPadOS v17.6にそろえた (`Package.swift`、`project.yml`、`README.md`)
+* `README.md` の `Package.swift` 依存指定を v2.0.10から v2.0.11に更新
+* Swift ソースを SwiftFormat で整形し、SwiftLint / Periphery が通るよう調整
+* `SampleApp.swift` の macOS サンプルをビルド可能な形に整理
+* Xcode 用 `project.yml` のデプロイメントターゲットを SPM・テストターゲットと一致させた (従来 macOS v12.0 / iOS v17.0表記を整理)
+
+### Fixed
+
+* `.swiftformat` で `build`、`.build`、`DerivedData` 等を除外し、`lint:swiftformat` が Xcode 生成物を検査して失敗しないようにした
+* iOS フレームワーク／ユニットテストターゲットで `CODE_SIGNING_ALLOWED=NO` とし、ローカル Xcode ビルド時の署名・Ad Hoc 関連エラーを回避
+
 ## 2.0.10 - 2026-11-06
 
 ### Changed

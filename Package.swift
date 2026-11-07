@@ -5,8 +5,8 @@ let package = Package(
     name: "s2j-about-window",
     defaultLocalization: "en",
     platforms: [
-        .macOS(.v14),
-        .iOS(.v17)
+        .macOS("14.6"),
+        .iOS("17.6")
     ],
     products: [
         .library(
