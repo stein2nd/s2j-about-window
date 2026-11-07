@@ -32,7 +32,7 @@
   * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter)
     * **ワークフローファイル**: `.github/workflows/docs-linter.yml`
     * **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
-    * **実行環境**: `ubuntu-latest` (GitHub Actions の Ubuntu Runner)
+    * **実行環境**: `ubuntu-24.04` (GitHub Actions の Ubuntu Runner)
     * **実装状況**: ✅ **完全実装済み・テスト成功** - Docs Linter ワークフローが正常に動作し、すべてのチェックが成功
 
 ### 1.4. ジョブ構成
@@ -279,7 +279,7 @@
 #### 2.4.1. 概要
 
 * **目的**: Markdown ドキュメントの表記揺れ、用語統一、文体チェックを実行します。
-* **実行環境**: `ubuntu-latest`
+* **実行環境**: `ubuntu-24.04`
 * **依存関係**: なし (独立実行が可能)
 * **環境変数**:
   * `DOCS_LINTER_DIR`: `tools/docs-linter` (docs-linter のディレクトリ・パス)
@@ -292,7 +292,7 @@
    * **設定**: `submodules: recursive` (docs-linter を Git サブモジュールとして取得)
 
 2. **Setup Node.js**
-   * `actions/setup-node@v4` を使用して Node.js をセットアップします。
+   * `actions/setup-node@v5` を使用して Node.js をセットアップします。
    * **Node.js バージョン**: `24`
 
 3. **Cache npm dependencies**

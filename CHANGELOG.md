@@ -12,6 +12,10 @@
 
 ### Changed
 
+* `.gitignore` に `build/` を追加し、xcodebuild がリポジトリ直下に作る出力を除外
+* GitHub Actions (`docs-lint.yml`) の `actions/setup-node` を v4から v5に更新し、Runner を `ubuntu-24.04` に固定
+* `docs/SPEC_CICD.md` の Docs Lint CI 記述を上記に合わせて更新
+
 * 最小 OS を macOS v14.6 / iPadOS v17.6にそろえた (`Package.swift`、`project.yml`、`README.md`)
 * `README.md` の `Package.swift` 依存指定を v2.0.10から v2.0.11に更新
 * Swift ソースを SwiftFormat で整形し、SwiftLint / Periphery が通るよう調整
@@ -19,6 +23,8 @@
 * Xcode 用 `project.yml` のデプロイメントターゲットを SPM・テストターゲットと一致させた (従来 macOS v12.0 / iOS v17.0表記を整理)
 
 ### Fixed
+
+* `lint-docs` の Node.js v20非推奨および `ubuntu-latest` 移行予告の Annotation を解消
 
 * `.swiftformat` で `build`、`.build`、`DerivedData` 等を除外し、`lint:swiftformat` が Xcode 生成物を検査して失敗しないようにした
 * iOS フレームワーク／ユニットテストターゲットで `CODE_SIGNING_ALLOWED=NO` とし、ローカル Xcode ビルド時の署名・Ad Hoc 関連エラーを回避
