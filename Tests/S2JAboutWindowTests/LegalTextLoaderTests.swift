@@ -20,7 +20,7 @@ struct LegalTextLoaderTests {
         LegalTextLoaderTestsBundle.current
     }
 
-    @Test func `loads license without extension`() {
+    @Test func `loads license via default extension order`() {
         let result = LegalTextLoader.load(
             bundle: testBundle,
             resourceName: "FixtureLicense",
@@ -32,18 +32,19 @@ struct LegalTextLoaderTests {
         } else {
             Issue.record("Expected plainText, got \(result.content)")
         }
+        #expect(result.resolvedFileExtension == "txt")
     }
 
-    @Test func `loads license txt fallback`() {
+    @Test func `loads license with explicit txt preference`() {
         let result = LegalTextLoader.load(
             bundle: testBundle,
-            resourceName: "FixtureLicense",
+            resourceName: "FixtureLicenseAlt",
             kind: .license,
             preferredExtensions: ["txt"]
         )
 
         if case let .plainText(text) = result.content {
-            #expect(text.contains(".txt extension"))
+            #expect(text.contains("alternate txt"))
         } else {
             Issue.record("Expected plainText from txt")
         }

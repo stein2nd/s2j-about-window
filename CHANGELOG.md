@@ -2,6 +2,16 @@
 
 ## unreleased
 
+## 2.0.14 - 2026-11-09
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v2.0.13 から v2.0.14 に更新
+
+### Fixed
+
+* `LegalTextLoaderTests` のテスト用リソースを拡張子付き (`.txt`) に統一し、Xcode / GitHub Actions `test-ios` で拡張子なしファイルがバンドルされず `LegalTextLoader` 関連テストが失敗する問題を修正
+
 ## 2.0.13 - 2026-11-09
 
 ### Added

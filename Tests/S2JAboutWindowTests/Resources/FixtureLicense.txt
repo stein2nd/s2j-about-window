@@ -1,1 +1,1 @@
-License from .txt extension.
+Sample bundled license text for unit tests.

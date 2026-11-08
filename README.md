@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.13")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.14")
 ]
 ```
 
@@ -126,7 +126,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
-Add `LICENSE` (or `LICENSE.txt`) to the app target’s **Copy Bundle Resources**. The About window shows a **License…** button that opens a sheet with the full text (offline).
+Add `LICENSE` (or `LICENSE.txt`) to the app target's **Copy Bundle Resources**. The About window shows a **License…** button that opens a sheet with the full text (offline).
 
 アプリターゲットの **Copy Bundle Resources** に `LICENSE`（または `LICENSE.txt`）を追加します。About に **License…** ボタンが表示され、シートで全文をオフライン閲覧できます。
 
