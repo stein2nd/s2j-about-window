@@ -1,4 +1,4 @@
-# 仕様書の起点 (S2J About Window)
+# S2J About Window - 仕様書の起点
 
 本ドキュメントは、Swift Package「S2J About Window」の仕様の **入口** です。  
 各トピックは、以下のドキュメントに分割しています。AI 伴走やメンテナンス時は、該当する spec を参照してください。
@@ -13,6 +13,7 @@
 | [content_spec.md](./content_spec.md) | コンテンツ形式 (Markdown の扱い、フォールバック) (※将来分離時) |
 | [localization_spec.md](./localization_spec.md) | ローカライズ (キー一覧、Bundle.module、AboutDefault.md) (※将来分離時) |
 | [platform_spec.md](./platform_spec.md) | プラットフォーム別挙動 (macOS / iPadOS) (※将来分離時) |
+| [legal_text_spec.md](./legal_text_spec.md) | バンドル同梱 License / Acknowledgements 表示 ([Issue #17](https://github.com/stein2nd/s2j-about-window/issues/17)) |
 | [SPEC_CICD.md](./SPEC_CICD.md) | CI/CD 仕様 (ワークフロー・ローカルテスト・カバレッジ) |
 | [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) | 仕様の細分化方針とベター・プラクティス |
 
@@ -26,3 +27,4 @@
 * **「macOS / iPadOS で何が違うか」** → [SPEC.md](./SPEC.md) §4.1、[architecture.md](./architecture.md)
 * **「CI やローカルテストの仕様」** → [SPEC_CICD.md](./SPEC_CICD.md)
 * **「仕様をどう分割するかの方針」** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)
+* **「License / Acknowledgements をバンドルから表示」** → [legal_text_spec.md](./legal_text_spec.md)

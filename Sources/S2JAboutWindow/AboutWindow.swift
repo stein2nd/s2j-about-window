@@ -33,7 +33,10 @@ import SwiftUI
                 content: String,
                 appName: String? = nil,
                 version: String? = nil,
-                copyright: String? = nil
+                copyright: String? = nil,
+                licenseResourceName: String? = nil,
+                acknowledgementsResourceName: String? = nil,
+                resourceBundle: Bundle = .main
             ) {
                 #if os(macOS)
                     /*
@@ -47,7 +50,10 @@ import SwiftUI
                             content: content,
                             appName: appName,
                             version: version,
-                            copyright: copyright
+                            copyright: copyright,
+                            licenseResourceName: licenseResourceName,
+                            acknowledgementsResourceName: acknowledgementsResourceName,
+                            resourceBundle: resourceBundle
                         )
                     )
 

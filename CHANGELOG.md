@@ -2,6 +2,28 @@
 
 ## unreleased
 
+## 2.0.13 - 2026-11-09
+
+### Added
+
+* バンドル同梱の License / Acknowledgements を About からシート表示 ([Issue #17](https://github.com/stein2nd/s2j-about-window/issues/17)) — `LegalTextLoader`、`LegalTextView`、`AboutView` フッターボタン、`AboutWindow` / `aboutSheet` / `aboutPopover` のオプション引数
+* 仕様書 [`docs/legal_text_spec.md`](docs/legal_text_spec.md) と検討記録 `docs_mod/`
+* `LegalTextLoader` 向け Swift Testing (`LegalTextLoaderTests`) とテスト用リソース
+* リーガルテキスト用ローカライズキー (en / ja / Base)
+* macOS `SampleApp` 用 `SampleResources/LICENSE` と README の組み込み例・`MarkdownView` のサポート範囲の明記
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v2.0.12 から v2.0.13 に更新
+* `README.md` API 説明を License 引数・`LegalTextLoader` に合わせて更新
+* `docs/architecture.md`、`docs/specs.md`、`docs/SPEC.md` Backlog、`docs/overview.md` (共通仕様リンク) をリーガルテキスト機能に合わせて更新
+* `project.yml` に `SampleApp` リソースとユニットテストの `Tests/.../Resources` を追加
+* `Package.swift` のテストターゲットにリソース同梱を設定
+
+### Fixed
+
+* Xcode ビルド時に `LegalTextLoaderTests` が `Bundle.module` を参照して失敗する問題を修正 (SPM / Xcode 両対応のバンドル取得)
+
 ## 2.0.12 - 2026-11-08
 
 ### Changed
@@ -10,7 +32,7 @@
 
 ### Fixed
 
-* `MarkdownView` で段落や箇条書きが1行に潰れる問題を修正（ブロックごとに `Text` を並べて表示）
+* `MarkdownView` で段落や箇条書きが1行に潰れる問題を修正 (ブロックごとに `Text` を並べて表示)
 
 ## 2.0.11 - 2026-11-08
 

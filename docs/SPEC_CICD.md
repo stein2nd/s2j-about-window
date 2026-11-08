@@ -1,4 +1,4 @@
-# CICD_SPEC.md (S2J About Window - CI/CD 仕様)
+# S2J About Window - CI/CD 仕様
 
 ## はじめに
 

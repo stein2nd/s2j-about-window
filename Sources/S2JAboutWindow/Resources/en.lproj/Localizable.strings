@@ -5,3 +5,9 @@
 "About.NoDescription" = "No description available";
 "About.Copyright" = "Copyright";
 "About.Version" = "Version";
+"About.License.Button" = "License…";
+"About.Acknowledgements.Button" = "Acknowledgements";
+"About.LegalText.Title.License" = "License";
+"About.LegalText.Title.Acknowledgements" = "Acknowledgements";
+"About.LegalText.Empty" = "This document is empty.";
+"About.LegalText.LoadFailed" = "Could not load this document from the app bundle.";

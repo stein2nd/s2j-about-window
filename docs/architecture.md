@@ -1,8 +1,4 @@
-<!-- 
-目的：「フォルダー構成、主要ファイル、技術スタック、ビルド、責務」の明文化
- -->
-
-# アーキテクチャー
+# S2J About Window - アーキテクチャー
 
 ## 設計方針
 
@@ -21,6 +17,8 @@ Sources/S2JAboutWindow/
 ├── AboutView.swift     # SwiftUI ビュー (共通): アイコン・アプリ情報・MarkdownView のレイアウト
 ├── AboutViewModel.swift # ViewModel: コンテンツ・appName/version/copyright、Bundle 拡張
 ├── MarkdownView.swift  # Markdown → AttributedString 描画、スクロール・テキスト選択、パース失敗時のフォールバック
+├── LegalTextView.swift # バンドル License 等のプレーン長文表示・シート — [legal_text_spec.md](./legal_text_spec.md)
+├── LegalTextLoader.swift # ホスト Bundle からのリーガルテキスト読み込み
 ├── Extensions.swift    # iPadOS: aboutSheet / aboutPopover の View 拡張
 └── Resources/          # リソース (AboutDefault.md、Localizable.strings、Assets.xcassets)
 ```
@@ -32,6 +30,8 @@ Sources/S2JAboutWindow/
 | **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
 | **MarkdownView.swift** | 共通。`AttributedString(markdown:)` で Markdown を描画。失敗時はプレーンテキスト表示。`ScrollView` + テキスト選択対応。 |
 | **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。内部で `AboutView` を表示。 |
+| **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示、`LegalTextDocumentSheet` (About からのシート)。 |
+| **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
 
 ## プラットフォーム分岐のルール
 
@@ -40,7 +40,7 @@ Sources/S2JAboutWindow/
 * **iPadOS のみ**:
     * `aboutSheet` / `aboutPopover`、`NavigationView` + 閉じるボタン、`UIImage(named: "AppIcon")`、`Color(UIColor.systemBackground)`。
 * **共通**:
-    * `AboutView`、`AboutViewModel`、`MarkdownView`、`Bundle.resourceBundle`、リソース読み込み。
+    * `AboutView`、`AboutViewModel`、`MarkdownView`、`LegalTextView` / `LegalTextLoader`、`Bundle.resourceBundle`、リソース読み込み。
 
 ## テスト・プレビュー
 
@@ -57,3 +57,5 @@ Sources/S2JAboutWindow/
     * [overview.md](./overview.md)
 * 要件・実装状況:
     * [SPEC.md](./SPEC.md)
+* License / Acknowledgements:
+    * [legal_text_spec.md](./legal_text_spec.md)

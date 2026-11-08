@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.12")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.13")
 ]
 ```
 
@@ -119,10 +119,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             """,
             appName: "My App",
             version: "1.0.0",
-            copyright: "© 2024 My Company"
+            copyright: "© 2024 My Company",
+            licenseResourceName: "LICENSE"
         )
     }
 }
+```
+
+Add `LICENSE` (or `LICENSE.txt`) to the app target’s **Copy Bundle Resources**. The About window shows a **License…** button that opens a sheet with the full text (offline).
+
+アプリターゲットの **Copy Bundle Resources** に `LICENSE`（または `LICENSE.txt`）を追加します。About に **License…** ボタンが表示され、シートで全文をオフライン閲覧できます。
+
+```swift
+AboutView(
+    content: aboutMarkdown,
+    licenseResourceName: "LICENSE",
+    acknowledgementsResourceName: "ACKNOWLEDGEMENTS.md"
+)
 ```
 
 ### iPadOS
@@ -183,6 +196,14 @@ This is **bold** and *italic* text.
 [Visit our website](https://example.com)
 """
 ```
+
+`MarkdownView` renders a **subset** of Markdown via Swift’s `AttributedString(markdown:)`. Supported in practice: headings, emphasis, links, and lists (with block splitting for paragraph layout).
+
+**Not supported:** mermaid and other diagram syntax, GitHub Flavored Markdown tables, embedded HTML, and extensions beyond Apple’s Markdown interpreter. Unsupported blocks appear as plain text.
+
+`MarkdownView` は `AttributedString(markdown:)` による **Markdown の一部** のみを描画します。見出し・強調・リンク・リスト (段落レイアウト用のブロック分割を含む) を想定しています。
+
+**非対応:** mermaid などの図表記法、GFM 表、HTML 埋め込み、Apple の Markdown 解釈外の拡張。非対応部分はプレーンテキストとして表示されます。
 
 ### JSON
 
@@ -252,7 +273,15 @@ About ウィンドウは、ダークモード対応を含め、アプリケー�
 ```swift
 public class AboutWindow {
     public init()
-    public func showAboutWindow(content: String, appName: String?, version: String?, copyright: String?)
+    public func showAboutWindow(
+        content: String,
+        appName: String?,
+        version: String?,
+        copyright: String?,
+        licenseResourceName: String? = nil,
+        acknowledgementsResourceName: String? = nil,
+        resourceBundle: Bundle = .main
+    )
     public func closeWindow()
 }
 ```
@@ -261,18 +290,46 @@ public class AboutWindow {
 
 ```swift
 public struct AboutView: View {
-    public init(content: String, appName: String?, version: String?, copyright: String?)
+    public init(
+        content: String,
+        appName: String? = nil,
+        version: String? = nil,
+        copyright: String? = nil,
+        licenseResourceName: String? = nil,
+        acknowledgementsResourceName: String? = nil,
+        resourceBundle: Bundle = .main
+    )
 }
+```
+
+### LegalTextView / LegalTextLoader
+
+```swift
+public enum LegalTextKind { case license, acknowledgements }
+public enum LegalTextContent { case plainText(String), empty, loadFailed }
+public enum LegalTextLoader {
+    public static func load(bundle: Bundle, resourceName: String, kind: LegalTextKind, ...) -> LegalTextLoadResult
+}
+public struct LegalTextView: View { /* plain scrollable text */ }
 ```
 
 ### Extensions
 
 ```swift
 // iPadOS Sheet
-func aboutSheet(isPresented: Binding<Bool>, content: String, appName: String?, version: String?, copyright: String?) -> some View
+func aboutSheet(
+    isPresented: Binding<Bool>,
+    content: String,
+    appName: String? = nil,
+    version: String? = nil,
+    copyright: String? = nil,
+    licenseResourceName: String? = nil,
+    acknowledgementsResourceName: String? = nil,
+    resourceBundle: Bundle = .main
+) -> some View
 
 // iPadOS Popover
-func aboutPopover(isPresented: Binding<Bool>, content: String, appName: String?, version: String?, copyright: String?) -> some View
+func aboutPopover(/* same optional legal-text parameters */) -> some View
 ```
 
 ## Testing

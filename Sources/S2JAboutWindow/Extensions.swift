@@ -22,7 +22,10 @@ import SwiftUI
             content: String,
             appName: String? = nil,
             version: String? = nil,
-            copyright: String? = nil
+            copyright: String? = nil,
+            licenseResourceName: String? = nil,
+            acknowledgementsResourceName: String? = nil,
+            resourceBundle: Bundle = .main
         ) -> some View {
             sheet(isPresented: isPresented) {
                 NavigationView {
@@ -30,7 +33,10 @@ import SwiftUI
                         content: content,
                         appName: appName,
                         version: version,
-                        copyright: copyright
+                        copyright: copyright,
+                        licenseResourceName: licenseResourceName,
+                        acknowledgementsResourceName: acknowledgementsResourceName,
+                        resourceBundle: resourceBundle
                     )
                     .navigationTitle(
                         NSLocalizedString(
@@ -73,14 +79,20 @@ import SwiftUI
             content: String,
             appName: String? = nil,
             version: String? = nil,
-            copyright: String? = nil
+            copyright: String? = nil,
+            licenseResourceName: String? = nil,
+            acknowledgementsResourceName: String? = nil,
+            resourceBundle: Bundle = .main
         ) -> some View {
             popover(isPresented: isPresented) {
                 AboutView(
                     content: content,
                     appName: appName,
                     version: version,
-                    copyright: copyright
+                    copyright: copyright,
+                    licenseResourceName: licenseResourceName,
+                    acknowledgementsResourceName: acknowledgementsResourceName,
+                    resourceBundle: resourceBundle
                 )
                 .frame(width: 400, height: 500)
             }

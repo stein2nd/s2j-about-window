@@ -35,7 +35,8 @@ import SwiftUI
                             """,
                             appName: "Sample App",
                             version: "1.0.0",
-                            copyright: "© 2024 Sample Company"
+                            copyright: "© 2024 Sample Company",
+                            licenseResourceName: "LICENSE"
                         )
                     }
                 }
@@ -67,7 +68,8 @@ import SwiftUI
                         """,
                         appName: "Sample App",
                         version: "1.0.0",
-                        copyright: "© 2024 Sample Company"
+                        copyright: "© 2024 Sample Company",
+                        licenseResourceName: "LICENSE"
                     )
             }
         }

@@ -5,3 +5,9 @@
 "About.NoDescription" = "説明が利用できません";
 "About.Copyright" = "著作権";
 "About.Version" = "バージョン";
+"About.License.Button" = "ライセンス…";
+"About.Acknowledgements.Button" = "謝辞";
+"About.LegalText.Title.License" = "ライセンス";
+"About.LegalText.Title.Acknowledgements" = "謝辞";
+"About.LegalText.Empty" = "この文書は空です。";
+"About.LegalText.LoadFailed" = "アプリバンドルからこの文書をロードできませんでした。";

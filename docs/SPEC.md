@@ -1,4 +1,4 @@
-# SPEC.md (DCOAboutWindow - SwiftUI Port)
+# S2J About Window - DCOAboutWindow - SwiftUI Port
 
 ## はじめに
 
@@ -587,6 +587,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 品質保証と開発体験の向上を目的とした改善を、優先的に実施します。
 
+* **バンドル同梱 License / Acknowledgements 表示** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17))
+  * 仕様: [legal_text_spec.md](./legal_text_spec.md)。
+  * `LegalTextLoader` / `LegalTextView`、About からのシート表示、Phase 1〜2。
 * **UI テスト、スナップショット・テストの実装**
   * SnapshotTesting フレームワークの統合と実際のスナップショット検証を実装します。
   * macOS:
@@ -627,6 +630,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * 外部翻訳サービス (例: DeepL API) との連携を検討します。
   * 自動翻訳の機能を実装します。
   * 多言語対応を拡充します。
+* **macOS 補助 `NSWindow` による License 表示**
+  * [legal_text_spec.md](./legal_text_spec.md) Backlog。初版は `.sheet` に統一。
 
 ---
 

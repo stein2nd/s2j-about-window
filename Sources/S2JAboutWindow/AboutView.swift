@@ -20,6 +20,12 @@ import SwiftUI
          */
         @StateObject private var viewModel: AboutViewModel
 
+        private let licenseResourceName: String?
+        private let acknowledgementsResourceName: String?
+        private let resourceBundle: Bundle
+
+        @State private var presentedLegalKind: LegalTextKind?
+
         /**
          * コンストラクタ
          * 表示するコンテンツ（Markdown、JSON、RTF）、アプリ名、バージョン、著作権情報を指定してAboutViewModelを初期化
@@ -29,12 +35,18 @@ import SwiftUI
          * @param appName: アプリ名
          * @param version: バージョン
          * @param copyright: 著作権情報
+         * @param licenseResourceName: ホストバンドル内の License リソース名
+         * @param acknowledgementsResourceName: ホストバンドル内の Acknowledgements リソース名
+         * @param resourceBundle: リーガルテキストを含むバンドル (通常は `.main`)
          */
         public init(
             content: String,
             appName: String? = nil,
             version: String? = nil,
-            copyright: String? = nil
+            copyright: String? = nil,
+            licenseResourceName: String? = nil,
+            acknowledgementsResourceName: String? = nil,
+            resourceBundle: Bundle = .main
         ) {
             _viewModel = StateObject(wrappedValue: AboutViewModel(
                 content: content,
@@ -42,6 +54,9 @@ import SwiftUI
                 version: version,
                 copyright: copyright
             ))
+            self.licenseResourceName = licenseResourceName
+            self.acknowledgementsResourceName = acknowledgementsResourceName
+            self.resourceBundle = resourceBundle
         }
 
         /**
@@ -62,12 +77,69 @@ import SwiftUI
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
 
+                legalDocumentButtons
+
                 // スペーサー
                 Spacer()
             }
             .padding()
             .frame(minWidth: 400, minHeight: 500)
             .background(backgroundColor)
+            .sheet(item: $presentedLegalKind) { kind in
+                LegalTextDocumentSheet(
+                    kind: kind,
+                    resourceName: resourceName(for: kind),
+                    resourceBundle: resourceBundle
+                )
+            }
+        }
+
+        @ViewBuilder
+        private var legalDocumentButtons: some View {
+            if licenseResourceName != nil || acknowledgementsResourceName != nil {
+                HStack(spacing: 16) {
+                    if let licenseResourceName {
+                        Button(licenseButtonTitle) {
+                            presentedLegalKind = .license
+                        }
+                        .accessibilityIdentifier("about.license.button")
+                        .disabled(licenseResourceName.isEmpty)
+                    }
+                    if let acknowledgementsResourceName {
+                        Button(acknowledgementsButtonTitle) {
+                            presentedLegalKind = .acknowledgements
+                        }
+                        .accessibilityIdentifier("about.acknowledgements.button")
+                        .disabled(acknowledgementsResourceName.isEmpty)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+
+        private func resourceName(for kind: LegalTextKind) -> String {
+            switch kind {
+            case .license:
+                licenseResourceName ?? ""
+            case .acknowledgements:
+                acknowledgementsResourceName ?? ""
+            }
+        }
+
+        private var licenseButtonTitle: String {
+            NSLocalizedString(
+                "About.License.Button",
+                bundle: Bundle.resourceBundle,
+                comment: "License button"
+            )
+        }
+
+        private var acknowledgementsButtonTitle: String {
+            NSLocalizedString(
+                "About.Acknowledgements.Button",
+                bundle: Bundle.resourceBundle,
+                comment: "Acknowledgements button"
+            )
         }
 
         /**

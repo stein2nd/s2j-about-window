@@ -25,7 +25,8 @@ let package = Package(
         ),
         .testTarget(
             name: "S2JAboutWindowTests",
-            dependencies: ["S2JAboutWindow"]
+            dependencies: ["S2JAboutWindow"],
+            resources: [.process("Resources")]
         )
     ]
 )

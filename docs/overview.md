@@ -1,8 +1,4 @@
-<!-- 
-目的：「プロジェクトの存在理由、概要、基本情報」の明文化
- -->
-
-# 概要
+# S2J About Window - 概要
 
 ## 存在理由・スコープ
 
@@ -16,7 +12,7 @@
 
 本ツールの設計は、以下の共通 SPEC に準拠します。
 
-* [Swift/SwiftUI 共通仕様](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md)
+* [Swift/SwiftUI 共通仕様 (`SPECS.md`)](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/SPECS.md)
 
 技術スタック・開発ルール・国際化・コーディング規約・デザイン規約・テスト方針は、上記 COMMON_SPEC に従います。  
 本リポジトリでは、**プロジェクト固有の仕様**のみを `docs/` 配下の各 spec で定義します。
