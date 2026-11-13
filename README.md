@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.0")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.1")
 ]
 ```
 
@@ -207,7 +207,7 @@ This is **bold** and *italic* text.
 **Not supported / discouraged:** mermaid and other diagram DSLs, embedded HTML, and content meant for arbitrary web rendering.
  -->
 
-`MarkdownView` は [Textual](https://github.com/gonzalezreal/textual) ライブラリ (`StructuredText`) を使用して Markdown をレンダリングします。About 本文デフォルトのスタイルが適用されています; バンドルされている **Acknowledgements** (`.md`) には、**GFM テーブル** やフェンス付きコードブロック (例: onot で生成された OSS 通知) を含む GitHub スタイルのプリセットが使用されています。
+`MarkdownView` は [Textual](https://github.com/gonzalezreal/textual) ライブラリ (`StructuredText`) を使用して Markdown をレンダリングします。About 本文デフォルトのスタイルが適用されています; バンドルされている **Acknowledgements** (`.md`) には、**GFM テーブル** やフェンス付きコードブロック (例: onot で生成された OSS 通知) を含む GitHub スタイルのプリセットが使用されています。長い `` ```text `` ブロック (ライセンス全文) はシート幅で折り返します。
 
 **非推奨:** オフライン想定の Acknowledgements でのリモート画像 (`![](https://...)`) — Textual がネットワーク経由でそれらを取得しようとする可能性があります。アプリケーションバンドル内では、テキストのみの通知の使用を推奨します。
 

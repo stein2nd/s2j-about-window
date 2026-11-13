@@ -2,6 +2,17 @@
 
 ## unreleased
 
+## 3.0.1 - 2026-11-13
+
+### Changed
+
+* `MarkdownView` の legal 文書表示に Textual `overflowMode(.wrap)` を適用 (`Sources/S2JAboutWindow/MarkdownView.swift`)
+* `README.md` の `Package.swift` 依存指定を v3.0.0 から v3.0.1 に更新し、フェンス付きライセンス全文の折り返し表示を追記 (`docs/legal_text_spec.md` と同期)
+
+### Fixed
+
+* Acknowledgements シート内の Markdown コードブロック (onot の `` ```text `` ライセンス全文) で横スクロールが必要になる問題を修正
+
 ## 3.0.0 - 2026-11-13
 
 ### Added

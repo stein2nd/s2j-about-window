@@ -203,7 +203,7 @@ About 本文から `[License](https://…)` を削除するかは **利用側の
 
 実装は [Textual](https://github.com/gonzalezreal/textual) の `StructuredText` です。Acknowledgements は `.gitHub` スタイル、About 本文は `.default` です。利用側向けの同内容は [README](../README.md) の Markdown 節に記載します。
 
-onot 等が生成する **GFM 表**・見出し・コードフェンス付きライセンス全文を想定します。オフライン Acknowledgements では **リモート画像** を書かないこと (Textual がネットワーク取得する場合がある)。
+onot 等が生成する **GFM 表**・見出し・コードフェンス付きライセンス全文を想定します。フェンス付きライセンス全文は `overflowMode(.wrap)` で折り返し表示します。オフライン Acknowledgements では **リモート画像** を書かないこと (Textual がネットワーク取得する場合がある)。
 
 | 区分 | 内容 |
 | --- | --- |

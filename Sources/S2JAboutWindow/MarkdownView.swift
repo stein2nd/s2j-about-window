@@ -49,7 +49,9 @@ import Textual
             case .about:
                 text.textual.structuredTextStyle(.default)
             case .legalDocument:
-                text.textual.structuredTextStyle(.gitHub)
+                text
+                    .textual.structuredTextStyle(.gitHub)
+                    .textual.overflowMode(.wrap)
             }
         }
     }
