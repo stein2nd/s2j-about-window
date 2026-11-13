@@ -5,7 +5,7 @@ import SwiftUI
     /**
      * @return AboutViewModel
      */
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     @MainActor
     public class AboutViewModel: ObservableObject {
         /**
@@ -56,7 +56,7 @@ import SwiftUI
          */
         public func loadDefaultContent() {
             guard let defaultContentPath = Bundle.resourceBundle.path(forResource: "AboutDefault", ofType: "md"),
-                  let defaultContent = try? String(contentsOfFile: defaultContentPath)
+                  let defaultContent = try? String(contentsOfFile: defaultContentPath, encoding: .utf8)
             else {
                 content = NSLocalizedString(
                     "About.NoDescription",
@@ -71,7 +71,7 @@ import SwiftUI
 
     // MARK: - Bundle Extensions
 
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     extension Bundle {
         /**
          * @return アプリ名

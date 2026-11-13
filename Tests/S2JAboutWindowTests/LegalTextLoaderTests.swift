@@ -78,7 +78,8 @@ struct LegalTextLoaderTests {
         )
 
         if case let .plainText(text) = result.content {
-            #expect(text.contains("Acknowledgements"))
+            #expect(text.contains("OSS Notice"))
+            #expect(text.contains("| Name | Version | License | Copyright |"))
         } else {
             Issue.record("Expected markdown acknowledgements text")
         }

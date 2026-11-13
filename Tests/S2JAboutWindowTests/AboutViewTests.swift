@@ -2,7 +2,7 @@
 import SwiftUI
 import XCTest
 
-@available(macOS 14.0, iOS 17.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 @MainActor
 final class AboutViewTests: XCTestCase {
     func testAboutViewModelInitialization() {
@@ -37,34 +37,6 @@ final class AboutViewTests: XCTestCase {
 
         // Basic test to ensure MarkdownView can be created
         XCTAssertNotNil(markdownView)
-    }
-
-    func testMarkdownBlocksSplitParagraphsAndListItems() {
-        let content = """
-        A modern SwiftUI app for managing Homebrew packages.
-
-        - [GitHub Repository](https://example.com/repo)
-        - [License](https://example.com/license)
-        """
-        let blocks = MarkdownView.markdownBlocks(from: content)
-
-        XCTAssertEqual(blocks.count, 3)
-        XCTAssertTrue(blocks[0].contains("Homebrew packages"))
-        XCTAssertTrue(blocks[1].contains("GitHub Repository"))
-        XCTAssertTrue(blocks[2].contains("License"))
-    }
-
-    func testMarkdownBlocksSplitBlankLineSeparatedLinks() {
-        let content = """
-        Description line.
-
-        [GitHub Repository](https://example.com/repo)
-
-        [License](https://example.com/license)
-        """
-        let blocks = MarkdownView.markdownBlocks(from: content)
-
-        XCTAssertEqual(blocks.count, 3)
     }
 
     func testAboutViewCreation() {
@@ -105,7 +77,7 @@ final class AboutViewTests: XCTestCase {
 
 // MARK: - Snapshot Testing Support
 
-@available(macOS 14.0, iOS 17.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 extension AboutViewTests {
     func testAboutViewSnapshot() {
         let aboutView = AboutView(

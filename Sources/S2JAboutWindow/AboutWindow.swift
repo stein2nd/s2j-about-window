@@ -7,7 +7,7 @@ import SwiftUI
         /**
          * @return AboutWindow
          */
-        @available(macOS 14.0, *)
+        @available(macOS 15.0, *)
         @MainActor
         public class AboutWindow: NSObject, NSWindowDelegate {
             /**

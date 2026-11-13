@@ -2,6 +2,28 @@
 
 ## unreleased
 
+## 3.0.0 - 2026-11-13
+
+### Added
+
+* [Textual](https://github.com/gonzalezreal/textual) 依存による `MarkdownView` の再実装 (`StructuredText`) — GFM 表・コードブロック・長文 Acknowledgements (onot 形式) に対応
+* テストフィクスチャ `FixtureAcknowledgements.md` に onot 生成サンプル (`host-sbom`) を同梱
+
+### Changed
+
+* **Breaking:** 最小 OS を macOS v15.0 / iOS v18.0に引き上げ (`Package.swift`、`project.yml`、公開 API の `@available`)
+* `README.md` の `Package.swift` 依存指定を v2.0.14から v3.0.0に更新し、Markdown 節を Textual 前提に更新 (表対応、リモート画像は非推奨)
+* `project.yml` に Textual (SPM) を追加、`docs/architecture.md` / `docs/legal_text_spec.md` を同期
+* ユニットテスト (`AboutViewTests`、`LegalTextLoaderTests`) を上記実装に合わせて更新
+
+### Fixed
+
+* `AboutViewModel.loadDefaultContent()` で `String(contentsOfFile:encoding: .utf8)` を使用 (macOS v15 / iOS v18で `init(contentsOfFile:)` 非推奨への対応)
+
+### Removed
+
+* `MarkdownView.markdownBlocks(from:)` と `AttributedString(markdown:)` ベースの手動ブロック分割
+
 ## 2.0.14 - 2026-11-09
 
 ### Changed
@@ -50,7 +72,7 @@
 
 * `package.json` に Swift 向け npm スクリプトを追加 (`lint:swiftlint`、`lint:swiftformat`、`lint:periphery`、`format:swift`、`profile:swift`、`lint:build`、`analyze:swift`、`lint:swift`)
 * Swift リンター／フォーマッター用の設定ファイルを追加 (`.swiftlint.yml`、`.swiftformat`、`.swift-version`、`.periphery.yml`)
-* `project.yml` に macOS サンプル・アプリ `SampleApp` ターゲットとスキームを追加
+* `project.yml` に macOS サンプル・アプリケーション `SampleApp` ターゲットとスキームを追加
 
 ### Changed
 

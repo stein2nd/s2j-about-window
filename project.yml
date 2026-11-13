@@ -2,8 +2,8 @@ name: s2j-about-window
 options:
   bundleIdPrefix: com.s2j
   deploymentTarget:
-    macOS: "14.6"
-    iOS: "17.6"
+    macOS: "15.0"
+    iOS: "18.0"
   developmentLanguage: en
   usesTabs: false
   indentWidth: 4
@@ -11,17 +11,25 @@ options:
   xcodeVersion: "26.3"
   projectFormat: xcode16_3
 
+packages:
+  Textual:
+    url: https://github.com/gonzalezreal/textual
+    from: "0.5.0"
+
 targets:
   S2JAboutWindow-macOS:
     type: framework
     platform: macOS
-    deploymentTarget: "14.6"
+    deploymentTarget: "15.0"
     sources:
       - path: Sources/S2JAboutWindow
         excludes:
           - "**/*.md"
     resources:
       - path: Sources/S2JAboutWindow/Resources
+    dependencies:
+      - package: Textual
+        product: Textual
     settings:
       base:
         PRODUCT_NAME: S2JAboutWindow
@@ -30,7 +38,7 @@ targets:
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
-        MACOSX_DEPLOYMENT_TARGET: "14.6"
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
       configs:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: -Onone
@@ -41,13 +49,16 @@ targets:
   S2JAboutWindow-iOS:
     type: framework
     platform: iOS
-    deploymentTarget: "17.6"
+    deploymentTarget: "18.0"
     sources:
       - path: Sources/S2JAboutWindow
         excludes:
           - "**/*.md"
     resources:
       - path: Sources/S2JAboutWindow/Resources
+    dependencies:
+      - package: Textual
+        product: Textual
     settings:
       base:
         PRODUCT_NAME: S2JAboutWindow
@@ -57,7 +68,7 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGNING_ALLOWED: NO
-        IPHONEOS_DEPLOYMENT_TARGET: "17.6"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         SUPPORTS_MACCATALYST: false
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
       configs:
@@ -70,7 +81,7 @@ targets:
   S2JAboutWindowTests-macOS:
     type: bundle.unit-test
     platform: macOS
-    deploymentTarget: "14.6"
+    deploymentTarget: "15.0"
     sources:
       - path: Tests/S2JAboutWindowTests
     resources:
@@ -85,7 +96,7 @@ targets:
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
-        MACOSX_DEPLOYMENT_TARGET: "14.6"
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
       configs:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: -Onone
@@ -96,7 +107,7 @@ targets:
   SampleApp:
     type: application
     platform: macOS
-    deploymentTarget: "14.6"
+    deploymentTarget: "15.0"
     sources:
       - path: SampleApp.swift
     resources:
@@ -106,7 +117,7 @@ targets:
         PRODUCT_NAME: SampleApp
         PRODUCT_BUNDLE_IDENTIFIER: com.s2j.S2JAboutWindow.SampleApp
         SWIFT_VERSION: "6.3"
-        MACOSX_DEPLOYMENT_TARGET: "14.6"
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_LANGUAGE: en
@@ -116,7 +127,7 @@ targets:
   S2JAboutWindowTests-iOS:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "17.6"
+    deploymentTarget: "18.0"
     sources:
       - path: Tests/S2JAboutWindowTests
     resources:
@@ -132,7 +143,7 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGNING_ALLOWED: NO
-        IPHONEOS_DEPLOYMENT_TARGET: "17.6"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         SUPPORTS_MACCATALYST: false
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
       configs:

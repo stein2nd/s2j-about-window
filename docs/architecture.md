@@ -14,9 +14,9 @@
 ```
 Sources/S2JAboutWindow/
 ├── AboutWindow.swift   # macOS: NSWindow 管理、showAboutWindow/closeWindow の public API、NSWindowDelegate
-├── AboutView.swift     # SwiftUI ビュー (共通): アイコン・アプリ情報・MarkdownView のレイアウト
+├── AboutView.swift     # SwiftUI ビュー (共通): アイコン・アプリケーション情報・MarkdownView のレイアウト
 ├── AboutViewModel.swift # ViewModel: コンテンツ・appName/version/copyright、Bundle 拡張
-├── MarkdownView.swift  # Markdown → AttributedString 描画、スクロール・テキスト選択、パース失敗時のフォールバック
+├── MarkdownView.swift  # Textual `StructuredText` による Markdown 描画 (About / Acknowledgements)
 ├── LegalTextView.swift # バンドル License 等のプレーン長文表示・シート — [legal_text_spec.md](./legal_text_spec.md)
 ├── LegalTextLoader.swift # ホスト Bundle からのリーガルテキスト読み込み
 ├── Extensions.swift    # iPadOS: aboutSheet / aboutPopover の View 拡張
@@ -26,9 +26,9 @@ Sources/S2JAboutWindow/
 | ファイル | 責務 |
 |----------|------|
 | **AboutWindow.swift** | macOS 専用。`NSWindow` の生成・表示・閉じる、`NSHostingController` で `AboutView` をホスト、`NSWindowDelegate` でライフサイクル管理。 |
-| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリ名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
+| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリケーション名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
 | **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
-| **MarkdownView.swift** | 共通。`AttributedString(markdown:)` で Markdown を描画。失敗時はプレーンテキスト表示。`ScrollView` + テキスト選択対応。 |
+| **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、Acknowledgements `.md` は `.gitHub` (表・コードブロック)。`ScrollView` + `.textual.textSelection(.enabled)`。 |
 | **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。内部で `AboutView` を表示。 |
 | **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示、`LegalTextDocumentSheet` (About からのシート)。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |

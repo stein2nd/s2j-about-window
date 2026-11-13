@@ -2,7 +2,7 @@ import SwiftUI
 
 #if canImport(SwiftUI)
     /// プレーン長文のスクロール表示 (License および非 Markdown の Acknowledgements)。
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     public struct LegalTextView: View {
         private let content: LegalTextContent
 
@@ -51,7 +51,7 @@ import SwiftUI
     }
 
     /// About から開くリーガル文書シート (ロードは表示時)。
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     struct LegalTextDocumentSheet: View {
         let kind: LegalTextKind
         let resourceName: String
@@ -103,7 +103,7 @@ import SwiftUI
             if LegalTextLoader.usesMarkdownRendering(kind: kind, result: result),
                case let .plainText(markdown) = result.content
             {
-                MarkdownView(content: markdown)
+                MarkdownView(content: markdown, context: .legalDocument)
             } else {
                 LegalTextView(content: result.content)
             }

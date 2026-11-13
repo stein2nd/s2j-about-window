@@ -6,7 +6,7 @@ import SwiftUI
      * iPadOS向けのExtensions
      * @return Extensions
      */
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     public extension View {
         /**
          * iPadOS向けのSheet表示用のAboutView

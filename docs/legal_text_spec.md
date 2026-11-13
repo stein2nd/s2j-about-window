@@ -2,17 +2,17 @@
 
 Issue: [#17](https://github.com/stein2nd/s2j-about-window/issues/17)
 
-ホストアプリの About から、バンドル同梱の License / Acknowledgements 長文をオフライン表示する機能の仕様です。  
+ホストアプリケーションの About から、バンドル同梱の License / Acknowledgements 長文をオフライン表示する機能の仕様です。  
 設計上の決定経緯は [docs_mod/status.md](../docs_mod/status.md) を参照してください。
 
 ## 1. 目的とスコープ
 
 ### 1.1. 目的
 
-ホストアプリの About から、**アプリバンドルに同梱した長文テキスト** (アプリ自身の License、サードパーティ Acknowledgements) を、**オフラインで全文参照** できるようにします。
+ホストアプリケーションの About から、**アプリケーションバンドルに同梱した長文テキスト** (アプリケーション自身の License、サードパーティ Acknowledgements) を、**オフラインで全文参照** できるようにします。
 
 * About 本文 (`MarkdownView`) は、短い説明・リンク集向けとし、GPL 全文などの長文は **別画面** で表示する。
-* License (本アプリの利用条件) と Acknowledgements (サードパーティ・クレジット) は **UI 上も、データ上も、分離** する。
+* License (本アプリケーションの利用条件) と Acknowledgements (サードパーティ・クレジット) は **UI 上も、データ上も、分離** する。
 
 ### 1.2. 非目標
 
@@ -39,7 +39,7 @@ UI 語彙は [UX_VOCABULARY.md](https://github.com/stein2nd/xcode-common-specs/b
 
 | ID | レベル | 内容 |
 | --- | --- | --- |
-| LEG-01 | **Must** | ホスト `Bundle` 内の License リソースを読み込み、About からアプリ内のみで全文表示できる。 |
+| LEG-01 | **Must** | ホスト `Bundle` 内の License リソースを読み込み、About からアプリケーション内のみで全文表示できる。 |
 | LEG-02 | **Should** | `acknowledgementsResourceName` (または同等) が指定されたとき、同パターンで第二文書を表示できる。未指定なら Acknowledgements 用 UI は **非表示**。 |
 | LEG-03 | **Must** | 表示は縦スクロール可能とし、テキスト選択を有効にする ([UI_VIEWPORT.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/UI_VIEWPORT.md) の Content Integrity)。 |
 | LEG-04 | **Must** | `AboutView` / `aboutSheet` / `aboutPopover` / macOS `AboutWindow.showAboutWindow` で、**同じオプション引数** により License / Acknowledgements を有効化できる。 |
@@ -82,7 +82,7 @@ public enum LegalTextContent: Equatable, Sendable {
 
 ```swift
 /// プレーン長文のスクロール表示 (License および非 Markdown の Acknowledgements)。
-@available(macOS 14.0, iOS 17.0, *)
+@available(macOS 15.0, iOS 18.0, *)
 public struct LegalTextView: View {
     public init(content: LegalTextContent, title: String)
 }
@@ -95,7 +95,7 @@ public struct LegalTextView: View {
 ```swift
 public enum LegalTextLoader {
     /// - Parameters:
-    ///   - bundle: 通常はホストアプリの `Bundle.main`
+    ///   - bundle: 通常はホストアプリケーションの `Bundle.main`
     ///   - resourceName: 拡張子を含まない場合あり (例: `LICENSE`、`ACKNOWLEDGEMENTS`)
     ///   - preferredExtensions: 未指定時は種別ごとのデフォルト探索順を使う
     public static func load(
@@ -122,7 +122,7 @@ public enum LegalTextLoader {
 
 いずれも **後方互換** (引数追加のみ、デフォルト `nil`)。
 
-`resourceBundle` は **ホストアプリ** のバンドルです。ライブラリ自身の `Bundle.module` ではありません。
+`resourceBundle` は **ホストアプリケーション** のバンドルです。ライブラリ自身の `Bundle.module` ではありません。
 
 | API | 追加引数 |
 | --- | --- |
@@ -184,7 +184,7 @@ iOS / iPadOS (`aboutSheet` と同型):
 | `About.LegalText.Title.License` | License | ライセンス |
 | `About.LegalText.Title.Acknowledgements` | Acknowledgements | 謝辞 |
 | `About.LegalText.Empty` | This document is empty. | この文書は空です。 |
-| `About.LegalText.LoadFailed` | Could not load this document from the app bundle. | アプリバンドルからこの文書をロードできませんでした。 |
+| `About.LegalText.LoadFailed` | Could not load this document from the app bundle. | アプリケーションバンドルからこの文書をロードできませんでした。 |
 
 管理場所: 既存どおり `Sources/S2JAboutWindow/Resources/*.lproj/Localizable.strings` (将来 `.xcstrings` 移行は COMMON_SPEC に従う)。
 
@@ -201,15 +201,15 @@ About 本文から `[License](https://…)` を削除するかは **利用側の
 
 ### 6.1. `MarkdownView` のサポート範囲 (仕様上の制限)
 
-実装は `AttributedString(markdown:)` ベースです。利用側向けの同内容の説明は [README](../README.md) の Markdown 節に記載します。
+実装は [Textual](https://github.com/gonzalezreal/textual) の `StructuredText` です。Acknowledgements は `.gitHub` スタイル、About 本文は `.default` です。利用側向けの同内容は [README](../README.md) の Markdown 節に記載します。
 
-Acknowledgements に mermaid を書かないこと、OSS クレジット向けの見出し・リストを想定することを README / サンプルで推奨します。
+onot 等が生成する **GFM 表**・見出し・コードフェンス付きライセンス全文を想定します。オフライン Acknowledgements では **リモート画像** を書かないこと (Textual がネットワーク取得する場合がある)。
 
 | 区分 | 内容 |
 | --- | --- |
-| **想定してよい** | 見出し、強調、リンク、箇条書き (ブロック分割による段落レイアウトを含む) |
-| **非対応** | mermaid / 図表 DSL、GFM 表、HTML 埋め込み、Apple の Markdown 解釈外の拡張 |
-| **非対応時の挙動** | プレーンテキストとして表示 (握りつぶさない) |
+| **想定してよい** | 見出し、強調、リンク、リスト、GFM 表、フェンス付きコードブロック (onot NOTICE) |
+| **非推奨** | バンドル文書内の `![](https://...)` リモート画像 |
+| **非対応・非推奨** | mermaid / 図表 DSL、HTML 埋め込み、任意 Web 向け拡張 |
 
 ## 7. 実装フェーズ
 
@@ -230,12 +230,12 @@ Acknowledgements に mermaid を書かないこと、OSS クレジット向け�
 | 欠落リソース | **Swift Testing** | `loadFailed` |
 | 空ファイル | **Swift Testing** | `empty` |
 | 拡張子探索 | **Swift Testing** | `LICENSE` / `LICENSE.txt` |
-| `markdownBlocks` との非干渉 | **XCTest** (既存) | 既存 `AboutViewTests` / `MarkdownView` が継続 PASS。変更しない |
+| `MarkdownView` 生成 | **XCTest** (既存) | `AboutViewTests` でビュー生成が継続 PASS |
 | `LegalTextView` UI | **SnapshotTesting** (Phase 2 以降で検討) | Light / Dark。未導入時は Preview + `docs_mod/test-results.md` 記録で代替可 |
 
 ## 9. 利用側の組み込み例
 
-ホストアプリ:
+ホストアプリケーション:
 
 1. Xcode で `LICENSE` (拡張子なしまたは `.txt`) をターゲットに Copy Bundle Resources。
 2. 任意で `ACKNOWLEDGEMENTS.md` を同梱。

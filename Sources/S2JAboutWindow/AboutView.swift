@@ -13,7 +13,7 @@ import SwiftUI
      * AboutView
      * @return AboutView
      */
-    @available(macOS 14.0, iOS 17.0, *)
+    @available(macOS 15.0, iOS 18.0, *)
     public struct AboutView: View {
         /**
          * AboutViewModel のインスタンス
@@ -219,7 +219,7 @@ import SwiftUI
          * AboutView_Previews
          * @return AboutView_Previews
          */
-        @available(macOS 12.0, iOS 17.0, *)
+        @available(macOS 15.0, iOS 18.0, *)
         struct AboutView_Previews: PreviewProvider {
             /**
              * AboutViewのプレビュー

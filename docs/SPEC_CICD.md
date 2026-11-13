@@ -117,8 +117,8 @@
      * `has_ios_26_0`: iOS 26.0 ランタイムが利用可能かどうか
      * `has_ios_18_5`: iOS 18.5 ランタイムが利用可能かどうか
 
-5. **Xcode アプリの強制選択 (優先順位付き)**
-   * 優先順位に従って、利用可能な Xcode アプリを強制選択します。
+5. **Xcode アプリケーションの強制選択 (優先順位付き)**
+   * 優先順位に従って、利用可能な Xcode アプリケーションを強制選択します。
    * **優先順位**:
      1. `/Applications/Xcode_26.1.app/Contents/Developer`
      2. `/Applications/Xcode_26.1.0.app/Contents/Developer`
@@ -164,7 +164,7 @@
     * 選択されたシミュレーターを起動します。
     * **実装**:
       * `xcrun simctl boot` でシミュレーターを起動します。
-      * `open -a Simulator` で Simulator アプリを開きます。
+      * `open -a Simulator` で Simulator アプリケーションを開きます。
       * 最大60回 (約2分) ポーリングして、シミュレーターが起動するまで待機します。
     * **出力変数**:
       * `booted_udid`: 起動されたシミュレーターの UDID

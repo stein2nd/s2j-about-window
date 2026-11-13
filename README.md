@@ -3,8 +3,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![Xcode](https://img.shields.io/badge/Xcode-26.5-blue?logo=xcode&logoColor=white)](https://developer.apple.com/xcode/)
 [![Swift](https://img.shields.io/badge/Swift-6.3-blue?logo=Swift&logoColor=white)](https://www.swift.org)
-[![macOS](https://img.shields.io/badge/macOS-14.6+-blue?logo=apple&logoColor=white)](https://www.apple.com/macos/)
-[![iPadOS](https://img.shields.io/badge/iOS-17.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/ipados/)
+[![macOS](https://img.shields.io/badge/macOS-15.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![iPadOS](https://img.shields.io/badge/iOS-18.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/ipados/)
 
 ## Description
 
@@ -29,7 +29,7 @@ S2J About Window は、macOS および iPadOS アプリケーション向けの�
 * **Easy Integration**: Simple API for host applications
  -->
 
-* **クロス・プラットフォーム**: macOS (v14.6以降) と iPadOS (v17.6以降) の両方で動作
+* **クロス・プラットフォーム**: macOS (v15.0以降) と iOS (v18.0以降) の両方で動作
 * **SwiftUI ネイティブ**: モダン UI を実現する SwiftUI 完全構築
 * **カスタマイズ可能なコンテンツ**: Markdown、JSON、RTF コンテンツに対応
 * **ローカライズ対応**: 複数言語 (英語、日本語) の組込みサポート
@@ -58,7 +58,7 @@ For support, feature requests, or bug reports, please visit the [GitHub Issues](
 
 ### Requirements
 
-* macOS v14.6+ / iPadOS v17.6+
+* macOS v15.0+ / iOS v18.0+
 * Xcode v26.5+
 * Swift v6.3+
 
@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "2.0.14")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.0")
 ]
 ```
 
@@ -126,9 +126,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 ```
 
+<!-- 
 Add `LICENSE` (or `LICENSE.txt`) to the app target's **Copy Bundle Resources**. The About window shows a **License…** button that opens a sheet with the full text (offline).
+ -->
 
-アプリターゲットの **Copy Bundle Resources** に `LICENSE`（または `LICENSE.txt`）を追加します。About に **License…** ボタンが表示され、シートで全文をオフライン閲覧できます。
+アプリケーションターゲットの **Copy Bundle Resources** に `LICENSE` (または `LICENSE.txt`) を追加します。About に **License…** ボタンが表示され、シートで全文をオフライン閲覧できます。
 
 ```swift
 AboutView(
@@ -197,13 +199,19 @@ This is **bold** and *italic* text.
 """
 ```
 
-`MarkdownView` renders a **subset** of Markdown via Swift’s `AttributedString(markdown:)`. Supported in practice: headings, emphasis, links, and lists (with block splitting for paragraph layout).
+<!-- 
+`MarkdownView` renders Markdown using the [Textual](https://github.com/gonzalezreal/textual) library (`StructuredText`). About body text uses the default style; bundled **Acknowledgements** (`.md`) uses the GitHub-style preset, including **GFM tables** and fenced code blocks (for example onot-generated OSS notices).
 
-**Not supported:** mermaid and other diagram syntax, GitHub Flavored Markdown tables, embedded HTML, and extensions beyond Apple’s Markdown interpreter. Unsupported blocks appear as plain text.
+**Not recommended:** Remote images (`![](https://...)`) in offline Acknowledgements — Textual may fetch them over the network. Prefer text-only notices in the app bundle.
 
-`MarkdownView` は `AttributedString(markdown:)` による **Markdown の一部** のみを描画します。見出し・強調・リンク・リスト (段落レイアウト用のブロック分割を含む) を想定しています。
+**Not supported / discouraged:** mermaid and other diagram DSLs, embedded HTML, and content meant for arbitrary web rendering.
+ -->
 
-**非対応:** mermaid などの図表記法、GFM 表、HTML 埋め込み、Apple の Markdown 解釈外の拡張。非対応部分はプレーンテキストとして表示されます。
+`MarkdownView` は [Textual](https://github.com/gonzalezreal/textual) ライブラリ (`StructuredText`) を使用して Markdown をレンダリングします。About 本文デフォルトのスタイルが適用されています; バンドルされている **Acknowledgements** (`.md`) には、**GFM テーブル** やフェンス付きコードブロック (例: onot で生成された OSS 通知) を含む GitHub スタイルのプリセットが使用されています。
+
+**非推奨:** オフライン想定の Acknowledgements でのリモート画像 (`![](https://...)`) — Textual がネットワーク経由でそれらを取得しようとする可能性があります。アプリケーションバンドル内では、テキストのみの通知の使用を推奨します。
+
+**非対応・非推奨:** mermaid その他の図形 DSL、埋め込み HTML、および任意の Web レンダリングを目的としたコンテンツ。
 
 ### JSON
 

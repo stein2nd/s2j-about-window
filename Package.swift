@@ -5,8 +5,8 @@ let package = Package(
     name: "s2j-about-window",
     defaultLocalization: "en",
     platforms: [
-        .macOS("14.6"),
-        .iOS("17.6")
+        .macOS("15.0"),
+        .iOS("18.0")
     ],
     products: [
         .library(
@@ -15,12 +15,14 @@ let package = Package(
         )
     ],
     dependencies: [
-        // Add dependencies here if needed
+        .package(url: "https://github.com/gonzalezreal/textual", from: "0.5.0")
     ],
     targets: [
         .target(
             name: "S2JAboutWindow",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Textual", package: "textual")
+            ],
             resources: [.process("Resources")]
         ),
         .testTarget(
