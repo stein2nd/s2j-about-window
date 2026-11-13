@@ -25,19 +25,19 @@
 
 ### 1.3. ワークフロー構成
 
-* **ワークフローファイル**: `.github/workflows/swift-test.yml`
-* **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
-* **実行環境**: `macos-latest` (GitHub Actions の macOS Runner)
-* **その他のワークフロー**:
-  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter)
-    * **ワークフローファイル**: `.github/workflows/docs-linter.yml`
-    * **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
-    * **実行環境**: `ubuntu-24.04` (GitHub Actions の Ubuntu Runner)
-    * **実装状況**: ✅ **完全実装済み・テスト成功** - Docs Linter ワークフローが正常に動作し、すべてのチェックが成功
+* **Swift Test ワークフロー**: `.github/workflows/swift-test.yml`
+  * **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
+  * **実行環境**: `macos-26` (GitHub Actions の macOS Runner)
+  * **Xcode**: ワークフロー内で26.5などを優先選択 (`setup-xcode` + `xcode-select`)
+* **Docs Lint ワークフロー**: `.github/workflows/docs-lint.yml`
+  * **トリガー**: `push` / `pull_request` (`docs/**/*.md`、ルート `**/*.md`、`.textlintrc*`、`package.json` などパスフィルター)
+  * **実行環境**: `ubuntu-24.04`
+  * **実装**: ルートで `npm ci` → `npm run lint:docs` (依存: `@s2j/docs-linter`、設定: `.textlintrc.json`)
+  * **実装状況**: ✅ **完全実装済み・テスト成功**
 
 ### 1.4. ジョブ構成
 
-本ワークフローは、以下の3つのジョブで構成されています。
+`swift-test.yml` は、以下の3つのジョブで構成されています。
 
 1. **`test-macos`**: macOS 向けテスト実行
 2. **`test-ios`**: iOS/iPadOS 向けテスト実行
@@ -50,7 +50,7 @@
 #### 2.1.1. 概要
 
 * **目的**: macOS プラットフォーム向けのユニットテストを実行し、テスト・カバレッジを収集します。
-* **実行環境**: `macos-latest`
+* **実行環境**: `macos-26`
 * **依存関係**: なし (独立実行が可能)
 
 #### 2.1.2. 実行ステップ
@@ -60,7 +60,7 @@
 
 2. **Setup Xcode**
    * `maxim-lobanov/setup-xcode@v1` を使用して Xcode をセットアップします。
-   * **Xcode バージョン**: `latest-stable` (最新の安定版)
+   * **Xcode バージョン**: ワークフローで `26.5` 等を指定し、利用可能なアプリパスに `xcode-select` でフォールバック
 
 3. **Run tests on macOS**
    * `swift test --enable-code-coverage` を実行して、macOS 向けのユニットテストを実行します。
@@ -83,7 +83,7 @@
 #### 2.2.1. 概要
 
 * **目的**: iOS/iPadOS プラットフォーム向けのユニットテストを実行し、テスト・カバレッジを収集します。
-* **実行環境**: `macos-latest`
+* **実行環境**: `macos-26`
 * **タイムアウト**: `60分` (ビルド/シミュレーター起動で、時間を要する場合があるため)
 * **依存関係**: なし (独立で実行可能)
 * **環境変数**:
@@ -249,7 +249,7 @@
 #### 2.3.1. 概要
 
 * **目的**: リリース用の Universal Binary をビルドし、ビルド成果物をアーティファクトとして保存します。
-* **実行環境**: `macos-latest`
+* **実行環境**: `macos-26`
 * **依存関係**: `test-macos` および `test-ios` ジョブが成功した後に実行されます (`needs: [test-macos, test-ios]`)
 
 #### 2.3.2. 実行ステップ
@@ -259,7 +259,7 @@
 
 2. **Setup Xcode**
    * `maxim-lobanov/setup-xcode@v1` を使用して Xcode をセットアップします。
-   * **Xcode バージョン**: `latest-stable` (最新の安定版)
+   * **Xcode バージョン**: `test-macos` ジョブと同様 (ワークフローで固定／フォールバック)
 
 3. **Build Universal Binary**
    * `swift build -c release` を実行して、リリース用の Universal Binary をビルドします。
@@ -274,86 +274,45 @@
 * リリース用: Universal Binary が正常にビルドされます。
 * ビルド成果物: アーティファクトとして保存されます。
 
-### 2.4. `docs-linter` ジョブ
+### 2.4. `lint-docs` ジョブ (`docs-lint.yml`)
 
 #### 2.4.1. 概要
 
 * **目的**: Markdown ドキュメントの表記揺れ、用語統一、文体チェックを実行します。
+* **ワークフロー**: `.github/workflows/docs-lint.yml` (Swift Test とは別ファイル)
+* **ジョブ ID**: `lint-docs`
 * **実行環境**: `ubuntu-24.04`
 * **依存関係**: なし (独立実行が可能)
-* **環境変数**:
-  * `DOCS_LINTER_DIR`: `tools/docs-linter` (docs-linter のディレクトリ・パス)
-  * `PROJECT_ROOT`: `${{ github.workspace }}` (プロジェクト・ルート)
 
 #### 2.4.2. 実行ステップ
 
-1. **Checkout**
-   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
-   * **設定**: `submodules: recursive` (docs-linter を Git サブモジュールとして取得)
-
-2. **Setup Node.js**
-   * `actions/setup-node@v5` を使用して Node.js をセットアップします。
-   * **Node.js バージョン**: `24`
-
-3. **Cache npm dependencies**
-   * `actions/cache@v4` を使用して npm 依存関係をキャッシュします。
-   * **パス**: `~/.npm`
-   * **キー**: `${{ runner.os }}-npm-${{ hashFiles('tools/docs-linter/package-lock.json') }}`
-   * **目的**: 実行速度の向上 (約3倍) とパッケージ破損防止
-
-4. **Install dependencies**
-   * `tools/docs-linter` ディレクトリに移動します。
-   * `npm ci` を実行して依存関係をインストールします。
-   * `npm run build` を実行して TypeScript をビルドします。
-   * 依存関係の確認ログを出力します。
-
-5. **Show textlint config**
-   * textlint の設定ファイルを確認します。
-   * 対象ファイルを1つ選んで設定を確認します (`README.md` または `docs/**/*.md` の最初のファイル)。
-   * `npx textlint --print-config` を実行して設定内容を表示します。
-
-6. **Run docs linter**
-   * 対象ファイルを検出します:
-     * `README.md` (存在する場合)
-     * `docs/**/*.md` (存在する場合)
-   * textlint を実行します:
-     * **設定ファイル**: `./presets/swift/.textlintrc.swift.json`
-     * **NODE_PATH**: `$(pwd)/node_modules` (絶対パス)
-     * **実行方法**: `./node_modules/.bin/textlint --config <設定ファイル> <対象ファイル>`
-   * 検出された問題をレポートします。
-
-7. **Log summary**
-   * `if: always()` 条件で、常に実行されます。
-   * textlint の終了コードをログに出力します。
+1. **Checkout** — `actions/checkout@v5` (サブモジュール不要)
+2. **Setup Node.js** — `actions/setup-node@v5`、`node-version: "24"`
+3. **Install dependencies** — リポジトリルートで `npm ci`
+4. **Run Docs Linter** — `npm run lint:docs` (`package.json` の `lint:docs` スクリプト)
 
 #### 2.4.3. 対象ファイル
 
-* `README.md` (プロジェクト・ルート)
-* `docs/**/*.md` (すべての Markdown ファイル)
+`npm run lint:docs` が指定するパス (例):
+
+* `./README.md`、`./CHANGELOG.md`
+* `./docs/*.md`、`./docs/**/*.md`
 
 #### 2.4.4. 使用する textlint 設定
 
-* **設定ファイル**: `tools/docs-linter/presets/swift/.textlintrc.swift.json`
-* **ベース設定**: `tools/docs-linter/presets/base/.textlintrc.base.json`
-* **ルール**:
-  * `preset-jtf-style`: JTF スタイルガイドに準拠したチェック
-  * `preset-swift-docs-ja`: Swift ドキュメント向け日本語ルール
-  * `preset-ja-technical-writing`: 日本語技術文書向けルール (ベース設定で有効、Swift 設定で無効化)
-  * `no-dead-link`: リンク切れチェック (ベース設定で有効)
+* **npm パッケージ**: `@s2j/docs-linter` (`package.json` / `package-lock.json`)
+* **プロジェクト設定**: ルート `.textlintrc.json` (Swift プリセットを `extends`)
+* **プリセット実体**: `node_modules/@s2j/docs-linter/presets/swift/.textlintrc.swift.json` など
 
 #### 2.4.5. 期待される結果
 
-* Markdown ファイル: すべて textlint でチェックされます。
-* 検出対象: 表記揺れ、用語統一、文体の問題が検出されます。
-* 検出された問題: 警告として表示され、CI を継続します (エラーは発生しません)。
+* 対象 Markdown が textlint でチェックされ、違反があるとジョブが失敗します。
 
 #### 2.4.6. 実装状況
 
-**実装状況**: ✅ **完全実装済み・テスト成功** - Docs Linter ワークフローが正常に動作し、すべてのチェックが成功
+**実装状況**: ✅ **完全実装済み・テスト成功** — `docs-lint.yml` / ルート npm 構成で運用
 
-* GitHub Actions「Docs Linter」ワークフローが正常に動作し、すべてのステップが成功
-* textlint がルールを正しく解決し、Markdown ファイルをチェック
-* NODE_PATH を使用したルール解決が正常に機能
+* 旧構成 (`tools/docs-linter` Git サブモジュール専用) は廃止。ローカルも `npm run lint:docs` で CI と同じコマンドを実行可能。
 
 ## 3. ローカルテスト・スクリプト
 
@@ -401,7 +360,7 @@
 
 * `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
 * `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
-* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "17.0")
+* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "18.0" — `Package.swift` の iOS 18.0 と揃える。`scripts/test-local.sh` のフォールバックも 18.0)
 * `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
 * `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効化 (デフォルト: `project.yml` が存在する場合に自動有効化)
 * `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
@@ -502,11 +461,8 @@
     * テスト実行の優先順位の最適化 (SDK を指定せずに実行を優先) (✅実装完了)
     * 診断情報の常時アップロード (`if: always()` を追加) (✅実装完了)
   * `build-release` ジョブ: リリースビルド生成
-  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (✅100% 実装完了・テスト成功)
-    * `docs-linter` ジョブ: Markdown ファイルの textlint チェック
-    * NODE_PATH を使用したルール解決 (✅実装完了)
-    * npm キャッシュの最適化 (✅実装完了)
-    * Git サブモジュールとして docs-linter を取得 (✅実装完了)
+  * `docs-lint.yml`: Markdown ドキュメントの表記揺れ検出 (✅100% 実装完了・テスト成功)
+    * `lint-docs` ジョブ: ルート `npm ci` + `npm run lint:docs` (`@s2j/docs-linter`)
 * **ローカルテスト・スクリプト**:
   * `scripts/test-local.sh`: コミット前に CI/CD と同じテストをローカルで実行 (✅100% 実装完了)
   * 汎用的で、他の Swift Package Manager プロジェクトでも使用可能

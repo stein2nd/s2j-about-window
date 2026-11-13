@@ -2,6 +2,8 @@
 
 ## 設計方針
 
+* **最小 OS**: macOS v15.0、iOS v18.0 (`Package.swift` / `project.yml`、公開 API の `@available` と一致)。
+* **Markdown 依存**: [Textual](https://github.com/gonzalezreal/textual) の `StructuredText` (`MarkdownView`)。
 * **アーキテクチャー**:
     * MVVM パターンに準拠する。
 * **共有ロジック**:
@@ -28,9 +30,9 @@ Sources/S2JAboutWindow/
 | **AboutWindow.swift** | macOS 専用。`NSWindow` の生成・表示・閉じる、`NSHostingController` で `AboutView` をホスト、`NSWindowDelegate` でライフサイクル管理。 |
 | **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリケーション名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
 | **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
-| **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、Acknowledgements `.md` は `.gitHub` (表・コードブロック)。`ScrollView` + `.textual.textSelection(.enabled)`。 |
+| **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、バンドル Acknowledgements `.md` は `.legalDocument` コンテキストで `.gitHub` + `overflowMode(.wrap)`。`ScrollView` + `.textual.textSelection(.enabled)`。 |
 | **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。内部で `AboutView` を表示。 |
-| **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示、`LegalTextDocumentSheet` (About からのシート)。 |
+| **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示。`LegalTextDocumentSheet` が About からのシートを担当し、Acknowledgements `.md` は `MarkdownView` に委譲。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
 
 ## プラットフォーム分岐のルール
@@ -45,7 +47,9 @@ Sources/S2JAboutWindow/
 ## テスト・プレビュー
 
 * ユニットテスト:
-    * `Tests/S2JAboutWindowTests/AboutViewTests.swift` (AboutViewModel、MarkdownView、AboutView、AboutWindow の作成・表示・閉じる)。
+    * `Tests/S2JAboutWindowTests/AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。
+    * `Tests/S2JAboutWindowTests/LegalTextLoaderTests.swift` (Swift Testing: ローダー・拡張子探索・`usesMarkdownRendering`)。
+    * テストリソース: `Tests/S2JAboutWindowTests/Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
 * Xcode Preview:
     * `AboutView_Previews`、`MarkdownView_Previews` を `#if DEBUG` で提供。
 

@@ -15,7 +15,8 @@
 * Swift Package 名: s2j-about-window
 * 元リポジトリ: [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow)
 * 目的: AppKit ベースの「About Window」を SwiftUI で再実装します
-* 対応 OS: macOS v12以上、iPadOS v17以上
+* 対応 OS: macOS v15以上、iPadOS v18以上 (**3.0.0** 以降。 [Textual](https://github.com/gonzalezreal/textual) 利用により最小 OS を引き上げ)
+* バンドル License / Acknowledgements: [legal_text_spec.md](./legal_text_spec.md) (Issue #17 完了、2.0.13〜3.0.1)
 
 ---
 
@@ -106,19 +107,19 @@
 
 * **要件レベル**: **Must (必須)**
 * **プラットフォーム対応**:
-  * macOS: v12.0以上で動作すること。
-  * iPadOS: v17.0以上で動作すること。
+  * macOS: v15.0以上で動作すること。
+  * iPadOS: v18.0以上で動作すること。
 * **Swift バージョン**:
-  * Swift: v6.3以上でビルド可能であること。
+  * Swift: v6.3以上でビルド可能であること (`swift-tools-version: 6.3`)。
 * **Xcode バージョン**:
-  * Xcode: v14.0以上でビルド可能であること。
+  * Xcode: v26.x 以降を推奨 (CI は v26.5等を使用。Swift v6.3同梱)。
 
 #### 2.2.3. 信頼性
 
 * **要件レベル**: **Must (必須)**
 * **エラー・ハンドリング**:
-  * Markdown パースに失敗した場合:
-    * フォールバック処理を実装し、プレーンテキストとして表示します。
+  * About 本文の Markdown は Textual `StructuredText` で描画します (詳細は [architecture.md](./architecture.md))。
+  * バンドルリーガルテキストのロード失敗・空ファイルは `LegalTextContent` で UI に明示します ([legal_text_spec.md](./legal_text_spec.md))。
   * 不正なコンテンツ形式が渡された場合:
     * アプリケーションがクラッシュしないようにします。
 * **堅牢性**:
@@ -233,7 +234,8 @@
     * ライセンス情報
     * その他、ホスト・アプリケーションが指定する内容
 * ホスト・アプリケーションからは、下記のいずれかの手段で、「About ウィンドウ」への表示内容が渡されます。
-    * Markdown 記法で記述されたテキスト情報 (✅100% 実装完了 - `AttributedString(markdown:)` を使用)
+    * Markdown 記法で記述されたテキスト情報 (✅100% 実装完了 - Textual `StructuredText` / `MarkdownView`)
+    * バンドル同梱 License / Acknowledgements (✅100% 実装完了 - `LegalTextLoader` / シート表示。仕様: [legal_text_spec.md](./legal_text_spec.md))
     * JSON オブジェクト (⚠️ 未実装 - Backlog に追加)
     * RTF ドキュメント (⚠️ 未実装 - Backlog に追加)
 * ホスト・アプリケーションは、macOS アプリケーション (または iPadOS アプリケーション) を想定します。
@@ -247,9 +249,9 @@
 
 * macOS 向け About ウィンドウでは、`NSWindow` および `NSHostingController` を利用します。(✅100% 実装完了 - `AboutWindow.swift` で実装)
   * `NSWindowDelegate` プロトコルを実装し、ウィンドウのライフサイクルを適切に管理します
-  * タイトルバーの閉じるボタン (×) と ESC キーの両方でウィンドウを閉じることができます
+  * タイトルバーの閉じるボタン (×) でウィンドウを閉じることができます
 * iPadOS 向けでは、`UIViewControllerRepresentable` を利用せず、SwiftUI のネイティブ `.sheet` / `.popover` API のみで構成します。(✅100% 実装完了 - `Extensions.swift` で実装)
-* 共有ロジック (ViewModel / Markdown パーサー) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。(✅100% 実装完了)
+* 共有ロジック (ViewModel / Markdown レンダリング / リーガルテキスト I/O) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。(✅100% 実装完了)
 
 ### 4.2. プロジェクト構成
 
@@ -262,23 +264,25 @@
 ├┬─ docs/  # ドキュメント類
 │├─ `SPEC.md`  # 本ドキュメント
 │└─ `SPEC_CICD.md`  # CI/CD Workflow ドキュメント
-├┬─ tools/
-│└── docs-linter  # Git サブモジュール『Docs Linter』
+├── package.json / package-lock.json  # Docs Linter (`@s2j/docs-linter`)、`npm run lint:docs`
+├── .textlintrc.json  # textlint 設定 (Swift ドキュメント向けプリセット)
 ├┬─ .github/  # CI/CD
 │└┬─ workflows/
-│　├─ docs-linter.yml
+│　├─ docs-lint.yml  # Markdown lint (npm)
 │　└─ swift-test.yml (✅100% 実装完了)
 ├┬─ scripts/  # スクリプト
 │└─ test-local.sh  # ローカル・テスト実行スクリプト (✅100% 実装完了 - 統合版、汎用的)
 ├── SampleApp.swift  # エントリー・ポイント
-├── Package.swift  # Swift Package 定義 (プロジェクト・ファイル兼用) (✅100% 実装完了)
+├── Package.swift  # Swift Package 定義 (Textual 依存、macOS 15 / iOS 18) (✅100% 実装完了)
 ├── project.yml  # XcodeGen 設定ファイル (✅100% 実装完了)
 ├┬─ Sources/
 │└┬─ S2JAboutWindow/  # メイン・ソースコード
 │　├─ AboutWindow.swift  # macOS: NSWindow 管理 + public API (✅100% 実装完了)
 │　├─ AboutView.swift  # SwiftUI view (共通) (✅100% 実装完了)
 │　├─ AboutViewModel.swift  # ViewModel (app metadata、markdown) (✅100% 実装完了)
-│　├─ MarkdownView.swift  # Markdown を AttributedString で描画 (✅100% 実装完了)
+│　├─ MarkdownView.swift  # Textual StructuredText (✅100% 実装完了)
+│　├─ LegalTextLoader.swift  # バンドル License / Acknowledgements 読込 (✅100% 実装完了)
+│　├─ LegalTextView.swift  # プレーン長文 + シート (✅100% 実装完了)
 │　├─ Extensions.swift  # iPadOS 向け拡張 (✅100% 実装完了)
 │　└┬─ Resources/  # リソースファイル
 │　　├─ AboutDefault.md  # デフォルトコンテンツ (✅100% 実装完了)
@@ -289,14 +293,16 @@
 │　　└─ ja.lproj/Localizable.strings  # ローカライゼーション (✅100% 実装完了)
 ├┬─ Tests/
 │└┬─ S2JAboutWindowTests/  # テストコード
-│　└─ AboutViewTests.swift (⚠️ 実装中)
+│　├─ AboutViewTests.swift (✅ 基本 XCTest 完了、Snapshot 検証は未)
+│　├─ LegalTextLoaderTests.swift (✅ Swift Testing)
+│　└─ Resources/  # ローダー用フィクスチャ (.txt / .md)
 ├── UITests/ (⚠️ 未実装)
 └── Preview Content/ (⚠️ 未実装)
 ```
 
 ### 4.3. 主要ファイルの実装状況
 
-* `Package.swift` : Swift Package 定義、リソース設定 (✅100% 実装完了)
+* `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS 15 / iOS 18、リソース設定 (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
   * **ターゲット構成**:
     * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
@@ -310,7 +316,8 @@
 * `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)
 * `AboutView.swift` : SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合 (✅100% 実装完了)
 * `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
-* `MarkdownView.swift` : Markdown を AttributedString で描画、スクロール対応 (✅100% 実装完了)
+* `MarkdownView.swift` : Textual `StructuredText`、About `.default` / リーガル `.md` は `.gitHub` + 折り返し (✅100% 実装完了)
+* `LegalTextLoader.swift` / `LegalTextView.swift` : バンドル長文と About フッター連携 (✅100% 実装完了)
 * `Extensions.swift` : iPadOS 向け aboutSheet/aboutPopover 拡張 (✅100% 実装完了)
 * `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
 * `Resources/Localizable.strings` : 英語・日本語ローカライゼーション (✅100% 実装完了)
@@ -322,7 +329,7 @@
 * ローカライズ対応は、必須 (英語・日本語) の為、Base、English、Japanese を初期追加します。(✅100% 実装完了)
 * `Bundle.module` 経由で `Localizable.strings` を読み込みます (SwiftPM の `resources: [.process("Resources")]`)。(✅100% 実装完了)
 * Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書き可能にします。(✅100% 実装完了)
-* 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Close"`、`"About.Version"` (✅100% 実装完了)
+* 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Close"`、`"About.Version"`、リーガル用 `About.License.Button` 等 (✅100% 実装完了)
 
 ## 5. デザイン規約
 
@@ -393,8 +400,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * Universal Binary 化は SwiftPM のビルドフェーズで自動処理されます。
 * リリース用ビルドは GitHub Actions の CI ワークフローで生成し、Artifacts として管理します。
 * 本プロジェクトでは、以下の GitHub Actions ワークフローを導入します。
-  * `docs-linter.yml`: Markdown ドキュメントの表記揺れ検出 (Docs Linter) (✅100% 実装完了・テスト成功)
-  * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了・テスト成功)
+  * `docs-lint.yml`: Markdown ドキュメントの表記揺れ検出 (`npm run lint:docs`) (✅100% 実装完了・テスト成功)
+  * `swift-test.yml`: Swift Package のユニットテスト (macOS / iOS) およびリリースビルド (✅100% 実装完了・テスト成功)
 
 **実装状況**: ✅ **完全実装済み・テスト成功** - CI/CD ワークフローとローカルテスト・スクリプトの実装完了、GitHub Actions「Swift Test」ワークフローと「Docs Linter」ワークフローが正常に動作し、すべてのテストとチェックが成功
 
@@ -415,7 +422,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `NSObject` を継承し、`NSWindowDelegate` プロトコルを実装してウィンドウのライフサイクルを管理します。
     * `window.isReleasedWhenClosed = false` を設定し、`window.delegate = self` でデリゲートを設定します。
     * `windowWillClose(_:)` メソッドを実装し、ウィンドウが閉じられた際に適切にクリーンアップします。
-    * タイトルバーの閉じるボタン (×) と ESC キーの両方でウィンドウを閉じることができます。
+    * タイトルバーの閉じるボタン (×) でウィンドウを閉じることができます。
+    * `licenseResourceName` / `acknowledgementsResourceName` によるリーガル文書シート連携。
   * **AboutView.swift**:
     * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合です。
     * `@StateObject` を使用して `AboutViewModel` を管理します。
@@ -430,11 +438,13 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `loadDefaultContent()` メソッドでデフォルトコンテンツを読み込みます。
     * Bundle 拡張: `displayName`、`version`、`copyright` プロパティを追加します。
   * **MarkdownView.swift**:
-    * Markdown を `AttributedString` で描画し、スクロール対応、テキスト選択対応を実装します。
-    * `AttributedString(markdown:)` を使用した Markdown レンダリング。
-    * Markdown パース失敗時のフォールバック処理 (プレーンテキスト表示)。
-    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します。
+    * [Textual](https://github.com/gonzalezreal/textual) `StructuredText` による Markdown 描画。
+    * About 本文: `.structuredTextStyle(.default)`。バンドル Acknowledgements `.md`: `.legalDocument` で `.gitHub` + `overflowMode(.wrap)`。
+    * `ScrollView` + `.textual.textSelection(.enabled)`。
     * Xcode Preview 対応 (`MarkdownView_Previews` を実装)
+  * **LegalTextLoader.swift** / **LegalTextView.swift**:
+    * ホスト `Bundle` から License / Acknowledgements を読み込み、シートで表示 (プレーンまたは `MarkdownView`)。
+    * 詳細: [legal_text_spec.md](./legal_text_spec.md)。
   * **Extensions.swift**:
     * iPadOS 向け `aboutSheet()` / `aboutPopover()` 拡張機能。
     * `aboutSheet()`: `NavigationView` を使用し、閉じるボタンをツールバーに配置。
@@ -450,11 +460,11 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `NavigationView` と `ToolbarItem` を使用した UI 構成を実装します。
   * **マルチ・プラットフォーム対応**:
     * `#if canImport(SwiftUI)` ベースの共通化ロジック。
-    * `@available(macOS 12.0, iOS 17.0, *)` でプラットフォーム要件を指定。
+    * `@available(macOS 15.0, iOS 18.0, *)` でプラットフォーム要件を指定。
 * リソース・ローカライゼーション
   * **Package.swift**:
-    * Swift Package 定義、リソース設定 (`resources: [.process("Resources")]`)。
-    * macOS/iPadOS 両対応のマルチプラットフォーム対応 (`.macOS(.v12)`、`.iOS(.v17)`)。
+    * Swift Package 定義、Textual 依存、リソース設定 (`resources: [.process("Resources")]`)。
+    * macOS/iPadOS 両対応 (`.macOS("15.0")`、`.iOS("18.0")`)。
     * Swift Package として切り出し可能な構造。
     * デフォルトローカライゼーション: `defaultLocalization: "en"`。
   * **AboutDefault.md**:
@@ -474,23 +484,22 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * Bundle 拡張による `displayName`、`version`、`copyright` を自動取得します。
 * コンテンツ形式サポート
   * **Markdown 形式のコンテンツサポート**:
-    * `MarkdownView.swift` で実装完了。
-    * `AttributedString(markdown:)` を使用した Markdown レンダリング。
-    * スクロール対応 (`ScrollView` を使用)、テキスト選択対応 (`.textSelection(.enabled)` を使用)。
-    * Markdown パース失敗時のフォールバック処理 (プレーンテキストとして表示)。
-    * `onAppear` と `onChange(of: content)` でコンテンツ変更に対応します。
+    * `MarkdownView.swift` (Textual) で実装完了。GFM 表・コードフェンス (リーガル文書は折り返し) を Acknowledgements 向けにサポート。
+  * **バンドルリーガルテキスト**:
+    * `LegalTextLoader` / About フッター / シート表示 — 実装完了 (2.0.13〜3.0.1)。
 
 ### 10.2. ほとんど実装済み機能 (85-95% 完了)
 
 以下の機能は実装がほぼ完了していますが、一部の機能やテストが未完了です。
 
 * テストコード
-  * **AboutViewTests.swift**: 基本的なユニットテストは実装済み。
+  * **AboutViewTests.swift** (XCTest): 基本的なユニットテストは実装済み。
     * ✅ `AboutViewModel` の初期化テスト (デフォルト値、nil 値の両方をテスト)。
     * ✅ `MarkdownView` の作成テスト。
     * ✅ `AboutView` の作成テスト。
     * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
-    * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (テストメソッド `testAboutViewSnapshot()` と `testMarkdownViewSnapshot()` は存在するが、実際のスナップショット検証ロジックは未実装、コメントで「Note: This test would require SnapshotTesting framework」と記載されています)。
+    * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (プレースホルダーテストのみ)。
+  * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
 
 ### 10.3. 未実装機能
 
@@ -521,15 +530,16 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 | カテゴリー | 完了率 | 備考 |
 |---|---|---|
-| コア機能 | 100% | AboutWindow、AboutView、AboutViewModel、MarkdownView、Extensions すべて実装完了、Xcode Preview 対応も実装済み |
+| コア機能 | 100% | AboutWindow、AboutView、AboutViewModel、MarkdownView (Textual)、LegalText*、Extensions 実装完了 |
 | プラットフォーム対応 | 100% | macOS と iPadOS の両方で完全実装 (プラットフォーム固有 API を適切に使用) |
 | リソース・ローカライゼーション | 100% | 英語・日本語ローカライゼーション、デフォルトコンテンツ実装完了、`Bundle.module` 経由で適切に読み込み |
 | UI/UX 機能 | 100% | macOS と iPadOS の両方でダークモード・アプリケーション・アイコン自動取得を実装完了 |
 | CI/CD | 100% | GitHub Actions ワークフローとローカル・テストスクリプトの実装完了 (詳細は [SPEC_CICD.md](./SPEC_CICD.md) を参照) |
 | コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
-| テスト・品質保証 | 60% | 基本的なユニットテストは実装済み (AboutViewModel、MarkdownView、AboutView、AboutWindow の作成・表示・閉じるテスト)、SnapshotTesting は未実装 (テストメソッドは存在するが実際の検証ロジックは未実装) |
+| テスト・品質保証 | 70% | XCTest 基本 + `LegalTextLoaderTests` (Swift Testing)。SnapshotTesting / UI テストは未実装 |
+| バンドルリーガル表示 | 100% | Issue #17 完了 ([legal_text_spec.md](./legal_text_spec.md)) |
 
-**全体実装の完了率**: **約85%** (コア機能とプラットフォーム対応は完全実装、一部の拡張機能とテストが未実装)
+**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォーム対応は完了。JSON/RTF・Snapshot が残り)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
   * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
@@ -550,13 +560,13 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
       * macOS: `Color(NSColor.windowBackgroundColor)` と `NSApplication.shared.applicationIconImage` を使用。
       * iPadOS: `Color(UIColor.systemBackground)` と `UIImage(named: "AppIcon")` を使用。
   * ✅ **エラーハンドリング**:
-    * Markdown パース失敗時のフォールバック処理を実装します (`do-catch` でエラーを捕捉し、プレーンテキストとして表示します)。
+    * バンドルリーガルテキストは空・ロード失敗を UI で明示。About 本文は Textual に委譲。
   * ✅ **ドキュメント**:
     * 主要なクラス・メソッドに JSDoc スタイルのコメントを実装します。
     * パラメータ、戻り値、説明が適切に記載されています。
 * テスト品質
   * ✅ **ユニットテスト**:
-    * 基本的な機能のユニットテストを実装します (`AboutViewTests.swift`)。
+    * `AboutViewTests.swift` (XCTest) と `LegalTextLoaderTests.swift` (Swift Testing)。
   * ⚠️ **UI テスト**:
     * SnapshotTesting フレームワークの統合が未実装です。
   * ⚠️ **テスト・カバレッジ**:
@@ -572,7 +582,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `NSWindowDelegate` を実装し、`windowWillClose(_:)` メソッドでウィンドウが閉じられた際に適切にクリーンアップします。
     * `window.isReleasedWhenClosed = false` を設定し、ウィンドウのライフサイクルを適切に管理します。
   * ✅ **レンダリング**:
-    * `AttributedString(markdown:)` による効率的な Markdown レンダリング。
+    * Textual `StructuredText` による Markdown レンダリング (About / リーガル文書でスタイル分岐)。
 * 総合評価
   * **総合品質**:
     * **良好** - コア機能は高品質に実装されており、基本的な用途には十分に対応可能。
@@ -583,13 +593,15 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 本章では、「今後の予定」を記載します。
 
+### 11.0. 完了済み (参照)
+
+* **バンドル同梱 License / Acknowledgements** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17)・クローズ済み)
+  * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: 2.0.13〜**3.0.1** (Textual・コードブロック折り返し)。
+
 ### 11.1. 短期での改善予定 (1-3ヵ月)
 
 品質保証と開発体験の向上を目的とした改善を、優先的に実施します。
 
-* **バンドル同梱 License / Acknowledgements 表示** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17))
-  * 仕様: [legal_text_spec.md](./legal_text_spec.md)。
-  * `LegalTextLoader` / `LegalTextView`、About からのシート表示、Phase 1〜2。
 * **UI テスト、スナップショット・テストの実装**
   * SnapshotTesting フレームワークの統合と実際のスナップショット検証を実装します。
   * macOS:
@@ -641,8 +653,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 **補足**:
 * 本プロジェクトは Swift Package として他アプリケーションに組み込まれることを前提としているため、Xcode ウィザードで「App」テンプレートを選ぶ必要はありません。
-* macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを .macOS (.v12)、.iOS (.v17) と指定します。
-* また、本リポジトリでは Git サブモジュール [Docs Linter](https://github.com/stein2nd/docs-linter) を導入し、ドキュメント品質 (表記揺れや用語統一) の検証を CI で実施します。
+* macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを macOS v15.0、iOS v18.0と指定します (Textual 依存)。
+* ドキュメント品質 (表記揺れや用語統一) は npm パッケージ [`@s2j/docs-linter`](https://www.npmjs.com/package/@s2j/docs-linter) と `docs-lint.yml` で CI 検証します。
 
 ### 1. テンプレート選択
 
@@ -668,15 +680,15 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 | 項目 | 推奨値 | 理由 |
 |---|---|---|
-| macOS Deployment Target | macOS v12.0以上 | AppKit との互換確保 (NSWindowBridge で使用) |
-| iOS Deployment Target | iPadOS v17.0以上 | SwiftUI `onChange` などの新 API を利用するバージョン |
+| macOS Deployment Target | macOS v15.0以上 | Textual / 公開 API `@available` と一致 |
+| iOS Deployment Target | iPadOS v18.0以上 | Textual / 公開 API `@available` と一致 |
 
 ### 4. 実行確認の環境 (推奨)
 
 | プラットフォーム | 実行確認ターゲット | 理由 |
 |---|---|---|
-| macOS | macOS v13 (Ventura) 以降 | NSWindow の動作確認 |
-| iPadOS | iPadOS v16以降 (iPad Pro シミュレーター) | `.sheet` / `.popover` の UI 挙動確認 |
+| macOS | macOS v15 以降 | NSWindow・リーガルシートの動作確認 |
+| iPadOS | iPadOS v18 以降 (iPad シミュレーター) | `.sheet` / `.popover`・リーガルシートの UI 確認 |
 
 ### 5. CI ワークフロー補足
 

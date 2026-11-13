@@ -2,6 +2,18 @@
 
 ## unreleased
 
+## 3.0.2 - 2026-11-14
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v3.0.1 から v3.0.2 に更新
+* `docs/SPEC.md` / `docs/overview.md` / `docs/architecture.md` を v3.0.x 実装に同期 (最小 OS macOS v15 / iOS v18、Textual、`LegalText*`、Issue #17完了、Markdown 描画の記述更新)
+* `docs/SPEC_CICD.md` を現行 CI に同期 (`docs-lint.yml`、`@s2j/docs-linter`、Runner `macos-26` / `ubuntu-24.04`)
+* `docs/legal_text_spec.md` の公開 API・実装フェーズをコードベースに合わせて更新 (`LegalTextLoadResult`、v3.0.1折り返し)
+* `docs/specs.md` の legal_text 一行に Issue #17完了を追記
+* `scripts/test-local.sh` の `IOS_VERSION` デフォルトを `18.0` に変更 (`Package.swift` と一致)
+* `package.json` の `lint:docs` に `docs/*.md` を明示し、`lint:swift` の前に `xcode:generate` を実行するよう整理
+
 ## 3.0.1 - 2026-11-13
 
 ### Changed

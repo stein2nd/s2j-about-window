@@ -13,7 +13,7 @@
 | [content_spec.md](./content_spec.md) | コンテンツ形式 (Markdown の扱い、フォールバック) (※将来分離時) |
 | [localization_spec.md](./localization_spec.md) | ローカライズ (キー一覧、Bundle.module、AboutDefault.md) (※将来分離時) |
 | [platform_spec.md](./platform_spec.md) | プラットフォーム別挙動 (macOS / iPadOS) (※将来分離時) |
-| [legal_text_spec.md](./legal_text_spec.md) | バンドル同梱 License / Acknowledgements 表示 ([Issue #17](https://github.com/stein2nd/s2j-about-window/issues/17)) |
+| [legal_text_spec.md](./legal_text_spec.md) | バンドル同梱 License / Acknowledgements 表示 ([Issue #17](https://github.com/stein2nd/s2j-about-window/issues/17) 完了・2.0.13〜3.0.1) |
 | [SPEC_CICD.md](./SPEC_CICD.md) | CI/CD 仕様 (ワークフロー・ローカルテスト・カバレッジ) |
 | [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) | 仕様の細分化方針とベター・プラクティス |
 

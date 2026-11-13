@@ -1,6 +1,6 @@
 # S2J About Window - バンドル同梱リーガルテキスト表示
 
-Issue: [#17](https://github.com/stein2nd/s2j-about-window/issues/17)
+Issue: [#17](https://github.com/stein2nd/s2j-about-window/issues/17) (**完了** — 2.0.13〜3.0.1で実装・受け入れ済み)
 
 ホストアプリケーションの About から、バンドル同梱の License / Acknowledgements 長文をオフライン表示する機能の仕様です。  
 設計上の決定経緯は [docs_mod/status.md](../docs_mod/status.md) を参照してください。
@@ -84,11 +84,12 @@ public enum LegalTextContent: Equatable, Sendable {
 /// プレーン長文のスクロール表示 (License および非 Markdown の Acknowledgements)。
 @available(macOS 15.0, iOS 18.0, *)
 public struct LegalTextView: View {
-    public init(content: LegalTextContent, title: String)
+    public init(content: LegalTextContent)
 }
 ```
 
-公開型名: `LegalTextView` / `LegalTextContent` / `LegalTextKind` / `LegalTextLoader`。
+公開型名: `LegalTextView` / `LegalTextContent` / `LegalTextKind` / `LegalTextLoader` / `LegalTextLoadResult`。  
+シートのタイトルは `LegalTextDocumentSheet` (internal) が `navigationTitle` で付与。Acknowledgements の `.md` 表示分岐には `LegalTextLoader.usesMarkdownRendering(kind:result:)` を使用。
 
 ### 4.2. 読み込み (アダプタ)
 
@@ -103,9 +104,11 @@ public enum LegalTextLoader {
         resourceName: String,
         kind: LegalTextKind,
         preferredExtensions: [String]? = nil
-    ) -> LegalTextContent
+    ) -> LegalTextLoadResult
 }
 ```
+
+`LegalTextLoadResult` は `content: LegalTextContent` と `resolvedFileExtension: String?` を保持します。
 
 **探索順 (デフォルト)**:
 
@@ -142,7 +145,7 @@ flowchart TD
     E -->|No| G[非表示]
     C --> H[シート: LegalTextView または MarkdownView]
     F --> H
-    H --> I[LegalTextLoader.load on appear]
+    H --> I[LegalTextLoader.load on sheet .task]
 ```
 
 ボタン配置: About 本文 `MarkdownView` の **下**、著作権表示の上または下 (macOS About パネルに近い **フッター行**)。複数ボタンは `HStack` で **中央寄せ**。
@@ -184,7 +187,7 @@ iOS / iPadOS (`aboutSheet` と同型):
 | `About.LegalText.Title.License` | License | ライセンス |
 | `About.LegalText.Title.Acknowledgements` | Acknowledgements | 謝辞 |
 | `About.LegalText.Empty` | This document is empty. | この文書は空です。 |
-| `About.LegalText.LoadFailed` | Could not load this document from the app bundle. | アプリケーションバンドルからこの文書をロードできませんでした。 |
+| `About.LegalText.LoadFailed` | Could not load this document from the app bundle. | アプリバンドルからこの文書をロードできませんでした。 |
 
 管理場所: 既存どおり `Sources/S2JAboutWindow/Resources/*.lproj/Localizable.strings` (将来 `.xcstrings` 移行は COMMON_SPEC に従う)。
 
@@ -215,10 +218,12 @@ onot 等が生成する **GFM 表**・見出し・コードフェンス付きラ
 
 | Phase | 内容 | 受け入れ |
 | --- | --- | --- |
-| **1** | `LegalTextLoader` + `LegalTextView` + ローカライズ + **Swift Testing** (ローダー) | シート単体で GPL プレーンテキストを表示 |
-| **2** | `AboutView` フッターボタン、引数配線、`AboutWindow` / `aboutSheet` / `aboutPopover`、Acknowledgements `.md` → `MarkdownView`、README 制限明記、SnapshotTesting 検討 | Issue #17 の Must / Should 条件 |
+| **1** | `LegalTextLoader` + `LegalTextView` + ローカライズ + **Swift Testing** (ローダー) | ✅ 完了 — シート単体で GPL プレーンテキストを表示 |
+| **2** | `AboutView` フッターボタン、引数配線、`AboutWindow` / `aboutSheet` / `aboutPopover`、Acknowledgements `.md` → `MarkdownView` (Textual `.gitHub`)、README 制限明記 | ✅ 完了 — Issue #17 の Must / Should 条件 (ホスト実機確認含む) |
 
-**Backlog**: macOS 補助 `NSWindow` による License 表示。XCTest → Swift Testing の既存テスト全面移行 (別 Issue)。
+**3.0.x 追記**: Acknowledgements 内のフェンス付き長文は `MarkdownView` の `overflowMode(.wrap)` で折り返し (3.0.1)。
+
+**Backlog**: macOS 補助 `NSWindow` による License 表示。`LegalTextView` の SnapshotTesting。XCTest → Swift Testing の既存テスト全面移行 (別 Issue)。
 
 ## 8. テスト
 
