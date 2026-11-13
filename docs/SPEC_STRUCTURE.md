@@ -87,7 +87,7 @@ Swift アプリケーションでも、「何を明文化するか」はドメ�
 | **docs/localization_spec.md** | ローカライズ (キー一覧、Bundle.module、AboutDefault.md)。 | §2.1.4、§4.4 |
 | **docs/architecture.md** | コード構造と責務 (MVVM、ファイル別、#if os 方針)。 | §4.2 プロジェクト構成、§4.3 主要ファイル、§2.2.4 |
 | **docs/platform_spec.md** | プラットフォーム別挙動 (macOS / iPadOS)。 | §4.1、AboutWindow / Extensions の仕様 |
-| **docs/SPEC.md** | 実装状況サマリ・Backlog・品質評価・Appendix。要件詳細は上記へ委譲。 | 現行の §10, §11, Appendix を中心に残す |
+| **docs/SPEC.md** | 実装状況サマリ・Backlog・品質評価・Appendix。要件詳細は上記に委譲。 | 現行の §10, §11, Appendix を中心に残す |
 | **docs/SPEC_CICD.md** | CI/CD 仕様。 | 変更なし |
 
 ### 4.2. 改善の効果
@@ -112,5 +112,5 @@ Swift アプリケーションでも、「何を明文化するか」はドメ�
 ## 5. まとめ
 
 * Swift アプリケーションでも、**「存在理由」「API 契約」「ドメインルール」「コード構造」「プラットフォーム差」「リソース定義」** などは、それぞれ1ファイルにまとめておくと、AI 伴走とメンテナンスの両方に有利です。
-* **仕様の起点 (specs.md) を1つ用意** し、そこから各 spec へリンクする構成にすると、参照が安定します。
+* **仕様の起点 (specs.md) を1つ用意** し、そこから各 spec にリンクする構成にすると、参照が安定します。
 * S2J About Window では、上記の表に沿って `overview` / `requirements` / `api_spec` / `content_spec` / `localization_spec` / `architecture` / `platform_spec` を分離し、`SPEC.md` は実装状況・Backlog 中心に残す形が、現実的で効果的な改善になります。
