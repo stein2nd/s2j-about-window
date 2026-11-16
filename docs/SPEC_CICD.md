@@ -1,6 +1,6 @@
 # S2J About Window - CI/CD 仕様
 
-## はじめに
+## はじめに `{@spec_cicd:s-h001}`
 
 * 本ドキュメントでは、Swift Package「S2J About Window」の CI/CD 仕様を定義します。
 * 本プロジェクトの CI/CD 設計は、以下の共通 SPEC に準拠します。
@@ -8,22 +8,22 @@
 * 以下は、本プロジェクト固有の CI/CD 仕様をまとめたものです。
 * 詳細な実装状況については、[SPEC.md](./SPEC.md) を参照。
 
-## 1. 概要
+## 1. 概要 `{@spec_cicd:s1}`
 
 本プロジェクトでは、GitHub Actions を使用して CI/CD パイプラインを構築します。
 
-### 1.1. 実装状況
+### 1.1. 実装状況 `{@spec_cicd:s1-1}`
 
 **実装状況**: ✅ **完全実装済み・テスト成功** - CI/CD ワークフローとローカルテスト・スクリプトの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
 
-### 1.2. 基本方針
+### 1.2. 基本方針 `{@spec_cicd:s1-2}`
 
 * Swift Package のビルド成果物 (バイナリ / XCFramework) は Git 管理対象外です。
 * Universal Binary 化は SwiftPM のビルド・フェーズで自動処理されます。
 * リリース用ビルドは GitHub Actions の CI ワークフローで生成し、Artifacts として管理します。
 * CI/CD 環境 (GitHub Actions など) では bash が標準シェルとして使用されます。
 
-### 1.3. ワークフロー構成
+### 1.3. ワークフロー構成 `{@spec_cicd:s1-3}`
 
 * **Swift Test ワークフロー**: `.github/workflows/swift-test.yml`
   * **トリガー**: `push` および `pull_request` イベント (`main`、`develop` ブランチ)
@@ -35,7 +35,7 @@
   * **実装**: ルートで `npm ci` → `npm run lint:docs` (依存: `@s2j/docs-linter`、設定: `.textlintrc.json`)
   * **実装状況**: ✅ **完全実装済み・テスト成功**
 
-### 1.4. ジョブ構成
+### 1.4. ジョブ構成 `{@spec_cicd:s1-4}`
 
 `swift-test.yml` は、以下の3つのジョブで構成されています。
 
@@ -43,17 +43,17 @@
 2. **`test-ios`**: iOS/iPadOS 向けテスト実行
 3. **`build-release`**: リリースビルド生成
 
-## 2. ジョブ詳細仕様
+## 2. ジョブ詳細仕様 `{@spec_cicd:s2}`
 
-### 2.1. `test-macos` ジョブ
+### 2.1. `test-macos` ジョブ `{@spec_cicd:s2-1}`
 
-#### 2.1.1. 概要
+#### 2.1.1. 概要 `{@spec_cicd:s2-1-1}`
 
 * **目的**: macOS プラットフォーム向けのユニットテストを実行し、テスト・カバレッジを収集します。
 * **実行環境**: `macos-26`
 * **依存関係**: なし (独立実行が可能)
 
-#### 2.1.2. 実行ステップ
+#### 2.1.2. 実行ステップ `{@spec_cicd:s2-1-2}`
 
 1. **Checkout**
    * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
@@ -73,14 +73,14 @@
      * `flags`: `macos`
      * `name`: `macos-coverage`
 
-#### 2.1.3. 期待される結果
+#### 2.1.3. 期待される結果 `{@spec_cicd:s2-1-3}`
 
 * macOS 向けユニットテスト: すべて成功します。
 * テスト・カバレッジ: Codecov に正常にアップロードされます。
 
-### 2.2. `test-ios` ジョブ
+### 2.2. `test-ios` ジョブ `{@spec_cicd:s2-2}`
 
-#### 2.2.1. 概要
+#### 2.2.1. 概要 `{@spec_cicd:s2-2-1}`
 
 * **目的**: iOS/iPadOS プラットフォーム向けのユニットテストを実行し、テスト・カバレッジを収集します。
 * **実行環境**: `macos-26`
@@ -89,14 +89,14 @@
 * **環境変数**:
   * `LOG_DIR`: `/tmp/gha-ios-logs` (出力ログ保存先)
 
-#### 2.2.2. 実行ステップ
+#### 2.2.2. 実行ステップ `{@spec_cicd:s2-2-2}`
 
 1. **Checkout**
    * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
 
 2. **Xcode バージョンの選択 (フォールバック付き)**
    * 優先順位に従って、利用可能な Xcode バージョンを選択します。
-   * **優先順位**: Xcode 26.1 → Xcode 26.0.1 → Xcode 16.4.0
+   * **優先順位**: Xcode v26.1→ v26.0.1→ v16.4.0
    * **実装**: `maxim-lobanov/setup-xcode@v1` を使用し、各バージョンに対して `continue-on-error: true` を設定してフォールバックを実現します。
    * **注意**: 各セットアップ・ステップは失敗を許可し、利用可能な最初のバージョンを使用します。
 
@@ -113,16 +113,16 @@
      * `xcrun simctl list devices available`
    * **出力変数**:
      * `xcode_version`: 検出された Xcode バージョン
-     * `has_ios_26_1`: iOS 26.1 ランタイムが利用可能かどうか
-     * `has_ios_26_0`: iOS 26.0 ランタイムが利用可能かどうか
-     * `has_ios_18_5`: iOS 18.5 ランタイムが利用可能かどうか
+     * `has_ios_26_1`: iOS v26.1ランタイムが利用可能かどうか
+     * `has_ios_26_0`: iOS v26.0ランタイムが利用可能かどうか
+     * `has_ios_18_5`: iOS v18.5ランタイムが利用可能かどうか
 
 5. **Xcode アプリケーションの強制選択 (優先順位付き)**
    * 優先順位に従って、利用可能な Xcode アプリケーションを強制選択します。
    * **優先順位**:
      1. `/Applications/Xcode_26.1.app/Contents/Developer`
      2. `/Applications/Xcode_26.1.0.app/Contents/Developer`
-     3. `/Applications/Xcode.app/Contents/Developer` (26.0.1 またはその他の可能性)
+     3. `/Applications/Xcode.app/Contents/Developer` (26.0.1またはその他の可能性)
      4. `/Applications/Xcode_26.0.app/Contents/Developer`
      5. `/Applications/Xcode_16.4.0.app/Contents/Developer`
    * **実装**: `sudo xcode-select -s` を使用して Xcode を選択します。
@@ -149,7 +149,7 @@
 
 10. **シミュレーター・ランタイムとデバイスの選択 (フォールバック付き)**
     * 優先順位に従って、利用可能な iOS シミュレーター・ランタイムとデバイスを選択します。
-    * **ランタイム優先順位**: iOS 26.1 → iOS 26.0 → iOS 18.5 → 最初に利用可能な iOS ランタイム
+    * **ランタイム優先順位**: iOS v26.1→ v26.0→ v18.5→ 最初に利用可能な iOS ランタイム
     * **デバイス選択**:
       * まず、選択されたランタイムに対応するデバイスを検索します。
       * 見つからない場合は、優先デバイス名 (`iPhone 17`、`iPhone 16e`、`iPhone 16`、`iPad Air`、`iPad Pro`、`iPad (A16)`) から選択します。
@@ -177,7 +177,7 @@
 13. **ランタイムバージョンの抽出と SDK の自動検出**
     * シミュレーターのランタイム・バージョンを抽出します (例: `iOS 26.0` → `26.0`)。
     * `xcodebuild -showsdks` で利用可能な iOS Simulator SDK を確認します。
-    * ランタイム・バージョンと一致する SDK を自動検出します (例: `iphonesimulator26.0` for iOS 26.0)。
+    * ランタイム・バージョンと一致する SDK を自動検出します (例: `iphonesimulator26.0` for iOS v26.0)。
     * 完全一致が見つからない場合は、メジャー・バージョンで一致する SDK を検索します。
     * それでも見つからない場合は、任意の `iphonesimulator` SDK を使用します。
 
@@ -192,13 +192,13 @@
     * 複数のアプローチでテストを実行します。
     * **ストラテジー A**: `xcodebuild test-without-building` (SDK 指定なし、xcodebuild が自動選択)
       * 成功した場合は終了します。
-      * 失敗した場合は、ストラテジー A-2 に進みます。
+      * 失敗した場合は、ストラテジー A-2に進みます。
     * **ストラテジー A-2**: `xcodebuild test-without-building` (検出された SDK を明示的に指定)
       * 成功した場合は終了します。
       * 失敗した場合は、ストラテジー B に進みます。
     * **ストラテジー B**: `xcodebuild test` (SDK 指定なし、xcodebuild が自動選択)
       * 成功した場合は終了します。
-      * 失敗した場合は、ストラテジー B-2 に進みます。
+      * 失敗した場合は、ストラテジー B-2に進みます。
     * **ストラテジー B-2**: `xcodebuild test` (検出された SDK を明示的に指定)
       * 成功した場合は終了します。
     * **共通設定**:
@@ -227,13 +227,13 @@
       * `fail_ci_if_error`: `false` (失敗しても CI を継続)
     * **条件**: `if: ${{ always() }}` (テストが失敗しても実行)
 
-#### 2.2.3. 期待される結果
+#### 2.2.3. 期待される結果 `{@spec_cicd:s2-2-3}`
 
 * iOS/iPadOS 向けユニットテスト: すべて成功します。
 * テスト・カバレッジ: Codecov に正常にアップロードされます (失敗しても CI は継続)。
 * 診断情報: アーティファクトとして保存されます。
 
-#### 2.2.4. 堅牢性の特徴
+#### 2.2.4. 堅牢性の特徴 `{@spec_cicd:s2-2-4}`
 
 * **Xcode バージョンのフォールバック**: 複数の Xcode バージョンを試行し、利用可能な最初のバージョンを使用します。
 * **シミュレーター・ランタイムのフォールバック**: 複数の iOS ランタイムを試行し、利用可能な最初のランタイムを使用します。
@@ -244,15 +244,15 @@
 * **詳細なログ記録**: すべてのステップでログを記録し、アーティファクトとして保存します。
 * **診断情報の常時アップロード**: テストが失敗しても診断情報をアップロードし、問題の特定を容易にします。
 
-### 2.3. `build-release` ジョブ
+### 2.3. `build-release` ジョブ `{@spec_cicd:s2-3}`
 
-#### 2.3.1. 概要
+#### 2.3.1. 概要 `{@spec_cicd:s2-3-1}`
 
 * **目的**: リリース用の Universal Binary をビルドし、ビルド成果物をアーティファクトとして保存します。
 * **実行環境**: `macos-26`
 * **依存関係**: `test-macos` および `test-ios` ジョブが成功した後に実行されます (`needs: [test-macos, test-ios]`)
 
-#### 2.3.2. 実行ステップ
+#### 2.3.2. 実行ステップ `{@spec_cicd:s2-3-2}`
 
 1. **Checkout**
    * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
@@ -269,14 +269,14 @@
    * **アーティファクト名**: `s2j-about-window-build`
    * **パス**: `.build/release/`
 
-#### 2.3.3. 期待される結果
+#### 2.3.3. 期待される結果 `{@spec_cicd:s2-3-3}`
 
 * リリース用: Universal Binary が正常にビルドされます。
 * ビルド成果物: アーティファクトとして保存されます。
 
-### 2.4. `lint-docs` ジョブ (`docs-lint.yml`)
+### 2.4. `lint-docs` ジョブ (`docs-lint.yml`) `{@spec_cicd:s2-4}`
 
-#### 2.4.1. 概要
+#### 2.4.1. 概要 `{@spec_cicd:s2-4-1}`
 
 * **目的**: Markdown ドキュメントの表記揺れ、用語統一、文体チェックを実行します。
 * **ワークフロー**: `.github/workflows/docs-lint.yml` (Swift Test とは別ファイル)
@@ -284,66 +284,66 @@
 * **実行環境**: `ubuntu-24.04`
 * **依存関係**: なし (独立実行が可能)
 
-#### 2.4.2. 実行ステップ
+#### 2.4.2. 実行ステップ `{@spec_cicd:s2-4-2}`
 
 1. **Checkout** — `actions/checkout@v5` (サブモジュール不要)
 2. **Setup Node.js** — `actions/setup-node@v5`、`node-version: "24"`
 3. **Install dependencies** — リポジトリルートで `npm ci`
 4. **Run Docs Linter** — `npm run lint:docs` (`package.json` の `lint:docs` スクリプト)
 
-#### 2.4.3. 対象ファイル
+#### 2.4.3. 対象ファイル `{@spec_cicd:s2-4-3}`
 
 `npm run lint:docs` が指定するパス (例):
 
 * `./README.md`、`./CHANGELOG.md`
 * `./docs/*.md`、`./docs/**/*.md`
 
-#### 2.4.4. 使用する textlint 設定
+#### 2.4.4. 使用する textlint 設定 `{@spec_cicd:s2-4-4}`
 
 * **npm パッケージ**: `@s2j/docs-linter` (`package.json` / `package-lock.json`)
 * **プロジェクト設定**: ルート `.textlintrc.json` (Swift プリセットを `extends`)
 * **プリセット実体**: `node_modules/@s2j/docs-linter/presets/swift/.textlintrc.swift.json` など
 
-#### 2.4.5. 期待される結果
+#### 2.4.5. 期待される結果 `{@spec_cicd:s2-4-5}`
 
 * 対象 Markdown が textlint でチェックされ、違反があるとジョブが失敗します。
 
-#### 2.4.6. 実装状況
+#### 2.4.6. 実装状況 `{@spec_cicd:s2-4-6}`
 
 **実装状況**: ✅ **完全実装済み・テスト成功** — `docs-lint.yml` / ルート npm 構成で運用
 
 * 旧構成 (`tools/docs-linter` Git サブモジュール専用) は廃止。ローカルも `npm run lint:docs` で CI と同じコマンドを実行可能。
 
-## 3. ローカルテスト・スクリプト
+## 3. ローカルテスト・スクリプト `{@spec_cicd:s3}`
 
-### 3.1. 概要
+### 3.1. 概要 `{@spec_cicd:s3-1}`
 
-**実装状況**: ✅ **完全実装済み** - `scripts/test-local.sh` の統合版実装完了
+**実装状況**: ✅ **完全実装済み** - `scripts/test-local.sh` の統合版の実装完了
 
 * **スクリプト**: `scripts/test-local.sh`
 * **目的**: コミット前に CI/CD と同じテストをローカルで実行します。
 * **汎用性**: 他の Swift Package Manager プロジェクトでも使用可能
 * **互換性**: CI/CD 環境 (bash) とローカル環境 (zsh) の両方で動作します。
 
-### 3.2. 実行方法
+### 3.2. 実行方法 `{@spec_cicd:s3-2}`
 
 * **直接実行**: `./scripts/test-local.sh [オプション]` (macOS では zsh から実行可能)
 * **npm スクリプトから実行**: `npm run test:local -- [オプション]`
 
-### 3.3. 設定の優先順位
+### 3.3. 設定の優先順位 `{@spec_cicd:s3-3}`
 
 1. コマンドライン引数
 2. 自動検出 (Package.swift から)
 3. 環境変数
 4. デフォルト値
 
-### 3.4. 自動検出機能
+### 3.4. 自動的な検出機能 `{@spec_cicd:s3-4}`
 
 * `Package.swift` からパッケージ名とライブラリ名を自動検出
 * Xcode プロジェクト名の自動検出 (`.xcodeproj` ディレクトリまたは `project.yml` から)
 * iOS シミュレーター・デバイスの自動検出
 
-### 3.5. コマンドライン引数によるカスタマイズ
+### 3.5. コマンドライン引数によるカスタマイズ `{@spec_cicd:s3-5}`
 
 * `-s, --scheme-name <name>`: Xcode スキーム名
 * `-d, --ios-device <device>`: iOS/iPadOS シミュレーター・デバイス名
@@ -354,25 +354,25 @@
 * `--xcodegen-auto-install`: `xcodegen` を自動インストール
 * `-h, --help`: ヘルプを表示
 
-### 3.6. 環境変数によるカスタマイズ
+### 3.6. 環境変数によるカスタマイズ `{@spec_cicd:s3-6}`
 
 引数と自動検出が優先されます。
 
 * `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
 * `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
-* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "18.0" — `Package.swift` の iOS 18.0 と揃える。`scripts/test-local.sh` のフォールバックも 18.0)
+* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "18.0" — `Package.swift` の iOS v18.0とそろえる。`scripts/test-local.sh` のフォールバックも v18.0)
 * `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
 * `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効化 (デフォルト: `project.yml` が存在する場合に自動有効化)
 * `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
 * `XCODEGEN_AUTO_INSTALL`: `xcodegen` を自動インストールする場合は "true" (デフォルト: "false")
 
-### 3.7. 実行内容
+### 3.7. 実行内容 `{@spec_cicd:s3-7}`
 
-#### 3.7.1. Swift Package テスト (macOS)
+#### 3.7.1. Swift Package テスト (macOS) `{@spec_cicd:s3-7-1}`
 
 * `swift test --enable-code-coverage` を実行します。
 
-#### 3.7.2. Xcode プロジェクトの生成とテスト (オプション)
+#### 3.7.2. Xcode プロジェクトの生成とテスト (オプション) `{@spec_cicd:s3-7-2}`
 
 `project.yml` が存在する場合に実行されます。
 
@@ -383,46 +383,46 @@
   * 専用スキームが存在しない場合: 統合スキーム (`S2JAboutWindow`) を使用します。
 * `xcodebuild test -project <project> -scheme <scheme> -destination 'platform=macOS'` でテストを実行します。
 
-#### 3.7.3. iOS/iPadOS シミュレーターの確認とテスト (オプション)
+#### 3.7.3. iOS/iPadOS シミュレーターの確認とテスト (オプション) `{@spec_cicd:s3-7-3}`
 
 * 利用可能なシミュレーターを確認します。
 * **デバイス ID の取得**: UUID 形式 (8-4-4-4-12) で正しく抽出
-* **シミュレーターの起動**: 既に起動済みの場合はスキップ、未起動の場合は自動起動します。
+* **シミュレーターの起動**: すでに起動済みの場合はスキップ、未起動の場合は自動起動します。
 * iOS/iPadOS 向けビルドの確認 (`swift build -Xswiftc -sdk ... -Xswiftc -target ...`)
 * Swift Package として `xcodebuild test` を試行
 * Xcode プロジェクトが存在する場合は、Xcode プロジェクトとしても `xcodebuild test` を試行 (プラットフォーム専用スキームを自動選択)
 
-#### 3.7.4. エラー・ハンドリング
+#### 3.7.4. エラー・ハンドリング `{@spec_cicd:s3-7-4}`
 
 * **詳細なエラー・メッセージとデバッグ情報の表示**: 各ステップで適切なログとエラーメッセージを出力
 
-### 3.8. CI/CD との整合性
+### 3.8. CI/CD との整合性 `{@spec_cicd:s3-8}`
 
 * **macOS テスト**: `swift test --enable-code-coverage` を実行します (CI/CD と同じ)。
 * **iOS テスト**: Xcode プロジェクトの生成、シミュレーターの起動、`xcodebuild test` の実行を実施します (CI/CD と同じ)。
 
-## 4. テスト・カバレッジ
+## 4. テスト・カバレッジ `{@spec_cicd:s4}`
 
-### 4.1. カバレッジ収集
+### 4.1. カバレッジ収集 `{@spec_cicd:s4-1}`
 
 * **macOS**: `swift test --enable-code-coverage` でカバレッジを収集します。
 * **iOS**: `xcodebuild test -enableCodeCoverage YES` でカバレッジを収集します。
 
-### 4.2. カバレッジ・アップロード
+### 4.2. カバレッジ・アップロード `{@spec_cicd:s4-2}`
 
 * **サービス**: Codecov
 * **macOS カバレッジ**: `flags: macos`、`name: macos-coverage`
 * **iOS カバレッジ**: `flags: ios`、`name: ios-coverage`、`fail_ci_if_error: false`
 
-## 5. ビルド成果物
+## 5. ビルド成果物 `{@spec_cicd:s5}`
 
-### 5.1. リリース・ビルド
+### 5.1. リリース・ビルド `{@spec_cicd:s5-1}`
 
 * **パス**: `.build/release/`
 * **形式**: Universal Binary (Swift Package Manager が自動生成)
 * **アーティファクト名**: `s2j-about-window-build`
 
-### 5.2. 診断情報
+### 5.2. 診断情報 `{@spec_cicd:s5-2}`
 
 * **パス**: `/tmp/gha-ios-logs` (iOS テスト・ジョブのみ)
 * **アーティファクト名**: `ios-test-diagnostics`
@@ -434,21 +434,21 @@
   * テスト実行ログ
   * 結果バンドル (`result.xcresult`)
 
-## 6. エラー・ハンドリング
+## 6. エラー・ハンドリング `{@spec_cicd:s6}`
 
-### 6.1. テスト失敗時の動作
+### 6.1. テスト失敗時の動作 `{@spec_cicd:s6-1}`
 
 * **macOS テスト**: テストが失敗した場合、ジョブは失敗します。
 * **iOS テスト**: テストが失敗した場合、診断情報がアーティファクトとして保存され、CI は失敗します。
 * **カバレッジ・アップロード**: iOS テストのカバレッジ・アップロードが失敗した場合でも、CI は継続します (`fail_ci_if_error: false`)。
 
-### 6.2. ビルド失敗時の動作
+### 6.2. ビルド失敗時の動作 `{@spec_cicd:s6-2}`
 
 * **リリース・ビルド**: ビルドが失敗した場合、ジョブは失敗します。
 
-## 7. 実装状況
+## 7. 実装状況 `{@spec_cicd:s7}`
 
-### 7.1. 完全実装済み機能
+### 7.1. 完全実装済み機能 `{@spec_cicd:s7-1}`
 
 以下の機能は完全に実装され、テストも完了しています。
 
@@ -456,7 +456,7 @@
   * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了・テスト成功)
   * `test-macos` ジョブ: macOS 向けテスト実行とカバレッジ収集
   * `test-ios` ジョブ: iOS/iPadOS 向けテスト実行とカバレッジ収集
-    * ランタイム・バージョンの抽出と SDK の自動検出機能 (✅実装完了)
+    * ランタイム・バージョンの抽出と SDK の自動的な検出機能 (✅実装完了)
     * デスティネーション構築の改善 (OS バージョンを指定せず、UDID のみを使用) (✅実装完了)
     * テスト実行の優先順位の最適化 (SDK を指定せずに実行を優先) (✅実装完了)
     * 診断情報の常時アップロード (`if: always()` を追加) (✅実装完了)
@@ -466,10 +466,10 @@
 * **ローカルテスト・スクリプト**:
   * `scripts/test-local.sh`: コミット前に CI/CD と同じテストをローカルで実行 (✅100% 実装完了)
   * 汎用的で、他の Swift Package Manager プロジェクトでも使用可能
-  * プラットフォーム専用スキームの自動選択機能
+  * プラットフォーム専用スキームの自動選択の機能
   * シミュレーター管理の改善 (デバイス ID の取得、起動状態の確認)
 
-### 7.2. 実装完了率
+### 7.2. 実装完了率 `{@spec_cicd:s7-2}`
 
 **CI/CD**: 100% 実装完了・テスト成功
 
@@ -477,23 +477,23 @@
 * GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
 * GitHub Actions「Docs Linter」ワークフローが正常に動作し、すべてのチェックが成功
 
-## 8. 今後の改善予定
+## 8. 今後の改善予定 `{@spec_cicd:s8}`
 
-### 8.1. 短期での改善予定 (1-3ヵ月)
+### 8.1. 短期での改善予定 (1-3ヵ月) `{@spec_cicd:s8-1}`
 
 * **テスト・カバレッジの向上**: 現在のテスト・カバレッジを向上させ、目標値 (70%以上) を達成します。
 * **UI テストの追加**: SnapshotTesting フレームワークを使用した UI テストを追加します。
 
-### 8.2. 中期での改善予定 (3-6ヵ月)
+### 8.2. 中期での改善予定 (3-6ヵ月) `{@spec_cicd:s8-2}`
 
 * **並列実行の最適化**: `test-macos` と `test-ios` ジョブを並列実行し、CI 時間を短縮します。
 * **キャッシュの活用**: Swift Package の依存関係をキャッシュし、ビルド時間を短縮します。
 
 ---
 
-## Appendix A: ワークフロー設定の詳細
+## Appendix A: ワークフロー設定の詳細 `{@spec_cicd:s-appendix-a}`
 
-### A.1. トリガー設定
+### A.1. トリガー設定 `{@spec_cicd:s-a}`
 
 ```yaml
 on:
@@ -503,14 +503,14 @@ on:
     branches: [ main, develop ]
 ```
 
-### A.2. ジョブ依存関係
+### A.2. ジョブ依存関係 `{@spec_cicd:s-a-2}`
 
 ```yaml
 build-release:
   needs: [test-macos, test-ios]
 ```
 
-### A.3. 環境変数
+### A.3. 環境変数 `{@spec_cicd:s-a-3}`
 
 ```yaml
 test-ios:
@@ -520,7 +520,7 @@ test-ios:
 
 ---
 
-## Appendix B: 参考資料
+## Appendix B: 参考資料 `{@spec_cicd:s-appendix-b}`
 
 * [GitHub Actions ドキュメント](https://docs.github.com/ja/actions)
 * [Swift Package Manager ドキュメント](https://www.swift.org/package-manager/)

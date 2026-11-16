@@ -1,26 +1,26 @@
 # S2J About Window - DCOAboutWindow - SwiftUI Port
 
-## はじめに
+## はじめに `{@spec:s-h001}`
 
 * 本ドキュメントでは、Swift Package「S2J About Window」の専用仕様を定義します。
 * 本ツールの設計は、以下の共通 SPEC に準拠します。
     * [Swift/SwiftUI 共通仕様](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md)
 * 以下は、本ツール固有の仕様をまとめたものです。
 * CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
-* **仕様の細分化**: プロジェクトの存在理由・コード構造・CI/CD などは別ドキュメントに分割しています。一覧は [specs.md](./specs.md) を参照してください。細分化の方針とベター・プラクティスは [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) に記載しています。
+* **仕様の細分化**: プロジェクトの存在理由、コード構造、CI/CD などは別ドキュメントに分割しています。一覧は [specs.md](./specs.md) を参照してください。細分化の方針とベター・プラクティスは [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) に記載しています。
 
-## 1. プロジェクト概要
+## 1. プロジェクト概要 `{@spec:s1}`
 
 * 名称: S2J About Window
 * Swift Package 名: s2j-about-window
 * 元リポジトリ: [DCOAboutWindow](https://github.com/DangerCove/DCOAboutWindow)
 * 目的: AppKit ベースの「About Window」を SwiftUI で再実装します
-* 対応 OS: macOS v15以上、iPadOS v18以上 (**3.0.0** 以降。 [Textual](https://github.com/gonzalezreal/textual) 利用により最小 OS を引き上げ)
-* バンドル License / Acknowledgements: [legal_text_spec.md](./legal_text_spec.md) (Issue #17 完了、2.0.13〜3.0.1)
+* 対応 OS: macOS v15以上、iPadOS v18以上 (**3.0.0** 以降。[Textual](https://github.com/gonzalezreal/textual) 利用により最小 OS を引き上げ)
+* バンドル License / Acknowledgements: [legal_text_spec.md](./legal_text_spec.md) (Issue #17完了、2.0.13〜3.0.1)
 
 ---
 
-## 2. 要件ゴール
+## 2. 要件ゴール `{@spec:s2}`
 
 **要件レベルの凡例**:
 * **Must (必須)**:
@@ -30,11 +30,11 @@
 * **Could (可能であれば)**:
   * 本プロジェクトの価値を高める要件であり、実装可能であれば追加を検討します。
 
-### 2.1. 機能要件
+### 2.1. 機能要件 `{@spec:s2-1}`
 
 本プロジェクトは、macOS および iPadOS アプリケーション向けの About ウィンドウを提供する SwiftUI ベースのライブラリとして、以下の機能要件を満たす必要があります。
 
-#### 2.1.1. About ウィンドウ表示機能
+#### 2.1.1. About ウィンドウ表示機能 `{@spec:s2-1-1}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: ホスト・アプリケーションから呼び出され、About ウィンドウを表示する機能を提供します。
@@ -43,7 +43,7 @@
   * iPadOS では、Sheet または Popover モーダルとして表示します。
   * ウィンドウを閉じると自動でインスタンスを破棄します。
 
-#### 2.1.2. アプリケーション情報の表示機能
+#### 2.1.2. アプリケーション情報の表示機能 `{@spec:s2-1-2}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: アプリケーションの基本情報 (アプリケーション名、バージョン、著作権) を表示します。
@@ -53,7 +53,7 @@
   * 著作権情報を表示します。
   * アプリケーション・アイコンを自動取得して表示します (macOS のみ)。
 
-#### 2.1.3. コンテンツ表示機能
+#### 2.1.3. コンテンツ表示機能 `{@spec:s2-1-3}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: ホスト・アプリケーションから渡されたコンテンツ (ライセンス情報、その他の説明文など) を表示します。
@@ -63,7 +63,7 @@
   * RTF ドキュメント形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加します)。
   * コンテンツはスクロール可能で、テキスト選択が可能です。
 
-#### 2.1.4. ローカライゼーション対応機能
+#### 2.1.4. ローカライゼーション対応機能 `{@spec:s2-1-4}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: 複数言語 (英語、日本語) に対応したローカライゼーション機能を提供します。
@@ -72,7 +72,7 @@
   * `Bundle.module` 経由で `Localizable.strings` を読み込みます。
   * デフォルト Markdown コンテンツ (`AboutDefault.md`) を用意し、利用側で上書き可能にします。
 
-#### 2.1.5. ダークモード対応機能
+#### 2.1.5. ダークモード対応機能 `{@spec:s2-1-5}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: macOS および iPadOS のダークモードに自動的に適応する機能を提供します。
@@ -80,7 +80,7 @@
   * システムの外観設定に応じて、ライトモード・ダークモードを自動切り替えします。
   * 背景色、テキスト色が適切に表示されるようにします。
 
-#### 2.1.6. プラットフォーム固有 API 利用機能
+#### 2.1.6. プラットフォーム固有 API 利用機能 `{@spec:s2-1-6}`
 
 * **要件レベル**: **Must (必須)**
 * **説明**: macOS と iPadOS それぞれのプラットフォーム固有 API を適切に利用します。
@@ -89,11 +89,11 @@
   * iPadOS では、SwiftUI ネイティブの `.sheet` / `.popover` API のみで構成します。
   * 共有ロジックは `#if canImport(SwiftUI)` ベースで共通化します。
 
-### 2.2. 非機能要件
+### 2.2. 非機能要件 `{@spec:s2-2}`
 
 本プロジェクトは、Swift Package として他アプリケーションに組み込まれることを前提として、以下の非機能要件を満たす必要があります。
 
-#### 2.2.1. 性能・効率性
+#### 2.2.1. 性能・効率性 `{@spec:s2-2-1}`
 
 * **要件レベル**: **Must (必須)**
 * **応答時間**:
@@ -103,7 +103,7 @@
   * About ウィンドウ表示時のメモリ使用量は、追加で10MB 以下に抑えることを目指します。
   * ウィンドウを閉じた際に、メモリリークが発生しないことを目指します。
 
-#### 2.2.2. 互換性
+#### 2.2.2. 互換性 `{@spec:s2-2-2}`
 
 * **要件レベル**: **Must (必須)**
 * **プラットフォーム対応**:
@@ -114,7 +114,7 @@
 * **Xcode バージョン**:
   * Xcode: v26.x 以降を推奨 (CI は v26.5等を使用。Swift v6.3同梱)。
 
-#### 2.2.3. 信頼性
+#### 2.2.3. 信頼性 `{@spec:s2-2-3}`
 
 * **要件レベル**: **Must (必須)**
 * **エラー・ハンドリング**:
@@ -128,7 +128,7 @@
   * リソースファイル (`AboutDefault.md`、`Localizable.strings`) が存在しない場合:
     * エラーを発生させずに動作します。
 
-#### 2.2.4. 保守性
+#### 2.2.4. 保守性 `{@spec:s2-2-4}`
 
 * **要件レベル**: **Must (必須)**
 * **コード品質**:
@@ -139,14 +139,14 @@
   * 設計: ユニットテストが容易に記述できるようにします。
   * Xcode Preview に対応します。
 
-#### 2.2.5. セキュリティ
+#### 2.2.5. セキュリティ `{@spec:s2-2-5}`
 
 * **要件レベル**: **Should (推奨)**
 * **コンテンツの安全性**:
   * Markdown コンテンツに含まれるスクリプトや危険なリンク: 適切に処理します。
   * ユーザーが入力したコンテンツを表示する際: XSS などの脆弱性を、考慮します。
 
-#### 2.2.6. ユーザビリティ
+#### 2.2.6. ユーザビリティ `{@spec:s2-2-6}`
 
 * **要件レベル**: **Must (必須)**
 * **UI / UX**:
@@ -157,7 +157,7 @@
   * VoiceOver などのスクリーンリーダーに対応します (**Should** - 推奨)。
   * キーボード操作で、ウィンドウを閉じることができるようにします (macOS)。
 
-#### 2.2.7. 開発者体験
+#### 2.2.7. 開発者体験 `{@spec:s2-2-7}`
 
 * **要件レベル**: **Should (推奨)**
 * **API の使いやすさ**:
@@ -167,7 +167,7 @@
   * README.md に使用方法を記載します。
   * API リファレンスを整備します (**Could** - 可能であれば)。
 
-#### 2.2.8. テスト・品質保証
+#### 2.2.8. テスト・品質保証 `{@spec:s2-2-8}`
 
 * **要件レベル**: **Must (必須)**
 * **テスト・カバレッジ**:
@@ -180,7 +180,7 @@
   * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
   * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
 
-#### 2.2.9. パッケージング
+#### 2.2.9. パッケージング `{@spec:s2-2-9}`
 
 * **要件レベル**: **Must (必須)**
 * **Swift Package Manager 対応**:
@@ -188,34 +188,34 @@
   * Universal Binary 形式でビルド可能にします。
   * リソースファイル (`AboutDefault.md`、`Localizable.strings`、`Assets.xcassets`) を適切にパッケージングします。
 
-## 3. 準拠仕様
+## 3. 準拠仕様 `{@spec:s3}`
 
-### 3.1. 技術スタック
-
-* [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
-
-### 3.2. 開発ルール
+### 3.1. 技術スタック `{@spec:s3-1}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
-### 3.3. 国際化・ローカライズ
+### 3.2. 開発ルール `{@spec:s3-2}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
-### 3.4. コーディング規約
+### 3.3. 国際化・ローカライズ `{@spec:s3-3}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
-### 3.5. デザイン規約
+### 3.4. コーディング規約 `{@spec:s3-4}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
-### 3.6. テスト方針
+### 3.5. デザイン規約 `{@spec:s3-5}`
+
+* [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
+
+### 3.6. テスト方針 `{@spec:s3-6}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
 
-## 4. 個別要件
+## 4. 個別要件 `{@spec:s4}`
 
 **実装状況**: ✅ **基本機能は実装済み** - コア機能は、実装完了。一部機能は、未実装。
 
@@ -224,7 +224,7 @@
 * ダークモード対応は、必須です。
 * 本プロジェクトは、「Swift Package Manager」によって、Universal Binary 形式の Swift Package ツールとして他アプリケーション (以後、ホスト・アプリケーションと呼称) に組み込まれます。
 * ホスト・アプリケーションからは、下記のいずれかによって呼び出され、「About ウィンドウ」として表示します。
-    * メニューバー ▶︎ 「このアプリケーションについて」のクリック (✅実装済み - ホストアプリケーション側で `AboutWindow().showAboutWindow()` を呼び出し)
+    * 「メニューバー > このアプリケーションについて」のクリック (✅実装済み - ホストアプリケーション側で `AboutWindow().showAboutWindow()` を呼び出し)
     * キー・コンビネーション (command I) のプレス (✅実装済み - ホスト・アプリケーション側で実装)
     * 「アプリケーション情報を表示」ボタンのクリック (✅実装済み - ホスト・アプリケーション側で実装)
 * 「About ウィンドウ」としての表示情報は、下記のとおりです。
@@ -243,7 +243,7 @@
     * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。(✅100% 実装完了 - `Extensions.swift` で `aboutSheet`/`aboutPopover` を実装)
         * 例: `AboutView(content: aboutContent)` を `sheet(isPresented:)` から呼び出す。(✅100% 実装完了)
 
-### 4.1. プラットフォーム固有 API 利用方針
+### 4.1. プラットフォーム固有 API 利用方針 `{@spec:s4-1}`
 
 **実装状況**: ✅ **完全実装済み** - プラットフォーム固有 API の実装完了
 
@@ -253,7 +253,7 @@
 * iPadOS 向けでは、`UIViewControllerRepresentable` を利用せず、SwiftUI のネイティブ `.sheet` / `.popover` API のみで構成します。(✅100% 実装完了 - `Extensions.swift` で実装)
 * 共有ロジック (ViewModel / Markdown レンダリング / リーガルテキスト I/O) は、すべて `#if canImport(SwiftUI)` ベースで共通化します。(✅100% 実装完了)
 
-### 4.2. プロジェクト構成
+### 4.2. プロジェクト構成 `{@spec:s4-2}`
 
 コード構造と各ファイルの責務の詳細は [architecture.md](./architecture.md) を参照してください。
 
@@ -300,9 +300,9 @@
 └── Preview Content/ (⚠️ 未実装)
 ```
 
-### 4.3. 主要ファイルの実装状況
+### 4.3. 主要ファイルの実装状況 `{@spec:s4-3}`
 
-* `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS 15 / iOS 18、リソース設定 (✅100% 実装完了)
+* `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定 (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
   * **ターゲット構成**:
     * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
@@ -322,7 +322,7 @@
 * `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
 * `Resources/Localizable.strings` : 英語・日本語ローカライゼーション (✅100% 実装完了)
 
-### 4.4. アクセシビリティとローカライズ
+### 4.4. アクセシビリティとローカライズ `{@spec:s4-4}`
 
 **実装状況**: ✅ **完全実装済み** - 英語・日本語のローカライゼーション対応完了
 
@@ -331,14 +331,14 @@
 * Markdown のデフォルト文書 (`AboutDefault.md`) を用意し、利用側で上書き可能にします。(✅100% 実装完了)
 * 文字列キー例: `"About.Title"`、`"About.NoDescription"`、`"About.Copyright"`、`"About.Close"`、`"About.Version"`、リーガル用 `About.License.Button` 等 (✅100% 実装完了)
 
-## 5. デザイン規約
+## 5. デザイン規約 `{@spec:s5}`
 
 **実装状況**: ⚠️ **ほぼ実装済み** - ダークモード対応、アプリケーション・アイコン自動取得が完了 (macOS は完全実装、iPadOS は要確認)
 
 * アイコンは App アイコンから自動取得します。(✅100% 実装完了 - `NSApplication.shared.applicationIconImage` を使用、macOS 専用)
 * ダークモード対応は、必須です。(✅100% 実装完了 - macOS: `Color(NSColor.windowBackgroundColor)`、iPadOS: `Color(UIColor.systemBackground)` を使用)
 
-## 6. 使用方法
+## 6. 使用方法 `{@spec:s6}`
 
 **実装状況**: ✅ **完全実装済み** - 使用方法の実装完了
 
@@ -376,7 +376,7 @@ aboutWindow.showAboutWindow(
 )
 ```
 
-## 8. テスト戦略
+## 8. テスト戦略 `{@spec:s8}`
 
 **実装状況**: ⚠️ **実装中** - テストコードの実装が進行中
 
@@ -390,7 +390,7 @@ aboutWindow.showAboutWindow(
 * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
 * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
 
-## 9. CI / CD
+## 9. CI / CD `{@spec:s9}`
 
 CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照。
 
@@ -405,11 +405,11 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 **実装状況**: ✅ **完全実装済み・テスト成功** - CI/CD ワークフローとローカルテスト・スクリプトの実装完了、GitHub Actions「Swift Test」ワークフローと「Docs Linter」ワークフローが正常に動作し、すべてのテストとチェックが成功
 
-## 10. 実装状況サマリー
+## 10. 実装状況サマリー `{@spec:s10}`
 
 本章では、「現在の実装状況」を記載します。
 
-### 10.1. 完全実装済み機能 (100% 完了)
+### 10.1. 完全実装済み機能 (100% 完了) `{@spec:s10-1}`
 
 以下の機能は完全に実装され、テストも完了しています。
 
@@ -488,7 +488,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * **バンドルリーガルテキスト**:
     * `LegalTextLoader` / About フッター / シート表示 — 実装完了 (2.0.13〜3.0.1)。
 
-### 10.2. ほとんど実装済み機能 (85-95% 完了)
+### 10.2. ほとんど実装済み機能 (85-95% 完了) `{@spec:s10-2}`
 
 以下の機能は実装がほぼ完了していますが、一部の機能やテストが未完了です。
 
@@ -501,7 +501,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (プレースホルダーテストのみ)。
   * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
 
-### 10.3. 未実装機能
+### 10.3. 未実装機能 `{@spec:s10-3}`
 
 以下の機能は仕様に記載されていますが、まだ実装されていません。
 
@@ -520,7 +520,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * **Preview Content**:
     * Xcode Preview 用のリソースディレクトリが未作成です。
 
-### 10.4. 実装完了率
+### 10.4. 実装完了率 `{@spec:s10-4}`
 
 **実装完了率の算出方法**:
 * 各機能カテゴリーの実装状況を評価し、重み付け平均で全体の完了率を算出。
@@ -529,7 +529,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 **カテゴリー別完了率**:
 
 | カテゴリー | 完了率 | 備考 |
-|---|---|---|
+| --- | --- | --- |
 | コア機能 | 100% | AboutWindow、AboutView、AboutViewModel、MarkdownView (Textual)、LegalText*、Extensions 実装完了 |
 | プラットフォーム対応 | 100% | macOS と iPadOS の両方で完全実装 (プラットフォーム固有 API を適切に使用) |
 | リソース・ローカライゼーション | 100% | 英語・日本語ローカライゼーション、デフォルトコンテンツ実装完了、`Bundle.module` 経由で適切に読み込み |
@@ -537,9 +537,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | CI/CD | 100% | GitHub Actions ワークフローとローカル・テストスクリプトの実装完了 (詳細は [SPEC_CICD.md](./SPEC_CICD.md) を参照) |
 | コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
 | テスト・品質保証 | 70% | XCTest 基本 + `LegalTextLoaderTests` (Swift Testing)。SnapshotTesting / UI テストは未実装 |
-| バンドルリーガル表示 | 100% | Issue #17 完了 ([legal_text_spec.md](./legal_text_spec.md)) |
+| バンドルリーガル表示 | 100% | Issue #17完了 ([legal_text_spec.md](./legal_text_spec.md)) |
 
-**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォーム対応は完了。JSON/RTF・Snapshot が残り)
+**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォーム対応は完了。JSON/RTF、Snapshot が残り)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
   * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
@@ -548,7 +548,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * 主要な拡張機能 (JSON/RTF サポート) は未実装です。Markdown サポートにより基本的な用途には対応可能です。
 * テストコードについて: 基本的なユニットテストは実装済み。SnapshotTesting による UI テストは未実装。
 
-### 10.5. 品質評価
+### 10.5. 品質評価 `{@spec:s10-5}`
 
 * コード品質
   * ✅ **アーキテクチャー**:
@@ -589,16 +589,16 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * **改善点**:
     * SnapshotTesting による UI テストの実装、JSON/RTF 形式のコンテンツサポート追加により、さらなる品質向上が期待できます。
 
-## 11. Backlog
+## 11. Backlog `{@spec:s11}`
 
 本章では、「今後の予定」を記載します。
 
-### 11.0. 完了済み (参照)
+### 11.0. 完了済み (参照) `{@spec:s11-0}`
 
 * **バンドル同梱 License / Acknowledgements** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17)・クローズ済み)
-  * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: 2.0.13〜**3.0.1** (Textual・コードブロック折り返し)。
+  * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: v2.0.13〜 **v3.0.1** (Textual、コードブロック折り返し)。
 
-### 11.1. 短期での改善予定 (1-3ヵ月)
+### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 
 品質保証と開発体験の向上を目的とした改善を、優先的に実施します。
 
@@ -613,7 +613,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * Xcode Preview 用のリソースディレクトリを作成します。
   * 開発時のプレビュー機能向上を図ります。
 
-### 11.2. 中期での改善予定 (3-6ヵ月)
+### 11.2. 中期での改善予定 (3-6ヵ月) `{@spec:s11-2}`
 
 機能拡張を目的とした改善を実施します。
 
@@ -626,7 +626,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * `NSAttributedString` を利用した RTF レンダリングを実装します。
   * Markdown、JSON と同様に `AboutView` で表示可能にします。
 
-### 11.3. 長期での改善予定 (6ヵ月以上)
+### 11.3. 長期での改善予定 (6ヵ月以上) `{@spec:s11-3}`
 
 高度な機能や UX 向上を目的とした改善を検討します。
 
@@ -647,7 +647,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 ---
 
-## Appendix A: Xcode プロジェクト作成ウィザード推奨選択肢リスト
+## Appendix A: Xcode プロジェクト作成ウィザード推奨選択肢リスト `{@spec:s-appendix-a-xcode}`
 
 * [COMMON_SPEC.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/COMMON_SPEC.md) に準拠します。
 
@@ -656,15 +656,15 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * macOS/iPadOS 両対応の Swift Package として作成する場合は、「Framework」または「Swift Package」テンプレートを使用し、対応プラットフォームを macOS v15.0、iOS v18.0と指定します (Textual 依存)。
 * ドキュメント品質 (表記揺れや用語統一) は npm パッケージ [`@s2j/docs-linter`](https://www.npmjs.com/package/@s2j/docs-linter) と `docs-lint.yml` で CI 検証します。
 
-### 1. テンプレート選択
+### 1. テンプレート選択 `{@spec:s1-2}`
 
 * **Platform**: Multiplatform (macOS、iPadOS)
 * **Template**: Framework または Swift Package
 
-### 2. プロジェクト設定
+### 2. プロジェクト設定 `{@spec:s2-3}`
 
 | 項目 | 推奨値 | 理由 |
-|---|---|---|
+| --- | --- | --- |
 | Product Name | `s2j-about-window` | `SPEC.md` のプロダクト名と一致 |
 | Team | Apple ID に応じて設定 | コード署名のため |
 | Organization Identifier | `com.s2j` | ドメイン逆引き規則、一貫性確保 |
@@ -676,21 +676,21 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | Include Document Group | Off | Document-based App ではない |
 | Source Control | On (Git) | `SPEC.md` / GitHub 運用をリンクさせるため |
 
-### 3. デプロイ設定
+### 3. デプロイ設定 `{@spec:s3-7}`
 
 | 項目 | 推奨値 | 理由 |
-|---|---|---|
+| --- | --- | --- |
 | macOS Deployment Target | macOS v15.0以上 | Textual / 公開 API `@available` と一致 |
 | iOS Deployment Target | iPadOS v18.0以上 | Textual / 公開 API `@available` と一致 |
 
-### 4. 実行確認の環境 (推奨)
+### 4. 実行確認の環境 (推奨) `{@spec:s4-5}`
 
 | プラットフォーム | 実行確認ターゲット | 理由 |
-|---|---|---|
-| macOS | macOS v15 以降 | NSWindow・リーガルシートの動作確認 |
-| iPadOS | iPadOS v18 以降 (iPad シミュレーター) | `.sheet` / `.popover`・リーガルシートの UI 確認 |
+| --- | --- | --- |
+| macOS | macOS v15以降 | NSWindow、リーガルシートの動作確認 |
+| iPadOS | iPadOS v18以降 (iPad シミュレーター) | `.sheet` / `.popover`・リーガルシートの UI 確認 |
 
-### 5. CI ワークフロー補足
+### 5. CI ワークフロー補足 `{@spec:s5-2}`
 
 **実装状況**: ✅ **完全実装済み・テスト成功** - CI ワークフローの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功
 

@@ -1,6 +1,6 @@
 # S2J About Window - アーキテクチャー
 
-## 設計方針
+## 設計方針 `{@architecture:s-h001}`
 
 * **最小 OS**: macOS v15.0、iOS v18.0 (`Package.swift` / `project.yml`、公開 API の `@available` と一致)。
 * **Markdown 依存**: [Textual](https://github.com/gonzalezreal/textual) の `StructuredText` (`MarkdownView`)。
@@ -11,7 +11,7 @@
 * **プラットフォーム固有**:
     * macOS は `NSWindow` / `NSHostingController`、iPadOS は SwiftUI の `.sheet` / `.popover` のみで構成する。
 
-## ディレクトリ・ファイルと責務
+## ディレクトリ・ファイルと責務 `{@architecture:s-h002}`
 
 ```
 Sources/S2JAboutWindow/
@@ -26,7 +26,7 @@ Sources/S2JAboutWindow/
 ```
 
 | ファイル | 責務 |
-|----------|------|
+| --- | --- |
 | **AboutWindow.swift** | macOS 専用。`NSWindow` の生成・表示・閉じる、`NSHostingController` で `AboutView` をホスト、`NSWindowDelegate` でライフサイクル管理。 |
 | **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリケーション名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
 | **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
@@ -35,7 +35,7 @@ Sources/S2JAboutWindow/
 | **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示。`LegalTextDocumentSheet` が About からのシートを担当し、Acknowledgements `.md` は `MarkdownView` に委譲。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
 
-## プラットフォーム分岐のルール
+## プラットフォーム分岐のルール `{@architecture:s-h003}`
 
 * **macOS のみ**:
     * `AboutWindow` クラス、`NSWindow` / `NSHostingController` / `NSApplication.shared.applicationIconImage`、`Color(NSColor.windowBackgroundColor)`。
@@ -44,7 +44,7 @@ Sources/S2JAboutWindow/
 * **共通**:
     * `AboutView`、`AboutViewModel`、`MarkdownView`、`LegalTextView` / `LegalTextLoader`、`Bundle.resourceBundle`、リソース読み込み。
 
-## テスト・プレビュー
+## テスト・プレビュー `{@architecture:s-h004}`
 
 * ユニットテスト:
     * `Tests/S2JAboutWindowTests/AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。
@@ -53,7 +53,7 @@ Sources/S2JAboutWindow/
 * Xcode Preview:
     * `AboutView_Previews`、`MarkdownView_Previews` を `#if DEBUG` で提供。
 
-## 関連ドキュメント
+## 関連ドキュメント `{@architecture:s-h005}`
 
 * 仕様の入口:
     * [specs.md](./specs.md)

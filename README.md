@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.2")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.3")
 ]
 ```
 
@@ -362,11 +362,7 @@ For UI testing with snapshots:
 swift test --enable-code-coverage
 ```
 
-<!-- 
 ### Local Testing Before Commit
- -->
-
-### コミット前のローカルテスト
 
 <!-- 
 Before committing, you can run the same tests that CI/CD will run:
@@ -391,7 +387,7 @@ npm run test:local
 - iOS シミュレーターの確認と起動:
   - 利用可能なシミュレーターを自動検出
   - デバイス ID を UUID 形式で正しく抽出
-  - 既に起動済みの場合はスキップ、未起動の場合は自動起動
+  - すでに起動済みの場合はスキップ、未起動の場合は自動起動
 - iOS テストの実行を試行 (Xcode が利用可能な場合)
 - テスト失敗時の有用なエラー・メッセージの表示
 
@@ -399,7 +395,11 @@ npm run test:local
 
 ### カスタマイズ方法
 
-**優先順位**: 1. コマンドライン引数 ＞ 2. 自動検出 (Package.swift から) ＞ 3. 環境変数 ＞ 4. デフォルト値
+**優先順位**: は、下記の順番です。
+1. コマンドライン引数
+2. 自動検出 (Package.swift から)
+3. 環境変数
+4. デフォルト値
 
 #### コマンドライン引数で指定
 
@@ -441,11 +441,7 @@ SCHEME_NAME="MyPackage" IOS_DEVICE="iPhone 15" IOS_VERSION="16.0" ./scripts/test
 
 ## Development
 
-<!-- 
 ### Project Structure
- -->
-
-### プロジェクト構造
 
 <!-- 
 The project follows a standard Swift Package Manager structure:
@@ -463,11 +459,7 @@ The project follows a standard Swift Package Manager structure:
 * `Tests/` - テストファイル
 * `Package.swift` - パッケージ設定
 
-<!-- 
 ### Setting Up Development Environment
- -->
-
-### 開発環境のセットアップ
 
 <!-- 
 To set up the development environment for this project:
@@ -527,11 +519,7 @@ To set up the development environment for this project:
    swift test
    ```
 
-<!-- 
 ### Building and Testing
- -->
-
-### ビルドとテスト
 
 <!-- 
 To build the project, use:
@@ -546,7 +534,7 @@ swift build
 To run tests with code coverage:
  -->
 
-コード・カバレッジ付きでテストを実行するには、以下のコマンドを実行ししてください。
+コード・カバレッジ付きでテストを実行するには、以下のコマンドを実行してください。
 
 ```zsh
 swift test --enable-code-coverage

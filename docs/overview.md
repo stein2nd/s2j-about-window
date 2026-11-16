@@ -1,6 +1,6 @@
 # S2J About Window - 概要
 
-## 存在理由・スコープ
+## 存在理由・スコープ `{@overview:s-h001}`
 
 * **名称**: S2J About Window
 * **Swift Package 名**: s2j-about-window
@@ -9,7 +9,7 @@
 * **対応 OS**: macOS v15以上、iPadOS v18以上 (3.0.0以降。Textual 利用のため)
 * **主要依存**: [Textual](https://github.com/gonzalezreal/textual) 0.5.0以上 (SPM)
 
-## 準拠仕様
+## 準拠仕様 `{@overview:s-h002}`
 
 本ツールの設計は、以下の共通 SPEC に準拠します。
 
@@ -18,8 +18,8 @@
 技術スタック・開発ルール・国際化・コーディング規約・デザイン規約・テスト方針は、上記 COMMON_SPEC に従います。  
 本リポジトリでは、**プロジェクト固有の仕様**のみを `docs/` 配下の各 spec で定義します。
 
-## 関連ドキュメント
+## 関連ドキュメント `{@overview:s-h003}`
 
 * 仕様の入口・一覧: [specs.md](./specs.md)
-* 要件・実装状況・Backlog: [SPEC.md](./SPEC.md)
+* 要件、実装状況、Backlog: [SPEC.md](./SPEC.md)
 * CI/CD: [SPEC_CICD.md](./SPEC_CICD.md)

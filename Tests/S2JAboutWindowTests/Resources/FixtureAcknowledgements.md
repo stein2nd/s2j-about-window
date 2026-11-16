@@ -7,7 +7,7 @@ This product includes open source software components listed below. The full lic
 ## Components
 
 | Name | Version | License | Copyright |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | CozyBrewApp | 1.0.10 |  |  |
 | s2j-about-window | 2.0.14 | GPL-3.0-or-later |  |
 | s2j-source-list | 2.0.10 | GPL-3.0-or-later |  |
