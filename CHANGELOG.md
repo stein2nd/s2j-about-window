@@ -2,6 +2,19 @@
 
 ## unreleased
 
+## 3.0.4 - 2026-11-20
+
+### Added
+
+* `docs/status.md` に **機能一覧** と **100% 完了条件チェックリスト** (Acknowledgements 同型、`[x]` / `[ ]`、集計行と §ゲート外)
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v3.0.3→ v3.0.4に更新
+* `docs/status.md` — 目的節にチェックリスト追跡を追記。最終更新日を同期
+* `docs/specs.md` クイック参照 — `status.md` の100%節 (`` `{@status:s100}` ``) へのリンクと箇条書き表記を整理
+* `package.json` / `package-lock.json` — `@s2j/docs-linter` を `^1.0.34` に更新し lockfile を再生成
+
 ## 3.0.3 - 2026-11-16
 
 ### Added

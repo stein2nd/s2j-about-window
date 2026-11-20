@@ -76,12 +76,12 @@
 
 ## クイック参照 `{@specs:quick-ref}`
 
-* **「いま何ができて何が残りか」** → [status.md](./status.md) (`` `{@status:s-h005}` `` 付近)
-* **「なぜこのプロジェクトがあるか」** → [overview.md](./overview.md)
-* **「何を Must/Should で作るか」** → [SPEC.md](./SPEC.md) §2, §4
-* **「コードはどこに何を書くか」** → [architecture.md](./architecture.md)
-* **「macOS / iPadOS で何が違うか」** → [SPEC.md](./SPEC.md) §4.1、[architecture.md](./architecture.md)
-* **「CI やローカルテストの仕様」** → [SPEC_CICD.md](./SPEC_CICD.md)
-* **「仕様をどう分割するかの方針」** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)
-* **「License / Acknowledgements をバンドルから表示」** → [legal_text_spec.md](./legal_text_spec.md) (`` `{@legal_text_spec:s1}` `` 付近)
-* **「仕様見出しのタグの付け方」** → 本ファイル `` `{@specs:heading-tags}` `` (リンクは `` `{@specs:heading-tags-anchors}` ``)
+* **いま何ができて何が残りか** → [status.md](./status.md) (`` `{@status:s-h005}` `` / 100% チェックリスト `` `{@status:s100}` ``)
+* **なぜこのプロジェクトがあるか** → [overview.md](./overview.md)
+* **何を Must/Should で作るか** → [SPEC.md](./SPEC.md) §2, §4
+* **コードはどこに何を書くか** → [architecture.md](./architecture.md)
+* **macOS / iPadOS で何が違うか** → [SPEC.md](./SPEC.md) §4.1、[architecture.md](./architecture.md)
+* **CI やローカルテストの仕様** → [SPEC_CICD.md](./SPEC_CICD.md)
+* **仕様をどう分割するかの方針** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)
+* **License / Acknowledgements をバンドルから表示** → [legal_text_spec.md](./legal_text_spec.md) (`` `{@legal_text_spec:s1}` `` 付近)
+* **仕様見出しのタグの付け方** → 本ファイル `` `{@specs:heading-tags}` `` (リンクは `` `{@specs:heading-tags-anchors}` ``)
