@@ -413,6 +413,9 @@
 | `npm run lint:swiftformat` | SwiftFormat lint |
 | `npm run lint:periphery` | Periphery (`retain_swift_ui_previews: true` で `PreviewProvider` / `PreviewContent` を保持) |
 | `npm run lint:swift` | 上記を直列実行 |
+| `swift test` | macOS: XCTest + Snapshot (`AboutViewSnapshotTests`)。参照画像の更新は初回失敗後に `__Snapshots__/` をコミット |
+
+**iOS テスト** (`test-ios` ジョブ): `xcodebuild test` により `AboutSheetInspectorTests` (ViewInspector) を含むテストバンドルを実行。
 
 ## 4. テスト・カバレッジ `{@spec_cicd:s4}`
 
@@ -495,7 +498,7 @@
 ### 8.1. 短期での改善予定 (1-3ヵ月) `{@spec_cicd:s8-1}`
 
 * **テスト・カバレッジの向上**: 現在のテスト・カバレッジを向上させ、目標値 (70%以上) を達成します。
-* **UI テストの追加**: SnapshotTesting フレームワークを使用した UI テストを追加します。
+* **UI テストの拡張**: `NSWindow` / `LegalTextView` の Snapshot (参照画像の手順は [README.md](../README.md) の Testing 節に記載済み)。
 
 ### 8.2. 中期での改善予定 (3-6ヵ月) `{@spec_cicd:s8-2}`
 

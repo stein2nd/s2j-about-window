@@ -7,7 +7,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.5** |
+| リリース (npm / ドキュメント基準) | **3.0.6** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -50,7 +50,7 @@
 | CI/CD | 100% | `swift-test.yml`、`docs-lint.yml` |
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift` |
 | コンテンツ形式 (JSON/RTF) | 33% | Markdown のみ |
-| テスト・品質保証 | 70% | XCTest + Swift Testing。Snapshot 未 |
+| テスト・品質保証 | 85% | XCTest + Snapshot + Swift Testing (iOS: ViewInspector) |
 | **全体 (概算)** | **約88%** | コアとリーガルは完了 |
 
 **完了条件列:** 100% 到達用チェックリスト。`[x]` = 満たし済み、`[ ]` = 未。各§のアンカーが正本。実装％は当該§の `[x]` 数 ÷ 全項目数 (仕様行・[§ゲート外](#status-gates)を除く)。
@@ -64,13 +64,13 @@
 | バンドル License / Acknowledgements | 実装済み | 100 | [§リーガル](#status-legal) (5/5) |
 | プラットフォーム・ローカライズ | 実装済み | 100 | [§プラットフォーム](#status-platform) (4/4) |
 | CI ・ユニットテスト | 実装済み | 100 | [§CI・単体](#status-quality-unit) (6/6) |
-| Snapshot / UI テスト | 未 | 0 | [§Snapshot と UI](#status-quality-ui) (0/2) |
+| Snapshot / UI テスト | 実装済み | 100 | [§Snapshot と UI](#status-quality-ui) (2/2) |
 | コンテンツ形式 (Should) | 部分 | 33 | [§Should コンテンツ](#status-should-content) (1/3) |
 | 開発体験 (Preview 等) | 実装済み | 100 | [§開発体験](#status-devx) (1/1) |
 
 **Must 範囲 (上表の先頭5行):** **100%** — SPM ライブラリとしてホストに組込み可能な水準。
 
-**全体 (Should と Snapshot 含む):** チェックリスト **34項目中30項目** ≒ **約88%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
+**全体 (Should と Snapshot 含む):** チェックリスト **34項目中32項目** ≒ **約94%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
 
 ## 100% 完了条件チェックリスト `{@status:s100}`
 
@@ -125,12 +125,12 @@
 * [x] `npm run lint:docs` が `docs/**/*.md` を対象
 * [x] `npm run lint:swift` (SwiftLint / SwiftFormat / Periphery)
 
-### Snapshot と UI テスト `{@status:s-snapshot-ui}`
+### Snapshot と UI テスト {#status-quality-ui} `{@status:s-snapshot-ui}`
 
-正本: [SPEC.md](./SPEC.md) §11.1
+正本: [SPEC.md](./SPEC.md) §11.0、`Package.swift` (テスト依存のみ)
 
-* [ ] SnapshotTesting 統合と About 画面のスナップショット
-* [ ] iPadOS `.sheet` の UI 検証 (ViewInspector 等)
+* [x] SnapshotTesting 統合と About 画面のスナップショット (`AboutViewSnapshotTests`、`__Snapshots__/AboutViewSnapshotTests/*.png` 2件、macOS は `NSHostingView`、`AboutViewTests` の旧プレースホルダは撤去)
+* [x] iPadOS `.sheet` の UI 検証 (`AboutSheetInspectorTests` + ViewInspector — `test-ios` ジョブ。ローカル macOS `swift test` では未実行)
 
 ### Should コンテンツ形式 `{@status:s-should}`
 
@@ -154,7 +154,7 @@
 | G2 | 見出しタグ `<a id>` の自動挿入 (v0.2) | [specs.md](./specs.md) `{@specs:heading-tags-anchors}` |
 | G3 | カスタムテーマ・アニメーション・外部翻訳 API | [SPEC.md](./SPEC.md) §11.3 |
 
-**補足:** スナップショット表の **約88%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストの **約88%** は上記§の機械的な `[x]` 比率。
+**補足:** スナップショット表の **約88%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストの **約94%** は上記§の機械的な `[x]` 比率。
 
 ## 直近マイルストーン `{@status:s-h017}`
 
@@ -167,6 +167,7 @@
 | 3.0.3 | `docs/status.md`、見出しタグツール、ドキュメント整備 |
 | 3.0.4 | 100% 完了条件チェックリスト、`@s2j/docs-linter` 1.0.34 |
 | 3.0.5 | `Preview Content/`、Canvas プレビュー、開発体験チェックリスト100% |
+| 3.0.6 | Snapshot / ViewInspector 初版、`Package.swift` テスト依存、仕様同期 |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 
@@ -174,7 +175,7 @@
 
 | 項目 | 状態 | メモ |
 | --- | --- | --- |
-| SnapshotTesting / UI テスト | 未 | プレースホルダーのみ |
+| SnapshotTesting / UI テスト | 済 | `AboutViewSnapshotTests` / `AboutSheetInspectorTests` |
 | JSON / RTF コンテンツ | 未 | Should、Markdown で代替可 |
 | 見出しタグ: リンク用 `<a id>` 自動化 | 検討 | 規約 v0.2 ([specs.md](./specs.md) `{@specs:heading-tags-anchors}`) |
 | macOS 補助 `NSWindow` で License | Backlog | 初版は `.sheet` 統一 |

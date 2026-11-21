@@ -174,8 +174,8 @@
   * 主要な機能 (AboutWindow、AboutView、AboutViewModel、MarkdownView) のユニットテストを実装します。
   * テスト・カバレッジ目標: 70% 以上です。
 * **UI テスト**:
-  * SnapshotTesting フレームワークを使用した UI テストを実装します (**Should** - 推奨)。
-  * macOS と iPadOS それぞれのプラットフォームで、UI テストを実施します。
+  * SnapshotTesting を用いた About 画面の UI テスト (**Should** — 実装済み: `AboutViewSnapshotTests`)。`LegalTextView` / macOS `NSWindow` 全体は Backlog。
+  * macOS: `NSHostingView` 経由の画像スナップショット。iPadOS: ViewInspector による `aboutSheet` 検証 (`AboutSheetInspectorTests`、CI `test-ios`)。
 * **CI/CD でのテスト実行**:
   * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
   * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
@@ -294,16 +294,18 @@
 │　　└─ ja.lproj/Localizable.strings  # ローカライゼーション (✅100% 実装完了)
 ├┬─ Tests/
 │└┬─ S2JAboutWindowTests/  # テストコード
-│　├─ AboutViewTests.swift (✅ 基本 XCTest 完了、Snapshot 検証は未)
+│　├─ AboutViewTests.swift (✅ XCTest)
+│　├─ AboutViewSnapshotTests.swift (✅ SnapshotTesting / 参照画像あり)
+│　├─ AboutSheetInspectorTests.swift (✅ iOS: ViewInspector + `aboutSheet`)
 │　├─ LegalTextLoaderTests.swift (✅ Swift Testing)
-│　└─ Resources/  # ローダー用フィクスチャ (.txt / .md)
-├── UITests/ (⚠️ 未実装)
+│　├─ Resources/  # ローダー用フィクスチャ (.txt / .md)
+│　└─ __Snapshots__/AboutViewSnapshotTests/  # 参照 PNG (`testAboutViewSnapshot_light` 等)
 └── Preview Content/  # Xcode Canvas 用 Markdown (`AboutPreview.md` 等) (✅ 実装完了)
 ```
 
 ### 4.3. 主要ファイルの実装状況 `{@spec:s4-3}`
 
-* `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定 (✅100% 実装完了)
+* `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定。テストのみ `swift-snapshot-testing` / ViewInspector (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
   * **開発アセット**: `S2JAboutWindow-macOS` / `iOS` に `DEVELOPMENT_ASSET_PATHS: "Preview Content"` (Canvas 専用、リリースバイナリには含めない)。
   * **ターゲット構成**:
@@ -382,13 +384,14 @@ aboutWindow.showAboutWindow(
 
 ## 8. テスト戦略 `{@spec:s8}`
 
-**実装状況**: ⚠️ **実装中** - テストコードの実装が進行中
-
-* テスト: ライセンス表示部分は SnapshotTesting を実施します。(⚠️ 実装中)
+**実装状況**: ✅ **基本完了** — XCTest / Swift Testing / Snapshot (macOS) / ViewInspector (iOS) を実装。`LegalTextView` 専用 Snapshot と `NSWindow` 全体は Backlog。
 
 **UI テスト環境**:
-* macOS: `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting を実施します。(⚠️ 実装中)
-* iPadOS: `.sheet` 表示を `XCTest` + `ViewInspector` で検証可能にします。(⚠️ 実装中)
+* macOS: `AboutViewSnapshotTests` が `NSHostingView` 経由で `AboutView` / `MarkdownView` を画像比較 (`precision: 0.98`)。`withSnapshotTesting(record: .missing)` で参照 PNG 未存在時に記録。SwiftUI を直接 `.image(layout:)` せず、各テストメソッド内で `assertSnapshot` を呼ぶ (ヘルパー経由だとスナップショット名が衝突しうる)。
+* ローカル `swift test` (macOS): 画像スナップショットは **二件** (`AboutView` / `MarkdownView`) と `AboutViewTests` — `AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
+* iPadOS: `AboutSheetInspectorTests` が ViewInspector で `aboutSheet` 内の `AboutView` を検証 (CI `test-ios` / XcodeGen iOS テストバンドル)。
+* macOS `NSWindow` 全体のスナップショットは Backlog (View スナップショットで代替)。
+* `AboutViewTests` にあった Snapshot 用プレースホルダは削除済み (正本は `AboutViewSnapshotTests`)。
 
 **CI/CD でのテスト実行**:
 * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
@@ -502,13 +505,13 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 以下の機能は実装がほぼ完了していますが、一部の機能やテストが未完了です。
 
 * テストコード
-  * **AboutViewTests.swift** (XCTest): 基本的なユニットテストは実装済み。
+  * **AboutViewTests.swift** (XCTest): ユニットテストのみ (Snapshot プレースホルダは廃止)。
     * ✅ `AboutViewModel` の初期化テスト (デフォルト値、nil 値の両方をテスト)。
-    * ✅ `MarkdownView` の作成テスト。
-    * ✅ `AboutView` の作成テスト。
+    * ✅ `MarkdownView` / `AboutView` の作成テスト。
     * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
-    * ⚠️ **SnapshotTesting フレームワークの統合が未実装** (プレースホルダーテストのみ)。
+  * **AboutViewSnapshotTests.swift** (XCTest + SnapshotTesting): macOS で `testAboutViewSnapshot_light` / `testMarkdownViewSnapshot_light`、参照画像 `__Snapshots__/AboutViewSnapshotTests/*.png`。
   * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
+  * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み。
 
 ### 10.3. 未実装機能 `{@spec:s10-3}`
 
@@ -521,11 +524,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * RTF 形式のパース・表示機能は未実装。
 * テスト・品質保証
   * **UI テスト・スナップショットテスト**:
-    * SnapshotTesting フレームワークの統合と実際のスナップショット検証が未実装。
-      * macOS:
-        * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します。
-      * iPadOS:
-        * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
+    * macOS `NSWindow` 単体の Snapshot は未実装 (View スナップショットは完了)。
 
 ### 10.4. 実装完了率 `{@spec:s10-4}`
 
@@ -543,18 +542,18 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | UI/UX 機能 | 100% | macOS と iPadOS の両方でダークモード・アプリケーション・アイコン自動取得を実装完了 |
 | CI/CD | 100% | GitHub Actions ワークフローとローカル・テストスクリプトの実装完了 (詳細は [SPEC_CICD.md](./SPEC_CICD.md) を参照) |
 | コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
-| テスト・品質保証 | 70% | XCTest 基本 + `LegalTextLoaderTests` (Swift Testing)。SnapshotTesting / UI テストは未実装 |
+| テスト・品質保証 | 85% | XCTest + Snapshot (`AboutViewSnapshotTests`) + Swift Testing + iOS ViewInspector。`NSWindow` スナップショットは Backlog |
 | バンドルリーガル表示 | 100% | Issue #17完了 ([legal_text_spec.md](./legal_text_spec.md)) |
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift`、詳細は [status.md](./status.md) §開発体験 |
 
-**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォームと Canvas は完了。JSON/RTF、Snapshot が残り)
+**全体実装の完了率**: **約90%** (コア・リーガル・ Canvas ・ 基本 Snapshot は完了。JSON/RTF、`NSWindow` スナップショットが残り)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
   * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
 * プラットフォーム対応は、100% 実装完了 (macOS と iPadOS の両方で完全実装)。
 * CI/CD は、100% 実装完了・テスト成功 (GitHub Actions ワークフローとローカル・テストスクリプトの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功)。
 * 主要な拡張機能 (JSON/RTF サポート) は未実装です。Markdown サポートにより基本的な用途には対応可能です。
-* テストコードについて: 基本的なユニットテストは実装済み。SnapshotTesting による UI テストは未実装。
+* テストコードについて: XCTest ・ Snapshot ・ ViewInspector (iOS) を実装済み。`LegalTextView` / `NSWindow` の追加スナップショットは Backlog。
 
 ### 10.5. 品質評価 `{@spec:s10-5}`
 
@@ -577,8 +576,10 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * テスト品質
   * ✅ **ユニットテスト**:
     * `AboutViewTests.swift` (XCTest) と `LegalTextLoaderTests.swift` (Swift Testing)。
-  * ⚠️ **UI テスト**:
-    * SnapshotTesting フレームワークの統合が未実装です。
+  * ✅ **UI テスト (基本)**:
+    * `AboutView` / `MarkdownView` の画像スナップショットと iOS `aboutSheet` の ViewInspector。
+  * ⚠️ **UI テスト (拡張)**:
+    * `NSWindow` / `LegalTextView` の Snapshot は未実装です。
   * ⚠️ **テスト・カバレッジ**:
     * 現時点では基本的なテストのみで、カバレッジは限定的です。
 * 国際化・ローカライゼーション
@@ -597,7 +598,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * **総合品質**:
     * **良好** - コア機能は高品質に実装されており、基本的な用途には十分に対応可能。
   * **改善点**:
-    * SnapshotTesting による UI テストの実装、JSON/RTF 形式のコンテンツサポート追加により、さらなる品質向上が期待できます。
+    * `NSWindow` / `LegalTextView` の Snapshot 拡張、JSON/RTF コンテンツ、テスト・カバレッジの向上により、さらなる品質向上が期待できます。
 
 ## 11. Backlog `{@spec:s11}`
 
@@ -608,18 +609,15 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * **バンドル同梱 License / Acknowledgements** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17)・クローズ済み)
   * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: v2.0.13〜 **v3.0.1** (Textual、コードブロック折り返し)。
 * **Preview Content** — `Preview Content/`、`DEVELOPMENT_ASSET_PATHS`、`PreviewContent.swift` (v3.0.5)。
+* **Snapshot / UI テスト (初版)** — `AboutViewSnapshotTests`、`AboutSheetInspectorTests`、テスト依存 (`swift-snapshot-testing` / ViewInspector)。`NSWindow` スナップショットは未。
 
 ### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 
 品質保証と開発体験の向上を目的とした改善を、優先的に実施します。
 
-* **UI テスト、スナップショット・テストの実装**
-  * SnapshotTesting フレームワークの統合と実際のスナップショット検証を実装します。
-  * macOS:
-    * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します。
-  * iPadOS:
-    * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
-  * テスト・カバレッジを向上させます。
+* **スナップショット拡張・カバレッジ**
+  * `NSWindow` 表示のスナップショット、`LegalTextView` の Light / Dark。
+  * テスト・カバレッジの継続向上。
 
 ### 11.2. 中期での改善予定 (3-6ヵ月) `{@spec:s11-2}`
 

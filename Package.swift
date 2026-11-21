@@ -15,7 +15,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/gonzalezreal/textual", from: "0.5.0")
+        .package(url: "https://github.com/gonzalezreal/textual", from: "0.5.0"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.18.0"),
+        .package(url: "https://github.com/nalexn/ViewInspector", from: "0.10.0")
     ],
     targets: [
         .target(
@@ -27,7 +29,11 @@ let package = Package(
         ),
         .testTarget(
             name: "S2JAboutWindowTests",
-            dependencies: ["S2JAboutWindow"],
+            dependencies: [
+                "S2JAboutWindow",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "ViewInspector", package: "ViewInspector")
+            ],
             resources: [.process("Resources")]
         )
     ]

@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.5")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.6")
 ]
 ```
 
@@ -356,11 +356,13 @@ swift test
 For UI testing with snapshots:
  -->
 
-スナップショットを用いた UI テストの場合。
+スナップショットを用いた UI テストの場合。`AboutViewSnapshotTests` が [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) で参照画像と比較します。
 
 ```zsh
 swift test --enable-code-coverage
 ```
+
+参照画像がない場合、初回は記録用にテストが失敗します。表示が意図どおりなら `Tests/S2JAboutWindowTests/__Snapshots__/` をコミットし、再実行してください。iOS の `aboutSheet` 検証は ViewInspector (`AboutSheetInspectorTests`) で、CI の iOS ジョブで実行します。
 
 ### Local Testing Before Commit
 

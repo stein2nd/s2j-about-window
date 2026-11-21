@@ -2,6 +2,21 @@
 
 ## unreleased
 
+## 3.0.6 - 2026-11-21
+
+### Added
+
+* `Tests/.../AboutViewSnapshotTests.swift` — macOS: `AboutView` / `MarkdownView` の画像スナップショット (`swift-snapshot-testing`、`__Snapshots__/`)
+* `Tests/.../AboutSheetInspectorTests.swift` — iOS: `aboutSheet` 内 `AboutView` の ViewInspector 検証
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v3.0.5→ v3.0.6に更新
+* `AboutViewTests.swift` — Snapshot 用プレースホルダを削除 (`AboutViewSnapshotTests` に集約)
+* `Package.swift` / `Package.resolved` — テストターゲットに `swift-snapshot-testing` と ViewInspector を追加 (ライブラリ製品には非同梱)
+* `docs/status.md` — Snapshot / UI テストチェックリスト **100%** (2/2)、全体進捗を同期
+* `docs/SPEC.md` §8・§10・§11、`docs/architecture.md`、`docs/SPEC_CICD.md`、`docs/specs.md`、`README.md`、`docs/legal_text_spec.md`、`docs_mod/status.md` を Snapshot / ViewInspector 実装に同期
+
 ## 3.0.5 - 2026-11-21
 
 ### Added

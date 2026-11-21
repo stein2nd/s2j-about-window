@@ -83,6 +83,7 @@
 * **Xcode Canvas / Preview Content** → [architecture.md](./architecture.md) テスト・プレビュー、[status.md](./status.md#status-devx)
 * **macOS / iPadOS で何が違うか** → [SPEC.md](./SPEC.md) §4.1、[architecture.md](./architecture.md)
 * **CI やローカルテストの仕様** → [SPEC_CICD.md](./SPEC_CICD.md)
+* **Snapshot / ViewInspector テスト** → [architecture.md](./architecture.md) テスト・プレビュー、[status.md](./status.md#status-quality-ui)
 * **仕様をどう分割するかの方針** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)
 * **License / Acknowledgements をバンドルから表示** → [legal_text_spec.md](./legal_text_spec.md) (`` `{@legal_text_spec:s1}` `` 付近)
 * **仕様見出しのタグの付け方** → 本ファイル `` `{@specs:heading-tags}` `` (リンクは `` `{@specs:heading-tags-anchors}` ``)

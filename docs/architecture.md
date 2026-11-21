@@ -51,9 +51,13 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
 ## テスト・プレビュー `{@architecture:s-h004}`
 
 * ユニットテスト:
-    * `Tests/S2JAboutWindowTests/AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。
-    * `Tests/S2JAboutWindowTests/LegalTextLoaderTests.swift` (Swift Testing: ローダー・拡張子探索・`usesMarkdownRendering`)。
-    * テストリソース: `Tests/S2JAboutWindowTests/Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
+    * `AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。旧 Snapshot プレースホルダは `AboutViewSnapshotTests` へ集約。
+    * `LegalTextLoaderTests.swift` (Swift Testing: ローダー・拡張子探索・`usesMarkdownRendering`)。
+    * テストリソース: `Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
+* Snapshot / UI テスト:
+    * `AboutViewSnapshotTests.swift` — [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)。macOS: `NSHostingView` + `.image(precision: 0.98)`。参照 PNG は `__Snapshots__/AboutViewSnapshotTests/` (2件)。
+    * `AboutSheetInspectorTests.swift` — `#if os(iOS)`。ViewInspector で `aboutSheet` → `AboutView` (`test-ios`)。
+    * テスト依存 (`swift-snapshot-testing` 1.18+、`ViewInspector` 0.10+) は `S2JAboutWindowTests` のみ。
 * Xcode Preview:
     * `AboutView_Previews`、`MarkdownView_Previews` を `#if DEBUG` で提供。
     * リポジトリ直下 `Preview Content/` (`AboutPreview.md` / `MarkdownPreview.md`) を `PreviewContent.swift` が読み込み。XcodeGen は `DEVELOPMENT_ASSET_PATHS` を設定。
