@@ -44,9 +44,12 @@ jobs:
           fi
 
       - name: Record AboutView snapshot references
-        run: swift test --filter AboutViewSnapshotTests
-        env:
-          SNAPSHOT_TESTING_RECORD: all
+        # assertSnapshot は record 時も XCTest を失敗させるため、PNG 生成後に成功判定する
+        run: |
+          set +e
+          SNAPSHOT_TESTING_RECORD=all swift test --filter AboutViewSnapshotTests
+          test -f Tests/S2JAboutWindowTests/__Snapshots__/AboutViewSnapshotTests/testAboutViewSnapshot_light.1.png
+          test -f Tests/S2JAboutWindowTests/__Snapshots__/AboutViewSnapshotTests/testMarkdownViewSnapshot_light.1.png
 
       - name: Upload reference PNGs
         uses: actions/upload-artifact@v6
