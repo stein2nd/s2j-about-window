@@ -269,7 +269,8 @@
 ├┬─ .github/  # CI/CD
 │└┬─ workflows/
 │　├─ docs-lint.yml  # Markdown lint (npm)
-│　└─ swift-test.yml (✅100% 実装完了)
+│　├─ swift-test.yml (✅100% 実装完了)
+│　└─ update-snapshots.yml  # macOS 参照 PNG 記録 (`workflow_dispatch`、macos-26)
 ├┬─ scripts/  # スクリプト
 │└─ test-local.sh  # ローカル・テスト実行スクリプト (✅100% 実装完了 - 統合版、汎用的)
 ├── SampleApp.swift  # エントリー・ポイント
@@ -308,11 +309,12 @@
 * `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定。テストのみ `swift-snapshot-testing` / ViewInspector (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
   * **開発アセット**: `S2JAboutWindow-macOS` / `iOS` に `DEVELOPMENT_ASSET_PATHS: "Preview Content"` (Canvas 専用、リリースバイナリには含めない)。
+  * **テスト用 SPM** (ライブラリ製品には非同梱): `SnapshotTesting` / `ViewInspector`。`Package.swift` の `S2JAboutWindowTests` と同系統のバージョン要件。
   * **ターゲット構成**:
     * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
     * `S2JAboutWindow-iOS`: iOS 向けフレームワーク
-    * `S2JAboutWindowTests-macOS`: macOS 向けテストバンドル
-    * `S2JAboutWindowTests-iOS`: iOS 向けテストバンドル (署名設定: `CODE_SIGN_STYLE: Automatic`、`DEVELOPMENT_TEAM: ""`)
+    * `S2JAboutWindowTests-macOS`: macOS 向けテストバンドル (`SnapshotTesting` にリンク。`AboutViewSnapshotTests` を含む)
+    * `S2JAboutWindowTests-iOS`: iOS 向けテストバンドル (`ViewInspector` にリンク。`AboutViewSnapshotTests` と `__Snapshots__` はソース除外。署名: `CODE_SIGN_STYLE: Automatic`、`DEVELOPMENT_TEAM: ""`)
   * **スキーム構成**:
     * `S2JAboutWindow`: 統合スキーム (macOS + iOS)
     * `S2JAboutWindow-macOS`: macOS 専用スキーム (macOS ターゲットのみ)
@@ -388,8 +390,8 @@ aboutWindow.showAboutWindow(
 
 **UI テスト環境**:
 * macOS: `AboutViewSnapshotTests` が `NSHostingView` 経由で `AboutView` / `MarkdownView` を画像比較 (`perceptualPrecision: 0.98`)。参照 PNG は **macos-26** の `update-snapshots` ワークフローで記録 (SnapshotTesting の「参照 OS と一致」推奨に従う)。CI (`CI=true`) では `record: .never`。
-* ローカル `swift test` (macOS): スナップショット 2件は OS 差分のため **XCTSkip** (`FORCE_SNAPSHOT_TESTS=1` で強制実行)。`AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
-* iPadOS: `AboutSheetInspectorTests` が ViewInspector で `aboutSheet` 内の `AboutView` を検証 (CI `test-ios` / XcodeGen iOS テストバンドル)。
+* ローカル `swift test` (macOS): スナップショット2件は OS 差分のため **XCTSkip** (`FORCE_SNAPSHOT_TESTS=1` で強制実行)。`AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
+* iPadOS: `AboutSheetInspectorTests` が ViewInspector で `aboutSheet` 内の `AboutView` を検証 (CI `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。スナップショットソースは iOS ターゲットから除外)。
 * macOS `NSWindow` 全体のスナップショットは Backlog (View スナップショットで代替)。
 * `AboutViewTests` にあった Snapshot 用プレースホルダは削除済み (正本は `AboutViewSnapshotTests`)。
 
@@ -509,9 +511,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * ✅ `AboutViewModel` の初期化テスト (デフォルト値、nil 値の両方をテスト)。
     * ✅ `MarkdownView` / `AboutView` の作成テスト。
     * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
-  * **AboutViewSnapshotTests.swift** (XCTest + SnapshotTesting): macOS で `testAboutViewSnapshot_light` / `testMarkdownViewSnapshot_light`、参照画像 `__Snapshots__/AboutViewSnapshotTests/*.png`。
+  * **AboutViewSnapshotTests.swift** (XCTest + SnapshotTesting): **macOS のみ** (`swift test` / `test-macos`)。`testAboutViewSnapshot_light` / `testMarkdownViewSnapshot_light`、参照 `__Snapshots__/AboutViewSnapshotTests/*.png`。
   * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
-  * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み。
+  * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み (`test-ios` / XcodeGen。`project.yml` で ViewInspector をリンク)。
 
 ### 10.3. 未実装機能 `{@spec:s10-3}`
 
@@ -610,6 +612,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: v2.0.13〜 **v3.0.1** (Textual、コードブロック折り返し)。
 * **Preview Content** — `Preview Content/`、`DEVELOPMENT_ASSET_PATHS`、`PreviewContent.swift` (v3.0.5)。
 * **Snapshot / UI テスト (初版)** — `AboutViewSnapshotTests`、`AboutSheetInspectorTests`、テスト依存 (`swift-snapshot-testing` / ViewInspector)。`NSWindow` スナップショットは未。
+* **CI テスト安定化 (v3.0.7)** — `macos-26` 向けスナップショット再記録、`update-snapshots` 終了コード許容、`project.yml` で `test-ios` に ViewInspector を配線 (iOS からスナップショットテスト除外)。
 
 ### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 

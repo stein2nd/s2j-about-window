@@ -1,13 +1,13 @@
 # S2J About Window - 実装状況
 
-最終更新: 2026-11-21
+最終更新: 2026-11-22
 
 ## 概要 `{@status:s-h001}`
 
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.6** |
+| リリース (npm / ドキュメント基準) | **3.0.7** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -127,10 +127,10 @@
 
 ### Snapshot と UI テスト {#status-quality-ui} `{@status:s-snapshot-ui}`
 
-正本: [SPEC.md](./SPEC.md) §11.0、`Package.swift` (テスト依存のみ)
+正本: [SPEC.md](./SPEC.md) §11.0、`Package.swift` / `project.yml` (テスト依存のみ)
 
-* [x] SnapshotTesting 統合と About 画面のスナップショット (`AboutViewSnapshotTests`、`__Snapshots__/AboutViewSnapshotTests/*.png` 2件、macOS は `NSHostingView`、`AboutViewTests` の旧プレースホルダは撤去)
-* [x] iPadOS `.sheet` の UI 検証 (`AboutSheetInspectorTests` + ViewInspector — `test-ios` ジョブ。ローカル macOS `swift test` では未実行)
+* [x] SnapshotTesting 統合と About 画面のスナップショット (`AboutViewSnapshotTests`、`__Snapshots__/AboutViewSnapshotTests/*.png` 2件、macOS は `NSHostingView`。参照記録: `update-snapshots` / macos-26、比較: `test-macos`。ローカル `swift test` は `XCTSkip`)
+* [x] iPadOS `.sheet` の UI 検証 (`AboutSheetInspectorTests` + ViewInspector — `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。ローカル macOS `swift test` では未実行)
 
 ### Should コンテンツ形式 `{@status:s-should}`
 
@@ -168,6 +168,7 @@
 | 3.0.4 | 100% 完了条件チェックリスト、`@s2j/docs-linter` 1.0.34 |
 | 3.0.5 | `Preview Content/`、Canvas プレビュー、開発体験チェックリスト100% |
 | 3.0.6 | Snapshot / ViewInspector 初版、`Package.swift` テスト依存、仕様同期 |
+| 3.0.7 | `macos-26` スナップショット CI 修正、`project.yml` に ViewInspector / SnapshotTesting、`test-ios` ビルド修復 |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 

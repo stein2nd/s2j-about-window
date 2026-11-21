@@ -2,9 +2,20 @@
 
 ## unreleased
 
+## 3.0.7 - 2026-11-22
+
 ### Fixed
 
-* macOS `test-macos`: スナップショット参照 PNG を macos-26 で記録、CI 外は `XCTSkip`。`update-snapshots` ワークフローを追加
+* macOS `test-macos`: `macos-26` CI 向けスナップショット参照 PNG を更新。CI は `record: .never`、ローカル `swift test` は `XCTSkip` (`FORCE_SNAPSHOT_TESTS=1` で実行可)
+* `update-snapshots`: 記録モード時の終了コードを許容し、ワークフローが途中失敗しないよう調整
+* iOS `test-ios`: XcodeGen の `S2JAboutWindowTests-iOS` に ViewInspector をリンク。`AboutViewSnapshotTests` / `__Snapshots__` を iOS ターゲットから除外 (Snapshot は macOS SPM CI のみ)
+
+### Changed
+
+* `project.yml` — テスト用 SPM に `swift-snapshot-testing` (macOS テスト) と ViewInspector (iOS テスト) を追加
+* `README.md` の `Package.swift` 依存指定を v3.0.7 に更新
+* `package.json` / `package-lock.json` — バージョン 3.0.7
+* `docs/SPEC.md` / `docs/SPEC_CICD.md` / `docs/architecture.md` / `docs/status.md` — テスト分担 (`test-macos` / `test-ios` / `update-snapshots`) と `project.yml` を同期
 
 ## 3.0.6 - 2026-11-21
 

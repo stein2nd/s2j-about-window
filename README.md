@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.6")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.7")
 ]
 ```
 
@@ -362,7 +362,7 @@ For UI testing with snapshots:
 swift test --enable-code-coverage
 ```
 
-参照 PNG は **macos-26** 上の [`update-snapshots`](.github/workflows/update-snapshots.yml) ワークフローで記録し、コミットします。ローカル `swift test` では macOS 差分のためスナップショットはスキップされ、**CI の `test-macos` で比較**されます。手元で比較する場合は `FORCE_SNAPSHOT_TESTS=1 swift test --filter AboutViewSnapshotTests` を使い、必要なら `SNAPSHOT_TESTING_RECORD=all` で再記録してください。iOS の `aboutSheet` 検証は ViewInspector (`AboutSheetInspectorTests`) で、CI の iOS ジョブで実行します。
+参照 PNG は **macos-26** 上の [`update-snapshots`](.github/workflows/update-snapshots.yml) ワークフローで記録し、コミットします。ローカル `swift test` では macOS 差分のためスナップショットはスキップされ、**CI の `test-macos` で比較**されます。手元で比較する場合は `FORCE_SNAPSHOT_TESTS=1 swift test --filter AboutViewSnapshotTests` を使い、必要なら `SNAPSHOT_TESTING_RECORD=all` で再記録してください。iOS の `aboutSheet` 検証は ViewInspector (`AboutSheetInspectorTests`) で、CI の `test-ios` (`xcodegen` 後、`project.yml` の `S2JAboutWindowTests-iOS`) で実行します。
 
 ### Local Testing Before Commit
 

@@ -43,6 +43,10 @@
 2. **`test-ios`**: iOS/iPadOS 向けテスト実行
 3. **`build-release`**: リリースビルド生成
 
+**補助ワークフロー** (同一リポジトリ、手動トリガー):
+
+* **`update-snapshots`** (`update-snapshots.yml`): `macos-26` 上で `AboutViewSnapshotTests` の参照 PNG を記録し、`__Snapshots__/` をコミット用に出力。記録モードの終了コードは許容 (v3.0.7)。
+
 ## 2. ジョブ詳細仕様 `{@spec_cicd:s2}`
 
 ### 2.1. `test-macos` ジョブ `{@spec_cicd:s2-1}`
@@ -65,6 +69,7 @@
 3. **Run tests on macOS**
    * `swift test --enable-code-coverage` を実行して、macOS 向けのユニットテストを実行します。
    * テスト・カバレッジを有効化します。
+   * `AboutViewSnapshotTests` は `CI=true` のときのみ画像比較 (`record: .never`)。ローカル `swift test` では OS 差分のため `XCTSkip` (手元比較は `FORCE_SNAPSHOT_TESTS=1`)。
 
 4. **Upload coverage to Codecov**
    * `codecov/codecov-action@v7` を使用して、テスト・カバレッジを Codecov にアップロードします。
@@ -146,6 +151,7 @@
 9. **Xcode プロジェクトの生成**
    * `project.yml` が存在する場合、`xcodegen generate` で Xcode プロジェクトを生成します。
    * **検証**: 生成されたスキーム・ファイル (`S2JAboutWindow-iOS.xcscheme`) の存在と内容を確認します。
+   * **テストターゲット**: `S2JAboutWindowTests-iOS` は `ViewInspector` に依存し、`AboutViewSnapshotTests` / `__Snapshots__` をソースから除外。スナップショットは macOS の `swift test` のみ。
 
 10. **シミュレーター・ランタイムとデバイスの選択 (フォールバック付き)**
     * 優先順位に従って、利用可能な iOS シミュレーター・ランタイムとデバイスを選択します。
@@ -415,7 +421,7 @@
 | `npm run lint:swift` | 上記を直列実行 |
 | `swift test` | macOS: XCTest + Snapshot (`AboutViewSnapshotTests`)。参照画像の更新は初回失敗後に `__Snapshots__/` をコミット |
 
-**iOS テスト** (`test-ios` ジョブ): `xcodebuild test` により `AboutSheetInspectorTests` (ViewInspector) を含むテストバンドルを実行。
+**iOS テスト** (`test-ios` ジョブ): `xcodegen` 後に `xcodebuild test` でテストバンドルを実行。`project.yml` の `S2JAboutWindowTests-iOS` は ViewInspector に依存し、`AboutSheetInspectorTests` を含む。スナップショット (`AboutViewSnapshotTests`) は macOS の `swift test` のみ (iOS ターゲットからソース除外)。
 
 ## 4. テスト・カバレッジ `{@spec_cicd:s4}`
 

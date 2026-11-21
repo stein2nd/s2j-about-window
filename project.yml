@@ -15,6 +15,12 @@ packages:
   Textual:
     url: https://github.com/gonzalezreal/textual
     from: "0.5.0"
+  SnapshotTesting:
+    url: https://github.com/pointfreeco/swift-snapshot-testing
+    from: "1.18.0"
+  ViewInspector:
+    url: https://github.com/nalexn/ViewInspector
+    from: "0.10.0"
 
 targets:
   S2JAboutWindow-macOS:
@@ -90,6 +96,8 @@ targets:
       - path: Tests/S2JAboutWindowTests/Resources
     dependencies:
       - target: S2JAboutWindow-macOS
+      - package: SnapshotTesting
+        product: SnapshotTesting
     settings:
       base:
         PRODUCT_NAME: S2JAboutWindowTests
@@ -132,10 +140,15 @@ targets:
     deploymentTarget: "18.0"
     sources:
       - path: Tests/S2JAboutWindowTests
+        excludes:
+          - AboutViewSnapshotTests.swift
+          - "**/__Snapshots__/**"
     resources:
       - path: Tests/S2JAboutWindowTests/Resources
     dependencies:
       - target: S2JAboutWindow-iOS
+      - package: ViewInspector
+        product: ViewInspector
     settings:
       base:
         PRODUCT_NAME: S2JAboutWindowTests
