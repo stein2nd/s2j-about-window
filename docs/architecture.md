@@ -22,7 +22,10 @@ Sources/S2JAboutWindow/
 ├── LegalTextView.swift # バンドル License 等のプレーン長文表示・シート — [legal_text_spec.md](./legal_text_spec.md)
 ├── LegalTextLoader.swift # ホスト Bundle からのリーガルテキスト読み込み
 ├── Extensions.swift    # iPadOS: aboutSheet / aboutPopover の View 拡張
+├── PreviewContent.swift # `#if DEBUG` — リポジトリ `Preview Content/` の Markdown を Canvas 用に読み込み
 └── Resources/          # リソース (AboutDefault.md、Localizable.strings、Assets.xcassets)
+
+Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.md` / `MarkdownPreview.md`。XcodeGen `DEVELOPMENT_ASSET_PATHS`
 ```
 
 | ファイル | 責務 |
@@ -34,6 +37,7 @@ Sources/S2JAboutWindow/
 | **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。内部で `AboutView` を表示。 |
 | **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示。`LegalTextDocumentSheet` が About からのシートを担当し、Acknowledgements `.md` は `MarkdownView` に委譲。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
+| **PreviewContent.swift** | `#if DEBUG` のみ。`AboutView_Previews` / `MarkdownView_Previews` から利用。Periphery は `.periphery.yml` で Preview を保持。 |
 
 ## プラットフォーム分岐のルール `{@architecture:s-h003}`
 
@@ -52,6 +56,7 @@ Sources/S2JAboutWindow/
     * テストリソース: `Tests/S2JAboutWindowTests/Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
 * Xcode Preview:
     * `AboutView_Previews`、`MarkdownView_Previews` を `#if DEBUG` で提供。
+    * リポジトリ直下 `Preview Content/` (`AboutPreview.md` / `MarkdownPreview.md`) を `PreviewContent.swift` が読み込み。XcodeGen は `DEVELOPMENT_ASSET_PATHS` を設定。
 
 ## 関連ドキュメント `{@architecture:s-h005}`
 

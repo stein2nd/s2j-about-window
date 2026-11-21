@@ -227,7 +227,7 @@ import SwiftUI
              */
             static var previews: some View {
                 AboutView(
-                    content: "# About This App\n\nThis is a sample about content.",
+                    content: PreviewContent.markdown(named: "AboutPreview"),
                     appName: "Sample App",
                     version: "1.0.0",
                     copyright: "© 2024 Sample Company"

@@ -377,6 +377,7 @@
 `project.yml` が存在する場合に実行されます。
 
 * `xcodegen generate` で Xcode プロジェクトを生成します。
+* `project.yml` の `DEVELOPMENT_ASSET_PATHS` により、リポジトリ直下 `Preview Content/` が開発ビルドにのみ同梱されます (SwiftUI Canvas 用。詳細は [architecture.md](./architecture.md))。
 * **プラットフォーム専用スキームの自動選択**:
   * macOS テスト実行時: `S2JAboutWindow-macOS` スキームが存在する場合は自動選択します (macOS ターゲットのみをビルド・テスト)。
   * iOS テスト実行時: `S2JAboutWindow-iOS` スキームが存在する場合は自動選択します (iOS ターゲットのみをビルド・テスト)。
@@ -400,6 +401,18 @@
 
 * **macOS テスト**: `swift test --enable-code-coverage` を実行します (CI/CD と同じ)。
 * **iOS テスト**: Xcode プロジェクトの生成、シミュレーターの起動、`xcodebuild test` の実行を実施します (CI/CD と同じ)。
+
+### 3.9. ローカル Swift 品質ゲート `{@spec_cicd:s3-9}`
+
+コミット前の Swift 静的解析 (CI とは別パイプライン。`package.json` 経由)。
+
+| npm スクリプト | 内容 |
+| --- | --- |
+| `npm run xcode:generate` | `xcodegen generate` (`Preview Content` の `DEVELOPMENT_ASSET_PATHS` を反映) |
+| `npm run lint:swiftlint` | SwiftLint (`Sources` / `Tests` / `SampleApp.swift` / `Package.swift`。`PreviewContent.swift` を含む) |
+| `npm run lint:swiftformat` | SwiftFormat lint |
+| `npm run lint:periphery` | Periphery (`retain_swift_ui_previews: true` で `PreviewProvider` / `PreviewContent` を保持) |
+| `npm run lint:swift` | 上記を直列実行 |
 
 ## 4. テスト・カバレッジ `{@spec_cicd:s4}`
 

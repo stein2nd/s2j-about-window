@@ -137,7 +137,7 @@
   * プラットフォーム固有のコード: `#if os(macOS)` / `#if os(iOS)` で適切に分離します。
 * **テスト容易性**:
   * 設計: ユニットテストが容易に記述できるようにします。
-  * Xcode Preview に対応します。
+  * Xcode Preview に対応します (✅ `Preview Content/` + `PreviewContent.swift` で `AboutView` / `MarkdownView` の Canvas がリポジトリ内 Markdown を表示)。
 
 #### 2.2.5. セキュリティ `{@spec:s2-2-5}`
 
@@ -284,6 +284,7 @@
 │　├─ LegalTextLoader.swift  # バンドル License / Acknowledgements 読込 (✅100% 実装完了)
 │　├─ LegalTextView.swift  # プレーン長文 + シート (✅100% 実装完了)
 │　├─ Extensions.swift  # iPadOS 向け拡張 (✅100% 実装完了)
+│　├─ PreviewContent.swift  # DEBUG: `Preview Content/` から Canvas 用 Markdown を読み込み (✅100% 実装完了)
 │　└┬─ Resources/  # リソースファイル
 │　　├─ AboutDefault.md  # デフォルトコンテンツ (✅100% 実装完了)
 │　　├┬─ Assets.xcassets/  # アセット (✅100% 実装完了)
@@ -297,13 +298,14 @@
 │　├─ LegalTextLoaderTests.swift (✅ Swift Testing)
 │　└─ Resources/  # ローダー用フィクスチャ (.txt / .md)
 ├── UITests/ (⚠️ 未実装)
-└── Preview Content/ (⚠️ 未実装)
+└── Preview Content/  # Xcode Canvas 用 Markdown (`AboutPreview.md` 等) (✅ 実装完了)
 ```
 
 ### 4.3. 主要ファイルの実装状況 `{@spec:s4-3}`
 
 * `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定 (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
+  * **開発アセット**: `S2JAboutWindow-macOS` / `iOS` に `DEVELOPMENT_ASSET_PATHS: "Preview Content"` (Canvas 専用、リリースバイナリには含めない)。
   * **ターゲット構成**:
     * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
     * `S2JAboutWindow-iOS`: iOS 向けフレームワーク
@@ -319,6 +321,8 @@
 * `MarkdownView.swift` : Textual `StructuredText`、About `.default` / リーガル `.md` は `.gitHub` + 折り返し (✅100% 実装完了)
 * `LegalTextLoader.swift` / `LegalTextView.swift` : バンドル長文と About フッター連携 (✅100% 実装完了)
 * `Extensions.swift` : iPadOS 向け aboutSheet/aboutPopover 拡張 (✅100% 実装完了)
+* `PreviewContent.swift` : `#if DEBUG` のみ。`SRCROOT` またはリポジトリ相対パスから `Preview Content/*.md` を読み込み (✅100% 実装完了)
+* `Preview Content/AboutPreview.md` / `MarkdownPreview.md` : Canvas 用サンプル本文 (✅100% 実装完了)
 * `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
 * `Resources/Localizable.strings` : 英語・日本語ローカライゼーション (✅100% 実装完了)
 
@@ -431,7 +435,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * アプリケーション情報: アプリケーション名 (`.title2`、`.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
     * プラットフォーム固有の背景色対応: macOS では `Color(NSColor.windowBackgroundColor)`、iPadOS では `Color(UIColor.systemBackground)` を使用。
     * プラットフォーム固有のアプリケーション・アイコン取得: macOS では `NSApplication.shared.applicationIconImage`、iPadOS では `UIImage(named:)` を使用。
-    * Xcode Preview 対応 (`AboutView_Previews` を実装)。
+    * Xcode Preview 対応 (`AboutView_Previews` — `PreviewContent.markdown(named: "AboutPreview")`)。
   * **AboutViewModel.swift**:
     * ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張機能。
     * `@Published` プロパティで `content`、`appName`、`version`、`copyright` を管理します。
@@ -441,7 +445,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * [Textual](https://github.com/gonzalezreal/textual) `StructuredText` による Markdown 描画。
     * About 本文: `.structuredTextStyle(.default)`。バンドル Acknowledgements `.md`: `.legalDocument` で `.gitHub` + `overflowMode(.wrap)`。
     * `ScrollView` + `.textual.textSelection(.enabled)`。
-    * Xcode Preview 対応 (`MarkdownView_Previews` を実装)
+    * Xcode Preview 対応 (`MarkdownView_Previews` — `PreviewContent.markdown(named: "MarkdownPreview")`)
   * **LegalTextLoader.swift** / **LegalTextView.swift**:
     * ホスト `Bundle` から License / Acknowledgements を読み込み、シートで表示 (プレーンまたは `MarkdownView`)。
     * 詳細: [legal_text_spec.md](./legal_text_spec.md)。
@@ -487,6 +491,11 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * `MarkdownView.swift` (Textual) で実装完了。GFM 表・コードフェンス (リーガル文書は折り返し) を Acknowledgements 向けにサポート。
   * **バンドルリーガルテキスト**:
     * `LegalTextLoader` / About フッター / シート表示 — 実装完了 (2.0.13〜3.0.1)。
+* 開発体験 (Xcode Preview)
+  * **Preview Content**:
+    * リポジトリ直下 `Preview Content/` (`AboutPreview.md`、`MarkdownPreview.md`)。
+    * `PreviewContent.swift` が Xcode (`SRCROOT`) または SwiftPM 開発時の相対パスから読み込み。
+    * `project.yml` の `DEVELOPMENT_ASSET_PATHS` と XcodeGen 生成プロジェクトで Canvas と連携。
 
 ### 10.2. ほとんど実装済み機能 (85-95% 完了) `{@spec:s10-2}`
 
@@ -517,8 +526,6 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
         * `NSWindow` を表示し、タイトルおよび Markdown 表示内容を SnapshotTesting します。
       * iPadOS:
         * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
-  * **Preview Content**:
-    * Xcode Preview 用のリソースディレクトリが未作成です。
 
 ### 10.4. 実装完了率 `{@spec:s10-4}`
 
@@ -538,8 +545,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
 | テスト・品質保証 | 70% | XCTest 基本 + `LegalTextLoaderTests` (Swift Testing)。SnapshotTesting / UI テストは未実装 |
 | バンドルリーガル表示 | 100% | Issue #17完了 ([legal_text_spec.md](./legal_text_spec.md)) |
+| 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift`、詳細は [status.md](./status.md) §開発体験 |
 
-**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォーム対応は完了。JSON/RTF、Snapshot が残り)
+**全体実装の完了率**: **約88%** (コア・リーガル表示・プラットフォームと Canvas は完了。JSON/RTF、Snapshot が残り)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
   * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
@@ -564,6 +572,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * ✅ **ドキュメント**:
     * 主要なクラス・メソッドに JSDoc スタイルのコメントを実装します。
     * パラメータ、戻り値、説明が適切に記載されています。
+  * ✅ **開発体験**:
+    * `Preview Content/` と `#if DEBUG` の `PreviewContent` / `PreviewProvider` により、インライン文字列に依存しない Canvas 確認が可能。
 * テスト品質
   * ✅ **ユニットテスト**:
     * `AboutViewTests.swift` (XCTest) と `LegalTextLoaderTests.swift` (Swift Testing)。
@@ -597,6 +607,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 * **バンドル同梱 License / Acknowledgements** ([#17](https://github.com/stein2nd/s2j-about-window/issues/17)・クローズ済み)
   * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: v2.0.13〜 **v3.0.1** (Textual、コードブロック折り返し)。
+* **Preview Content** — `Preview Content/`、`DEVELOPMENT_ASSET_PATHS`、`PreviewContent.swift` (v3.0.5)。
 
 ### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 
@@ -609,9 +620,6 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * iPadOS:
     * `.sheet` 表示を `XCTest` + `ViewInspector` で検証します。
   * テスト・カバレッジを向上させます。
-* **Preview Content の実装**
-  * Xcode Preview 用のリソースディレクトリを作成します。
-  * 開発時のプレビュー機能向上を図ります。
 
 ### 11.2. 中期での改善予定 (3-6ヵ月) `{@spec:s11-2}`
 

@@ -39,6 +39,7 @@ targets:
         DEVELOPMENT_LANGUAGE: en
         GENERATE_INFOPLIST_FILE: YES
         MACOSX_DEPLOYMENT_TARGET: "15.0"
+        DEVELOPMENT_ASSET_PATHS: '"Preview Content"'
       configs:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: -Onone
@@ -71,6 +72,7 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         SUPPORTS_MACCATALYST: false
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
+        DEVELOPMENT_ASSET_PATHS: '"Preview Content"'
       configs:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: -Onone

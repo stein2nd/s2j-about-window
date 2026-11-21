@@ -60,18 +60,7 @@ import Textual
         @available(macOS 15.0, iOS 18.0, *)
         struct MarkdownView_Previews: PreviewProvider {
             static var previews: some View {
-                MarkdownView(content: """
-                # About This App
-
-                This is a **sample** about content with *markdown* formatting.
-
-                ## Features
-                - Feature 1
-                - Feature 2
-                - Feature 3
-
-                [Visit our website](https://example.com)
-                """)
+                MarkdownView(content: PreviewContent.markdown(named: "MarkdownPreview"))
             }
         }
     #endif

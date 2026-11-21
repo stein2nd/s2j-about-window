@@ -236,7 +236,7 @@ onot 等が生成する **GFM 表**・見出し・コードフェンス付きラ
 | 空ファイル | **Swift Testing** | `empty` |
 | 拡張子探索 | **Swift Testing** | `LICENSE` / `LICENSE.txt` |
 | `MarkdownView` 生成 | **XCTest** (既存) | `AboutViewTests` でビュー生成が継続 PASS |
-| `LegalTextView` UI | **SnapshotTesting** (フェーズ2以降で検討) | Light / Dark。未導入時は Preview + `docs_mod/test-results.md` 記録で代替可 |
+| `LegalTextView` UI | **SnapshotTesting** (フェーズ2以降で検討) | Light / Dark。未導入時は `Preview Content/` / Canvas または `docs_mod/test-results.md` で代替可 |
 
 ## 9. 利用側の組込み例 `{@legal_text_spec:s9}`
 

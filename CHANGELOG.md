@@ -2,6 +2,22 @@
 
 ## unreleased
 
+## 3.0.5 - 2026-11-21
+
+### Added
+
+* `Preview Content/` (`AboutPreview.md`、`MarkdownPreview.md`) — Xcode Canvas 用サンプル Markdown
+* `Sources/S2JAboutWindow/PreviewContent.swift` — `#if DEBUG` でプレビュー本文をファイルから読み込み
+* `docs/status.md` — 開発体験チェックリストを **100%** (1/1)、機能一覧・スナップショットを同期
+
+### Changed
+
+* `README.md` の `Package.swift` 依存指定を v3.0.4→ v3.0.5に更新
+* `AboutView_Previews` / `MarkdownView_Previews` が `Preview Content` の Markdown を表示するよう更新
+* `project.yml` — `S2JAboutWindow-macOS` / `iOS` に `DEVELOPMENT_ASSET_PATHS: "Preview Content"`
+* `README.md` — 開発環境に `xcode:generate` と Canvas 手順、`Preview Content/` の説明を追記
+* `docs/SPEC.md` / `docs/architecture.md` / `docs/SPEC_CICD.md` / `docs/legal_text_spec.md` / `docs/specs.md` を Preview Content 実装に同期
+
 ## 3.0.4 - 2026-11-20
 
 ### Added

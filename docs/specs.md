@@ -80,6 +80,7 @@
 * **なぜこのプロジェクトがあるか** → [overview.md](./overview.md)
 * **何を Must/Should で作るか** → [SPEC.md](./SPEC.md) §2, §4
 * **コードはどこに何を書くか** → [architecture.md](./architecture.md)
+* **Xcode Canvas / Preview Content** → [architecture.md](./architecture.md) テスト・プレビュー、[status.md](./status.md#status-devx)
 * **macOS / iPadOS で何が違うか** → [SPEC.md](./SPEC.md) §4.1、[architecture.md](./architecture.md)
 * **CI やローカルテストの仕様** → [SPEC_CICD.md](./SPEC_CICD.md)
 * **仕様をどう分割するかの方針** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)

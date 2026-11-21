@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.4")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.5")
 ]
 ```
 
@@ -457,7 +457,9 @@ The project follows a standard Swift Package Manager structure:
 
 * `Sources/` - ソースコード
 * `Tests/` - テストファイル
+* `Preview Content/` - Xcode Canvas 用 Markdown (`AboutPreview.md`、`MarkdownPreview.md`)。配布ターゲットには含めません
 * `Package.swift` - パッケージ設定
+* `project.yml` - XcodeGen (`npm run xcode:generate` → `DEVELOPMENT_ASSET_PATHS` で Preview と連携)
 
 ### Setting Up Development Environment
 
@@ -506,6 +508,15 @@ To set up the development environment for this project:
    ```zsh
    open Package.swift
    ```
+
+   SwiftUI **Canvas** で `AboutView` / `MarkdownView` のプレビューを使う場合は、XcodeGen でプロジェクトを生成してから開きます。
+
+   ```zsh
+   npm run xcode:generate
+   open s2j-about-window.xcodeproj
+   ```
+
+   プレビュー本文はリポジトリ直下の `Preview Content/*.md` です (`PreviewContent.swift` が読み込み)。
 
 3. プロジェクトをビルドします:
 

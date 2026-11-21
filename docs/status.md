@@ -1,13 +1,13 @@
 # S2J About Window - 実装状況
 
-最終更新: 2026-11-20
+最終更新: 2026-11-21
 
 ## 概要 `{@status:s-h001}`
 
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.4** |
+| リリース (npm / ドキュメント基準) | **3.0.5** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -38,7 +38,7 @@
 
 ## スナップショット (カテゴリー別) `{@status:s-h005}`
 
-`SPEC.md` §10.4と同期した要約 (2026-11-16時点)。
+`SPEC.md` §10.4と同期した要約 (2026-11-21時点)。
 
 | カテゴリー | 完了率 | 状態 |
 | --- | --- | --- |
@@ -48,6 +48,7 @@
 | UI/UX | 100% | ダークモード、アイコン |
 | バンドルリーガル表示 | 100% | 2.0.13〜3.0.1、ホスト実証済み |
 | CI/CD | 100% | `swift-test.yml`、`docs-lint.yml` |
+| 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift` |
 | コンテンツ形式 (JSON/RTF) | 33% | Markdown のみ |
 | テスト・品質保証 | 70% | XCTest + Swift Testing。Snapshot 未 |
 | **全体 (概算)** | **約88%** | コアとリーガルは完了 |
@@ -65,17 +66,17 @@
 | CI ・ユニットテスト | 実装済み | 100 | [§CI・単体](#status-quality-unit) (6/6) |
 | Snapshot / UI テスト | 未 | 0 | [§Snapshot と UI](#status-quality-ui) (0/2) |
 | コンテンツ形式 (Should) | 部分 | 33 | [§Should コンテンツ](#status-should-content) (1/3) |
-| 開発体験 (Preview 等) | 未 | 0 | [§開発体験](#status-devx) (0/1) |
+| 開発体験 (Preview 等) | 実装済み | 100 | [§開発体験](#status-devx) (1/1) |
 
 **Must 範囲 (上表の先頭5行):** **100%** — SPM ライブラリとしてホストに組込み可能な水準。
 
-**全体 (Should と Snapshot 含む):** チェックリスト **34項目中29項目** ≒ **約85%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
+**全体 (Should と Snapshot 含む):** チェックリスト **34項目中30項目** ≒ **約88%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
 
 ## 100% 完了条件チェックリスト `{@status:s100}`
 
 [S2J Acknowledgements](https://github.com/stein2nd/s2j-acknowledgements/blob/main/docs/status.md) 同型。検証は `npm run test:local` / CI を正本とする ([SPEC_CICD.md](./SPEC_CICD.md))。
 
-### 仕様・ドキュメント `{@status:s-status-spec-docs}`
+### 仕様・ドキュメント `{@status:s-h008}`
 
 * [x] [specs.md](./specs.md) 索引とクイック参照
 * [x] [SPEC.md](./SPEC.md) / [architecture.md](./architecture.md) / [legal_text_spec.md](./legal_text_spec.md) が v3.0.x 実装と同期
@@ -83,7 +84,7 @@
 * [x] GitHub Actions `Lint Docs` (`docs-lint.yml`)
 * [x] 見出しタグ規約 v0.1と `npm run docs:heading-tags`
 
-### コア About (Must) `{@status:s-about-must-status-core}`
+### コア About (Must) `{@status:s-about-must}`
 
 正本: [SPEC.md](./SPEC.md) §2・§4
 
@@ -91,12 +92,12 @@
 * [x] 共通 `AboutView` / `AboutViewModel` (メタデータ・ Markdown 本文)
 * [x] `MarkdownView` (Textual `StructuredText`、About `.default`)
 * [x] iPadOS `aboutSheet` / `aboutPopover` ([architecture.md](./architecture.md))
-* [x] リソース `AboutDefault.md` と `Bundle.module` 読込
+* [x] リソース `AboutDefault.md` と `Bundle.module` 読み込み
 * [x] ダークモード・アプリアイコン (プラットフォーム別)
 * [x] `Package.swift` — Textual 依存、最小 OS ([overview.md](./overview.md))
 * [x] 公開 API、使用例 ([README.md](../README.md) §6)
 
-### バンドル License / Acknowledgements `{@status:s-license-acknowledgements-status-legal}`
+### バンドル License / Acknowledgements `{@status:s-license-acknowledgements}`
 
 正本: [legal_text_spec.md](./legal_text_spec.md)、Issue [#17](https://github.com/stein2nd/s2j-about-window/issues/17)
 
@@ -106,14 +107,14 @@
 * [x] `LegalTextLoaderTests` (Swift Testing)
 * [x] ホスト実証 (例: Cozy Brew — Acknowledgements 表・長文表示)
 
-### プラットフォーム・ローカライズ `{@status:s-status-platform}`
+### プラットフォーム・ローカライズ `{@status:s-h011}`
 
 * [x] 最小 OS ([overview.md](./overview.md))、`@available`、CI シミュレータ
 * [x] `en` / `ja` / `Base` の `Localizable.strings`
 * [x] `#if os` 方針どおり macOS / iOS の責務分離 ([architecture.md](./architecture.md))
 * [x] `SampleApp` (macOS) と XcodeGen `project.yml`
 
-### CI、ユニットテスト `{@status:s-ci-status-quality-unit}`
+### CI、ユニットテスト `{@status:s-ci}`
 
 正本: [SPEC_CICD.md](./SPEC_CICD.md)
 
@@ -124,14 +125,14 @@
 * [x] `npm run lint:docs` が `docs/**/*.md` を対象
 * [x] `npm run lint:swift` (SwiftLint / SwiftFormat / Periphery)
 
-### Snapshot と UI テスト `{@status:s-snapshot-ui-status-quality-ui}`
+### Snapshot と UI テスト `{@status:s-snapshot-ui}`
 
 正本: [SPEC.md](./SPEC.md) §11.1
 
 * [ ] SnapshotTesting 統合と About 画面のスナップショット
 * [ ] iPadOS `.sheet` の UI 検証 (ViewInspector 等)
 
-### Should コンテンツ形式 `{@status:s-should-status-should-content}`
+### Should コンテンツ形式 `{@status:s-should}`
 
 正本: [SPEC.md](./SPEC.md) §2 (Should)、§11.2
 
@@ -139,11 +140,11 @@
 * [ ] JSON オブジェクト形式のパース・表示
 * [ ] RTF ドキュメント形式の表示
 
-### 開発体験 `{@status:s-status-devx}`
+### 開発体験 {#status-devx} `{@status:s-h015}`
 
-* [ ] Xcode Preview 用 `Preview Content` ディレクトリ
+* [x] Xcode Preview 用 `Preview Content` ディレクトリ (`AboutPreview.md` / `MarkdownPreview.md`、`PreviewContent.swift`、`project.yml` の `DEVELOPMENT_ASSET_PATHS`)
 
-## ゲート外・任意 `{@status:s-status-gates}`
+## ゲート外・任意 `{@status:s-h016}`
 
 **100% 分母外** (未完了でも `Must` 100% は維持)。
 
@@ -153,7 +154,7 @@
 | G2 | 見出しタグ `<a id>` の自動挿入 (v0.2) | [specs.md](./specs.md) `{@specs:heading-tags-anchors}` |
 | G3 | カスタムテーマ・アニメーション・外部翻訳 API | [SPEC.md](./SPEC.md) §11.3 |
 
-**補足:** スナップショット表の **約88%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストの **約85%** は上記§の機械的な `[x]` 比率。
+**補足:** スナップショット表の **約88%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストの **約88%** は上記§の機械的な `[x]` 比率。
 
 ## 直近マイルストーン `{@status:s-h017}`
 
@@ -165,6 +166,7 @@
 | 3.0.2 | 仕様ドキュメント同期、見出しタグ規約 v0.1 |
 | 3.0.3 | `docs/status.md`、見出しタグツール、ドキュメント整備 |
 | 3.0.4 | 100% 完了条件チェックリスト、`@s2j/docs-linter` 1.0.34 |
+| 3.0.5 | `Preview Content/`、Canvas プレビュー、開発体験チェックリスト100% |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 
@@ -173,7 +175,6 @@
 | 項目 | 状態 | メモ |
 | --- | --- | --- |
 | SnapshotTesting / UI テスト | 未 | プレースホルダーのみ |
-| Preview Content ディレクトリ | 未 | Xcode Preview 用 |
 | JSON / RTF コンテンツ | 未 | Should、Markdown で代替可 |
 | 見出しタグ: リンク用 `<a id>` 自動化 | 検討 | 規約 v0.2 ([specs.md](./specs.md) `{@specs:heading-tags-anchors}`) |
 | macOS 補助 `NSWindow` で License | Backlog | 初版は `.sheet` 統一 |
