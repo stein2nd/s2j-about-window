@@ -10,8 +10,40 @@ import XCTest
 @available(macOS 15.0, iOS 18.0, *)
 @MainActor
 final class AboutViewSnapshotTests: XCTestCase {
+    #if os(macOS)
+        private static let imageSnapshot = Snapshotting<NSView, NSImage>.image(
+            precision: 0.99,
+            perceptualPrecision: 0.98
+        )
+
+        private func snapshotHostingView<Content: View>(
+            rootView: Content,
+            width: CGFloat,
+            height: CGFloat
+        ) -> NSHostingView<Content> {
+            let hosting = NSHostingView(rootView: rootView)
+            hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
+            hosting.appearance = NSAppearance(named: .aqua)
+            if let layer = hosting.layer {
+                layer.contentsScale = 2
+            }
+            hosting.layoutSubtreeIfNeeded()
+            return hosting
+        }
+    #endif
     override func invokeTest() {
-        withSnapshotTesting(record: .missing) {
+        let record: SnapshotTestingConfiguration.Record = {
+            if let raw = ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"],
+               let mode = SnapshotTestingConfiguration.Record(rawValue: raw)
+            {
+                return mode
+            }
+            if ProcessInfo.processInfo.environment["CI"] == "true" {
+                return .never
+            }
+            return .missing
+        }()
+        withSnapshotTesting(record: record) {
             super.invokeTest()
         }
     }
@@ -25,10 +57,8 @@ final class AboutViewSnapshotTests: XCTestCase {
         )
 
         #if os(macOS)
-            let hosting = NSHostingView(rootView: view)
-            hosting.frame = NSRect(x: 0, y: 0, width: 400, height: 500)
-            hosting.layoutSubtreeIfNeeded()
-            assertSnapshot(of: hosting, as: .image(precision: 0.98))
+            let hosting = snapshotHostingView(rootView: view, width: 400, height: 500)
+            assertSnapshot(of: hosting, as: Self.imageSnapshot)
         #elseif os(iOS)
             assertSnapshot(
                 of: view,
@@ -49,10 +79,8 @@ final class AboutViewSnapshotTests: XCTestCase {
         """)
 
         #if os(macOS)
-            let hosting = NSHostingView(rootView: view)
-            hosting.frame = NSRect(x: 0, y: 0, width: 360, height: 280)
-            hosting.layoutSubtreeIfNeeded()
-            assertSnapshot(of: hosting, as: .image(precision: 0.98))
+            let hosting = snapshotHostingView(rootView: view, width: 360, height: 280)
+            assertSnapshot(of: hosting, as: Self.imageSnapshot)
         #elseif os(iOS)
             assertSnapshot(
                 of: view,
