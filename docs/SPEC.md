@@ -175,7 +175,7 @@
   * テスト・カバレッジ目標: 70% 以上です。
 * **UI テスト**:
   * SnapshotTesting を用いた About 画面の UI テスト (**Should** — 実装済み: `AboutViewSnapshotTests`)。`LegalTextView` / macOS `NSWindow` 全体は Backlog。
-  * macOS: `NSHostingView` 経由の画像スナップショット。iPadOS: ViewInspector による `aboutSheet` 検証 (`AboutSheetInspectorTests`、CI `test-ios`)。
+  * macOS: `NSHostingView` 経由の画像スナップショット。iPadOS: ViewInspector による `aboutSheet` 検証 (`AboutSheetInspectorTests`、`inspect().color().sheet()`。`aboutSheet` は View 直下の `.sheet` 実装。CI `test-ios`)。
 * **CI/CD でのテスト実行**:
   * CI/CD パイプラインで自動的にテストを実行し、テスト・カバレッジを収集します。
   * CI/CD でのテスト実行に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) で規定します。
@@ -241,6 +241,7 @@
 * ホスト・アプリケーションは、macOS アプリケーション (または iPadOS アプリケーション) を想定します。
     * macOS の場合は、「独立ウィンドウ / パネル (App の About)」として「About ウィンドウ」をポップアップし、ウィンドウを閉じると自動でインスタンスを破棄します。(✅100% 実装完了 - `AboutWindow` クラスで実装)
     * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。(✅100% 実装完了 - `Extensions.swift` で `aboutSheet`/`aboutPopover` を実装)
+        * `aboutSheet` は `View` エクステンション内で SwiftUI `.sheet` を直接適用する (`aboutPopover` の `.popover` と同パターン)。シート内 UI は private `aboutSheetNavigationContent` に集約。(✅100% 実装完了 — v3.0.7で ViewInspector 向けに整理)
         * 例: `AboutView(content: aboutContent)` を `sheet(isPresented:)` から呼び出す。(✅100% 実装完了)
 
 ### 4.1. プラットフォーム固有 API 利用方針 `{@spec:s4-1}`
@@ -324,7 +325,7 @@
 * `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
 * `MarkdownView.swift` : Textual `StructuredText`、About `.default` / リーガル `.md` は `.gitHub` + 折り返し (✅100% 実装完了)
 * `LegalTextLoader.swift` / `LegalTextView.swift` : バンドル長文と About フッター連携 (✅100% 実装完了)
-* `Extensions.swift` : iPadOS 向け aboutSheet/aboutPopover 拡張 (✅100% 実装完了)
+* `Extensions.swift` : iPadOS 向け `aboutSheet` / `aboutPopover`。`aboutSheet` は View 直下 `.sheet` + `aboutSheetNavigationContent` (ViewInspector / CI `test-ios` 向け。v3.0.7) (✅100% 実装完了)
 * `PreviewContent.swift` : `#if DEBUG` のみ。`SRCROOT` またはリポジトリ相対パスから `Preview Content/*.md` を読み込み (✅100% 実装完了)
 * `Preview Content/AboutPreview.md` / `MarkdownPreview.md` : Canvas 用サンプル本文 (✅100% 実装完了)
 * `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
@@ -392,6 +393,7 @@ aboutWindow.showAboutWindow(
 * macOS: `AboutViewSnapshotTests` が `NSHostingView` 経由で `AboutView` / `MarkdownView` を画像比較 (`perceptualPrecision: 0.98`)。参照 PNG は **macos-26** の `update-snapshots` ワークフローで記録 (SnapshotTesting の「参照 OS と一致」推奨に従う)。CI (`CI=true`) では `record: .never`。
 * ローカル `swift test` (macOS): スナップショット2件は OS 差分のため **XCTSkip** (`FORCE_SNAPSHOT_TESTS=1` で強制実行)。`AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
 * iPadOS: `AboutSheetInspectorTests` が ViewInspector で `aboutSheet` 内の `AboutView` を検証 (CI `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。スナップショットソースは iOS ターゲットから除外)。
+* **ViewInspector 実装制約 (v3.0.7)**: `aboutSheet` はカスタム `ViewModifier` 内の `.sheet` にしない。ViewInspector はホストビュー・チェーン上のネイティブ `.sheet` のみ検出する (`inspect().color().sheet()`)。未対応時は `Host does not have 'sheet' modifier` で失敗する。
 * macOS `NSWindow` 全体のスナップショットは Backlog (View スナップショットで代替)。
 * `AboutViewTests` にあった Snapshot 用プレースホルダは削除済み (正本は `AboutViewSnapshotTests`)。
 
@@ -456,7 +458,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * 詳細: [legal_text_spec.md](./legal_text_spec.md)。
   * **Extensions.swift**:
     * iPadOS 向け `aboutSheet()` / `aboutPopover()` 拡張機能。
-    * `aboutSheet()`: `NavigationView` を使用し、閉じるボタンをツールバーに配置。
+    * `aboutSheet()`: `View` エクステンション内で `sheet(isPresented:)` を直接適用。シート本体は private `aboutSheetNavigationContent` (`NavigationView` + `AboutView` + iOS 閉じるツールバー)。カスタム `ViewModifier` で `.sheet` を包む方式は採用しない (ViewInspector 制約。v3.0.7)。
     * `aboutPopover()`: 400x500px の固定サイズで表示します。
 * プラットフォーム対応
   * **macOS 対応**:
@@ -513,7 +515,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
   * **AboutViewSnapshotTests.swift** (XCTest + SnapshotTesting): **macOS のみ** (`swift test` / `test-macos`)。`testAboutViewSnapshot_light` / `testMarkdownViewSnapshot_light`、参照 `__Snapshots__/AboutViewSnapshotTests/*.png`。
   * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
-  * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み (`test-ios` / XcodeGen。`project.yml` で ViewInspector をリンク)。
+  * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み (`test-ios` / XcodeGen。`project.yml` で ViewInspector をリンク)。`Color.clear.aboutSheet(...)` ホストで `inspect().color().sheet()` → `find(AboutView.self)`。
 
 ### 10.3. 未実装機能 `{@spec:s10-3}`
 
@@ -612,7 +614,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
   * 仕様: [legal_text_spec.md](./legal_text_spec.md)。リリース: v2.0.13〜 **v3.0.1** (Textual、コードブロック折り返し)。
 * **Preview Content** — `Preview Content/`、`DEVELOPMENT_ASSET_PATHS`、`PreviewContent.swift` (v3.0.5)。
 * **Snapshot / UI テスト (初版)** — `AboutViewSnapshotTests`、`AboutSheetInspectorTests`、テスト依存 (`swift-snapshot-testing` / ViewInspector)。`NSWindow` スナップショットは未。
-* **CI テスト安定化 (v3.0.7)** — `macos-26` 向けスナップショット再記録、`update-snapshots` 終了コード許容、`project.yml` で `test-ios` に ViewInspector を配線 (iOS からスナップショットテスト除外)。
+* **CI テスト安定化 (v3.0.7)** — `macos-26` 向けスナップショット再記録、`update-snapshots` 終了コード許容、`project.yml` で `test-ios` に ViewInspector を配線 (iOS からスナップショットテスト除外)。`aboutSheet` を View 直下 `.sheet` に変更し `AboutSheetInspectorTests` を安定化。
 
 ### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 

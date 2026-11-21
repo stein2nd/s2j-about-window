@@ -24,7 +24,7 @@
 | 1 | **公開型名** | 表示 `LegalTextView`、状態 `LegalTextContent`、種別 `LegalTextKind`、I/O `LegalTextLoader` (`static` のみの `enum`)。Issue 上の `LicenseView` / ドラフトの `BundledLegalTextView` は採用しない。 |
 | 2 | **macOS の提示方法** | macOS / iOS とも **`.sheet` に統一**。補助 `NSWindow` は初版では採用せず **Backlog**。macOS はシートの `minWidth` / `minHeight` で長文向けに広めにする。 |
 | 3 | **Acknowledgements の表示** | **文書の役割 + 拡張子** で分岐。License は常にプレーン (等幅 `LegalTextView`)。Acknowledgements は `.md` ならシート内 `MarkdownView`、それ以外はプレーン。`MarkdownView` のサポート範囲外 (mermaid 等) は [README](../README.md) の Markdown 制限と [legal_text_spec.md](../docs/legal_text_spec.md) §6.1 に明記。 |
-| 4 | **テスト枠** | 新規テストは **Swift Testing** (`LegalTextLoader` 等)。既存 `AboutViewTests` (XCTest) は変更しない。Snapshot (`AboutViewSnapshotTests`) は macOS `swift test` / `test-macos` のみ。iOS `aboutSheet` (ViewInspector) は `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。`LegalTextView` / `NSWindow` の Snapshot は Backlog。XCTest 全面移行は **別 Issue**。 |
+| 4 | **テスト枠** | 新規テストは **Swift Testing** (`LegalTextLoader` 等)。既存 `AboutViewTests` (XCTest) は変更しない。Snapshot (`AboutViewSnapshotTests`) は macOS `swift test` / `test-macos` のみ。iOS `aboutSheet` (ViewInspector、`aboutSheet` は View 直下 `.sheet` 実装) は `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。`LegalTextView` / `NSWindow` の Snapshot は Backlog。XCTest 全面移行は **別 Issue**。 |
 
 ## `docs/` 移行チェックリスト `{@docs_mod_status:s-docs}`
 

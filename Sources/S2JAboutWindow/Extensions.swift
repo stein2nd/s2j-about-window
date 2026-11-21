@@ -6,6 +6,53 @@ import SwiftUI
      * iPadOS向けのExtensions
      * @return Extensions
      */
+    @ViewBuilder
+    private func aboutSheetNavigationContent(
+        isPresented: Binding<Bool>,
+        content: String,
+        appName: String?,
+        version: String?,
+        copyright: String?,
+        licenseResourceName: String?,
+        acknowledgementsResourceName: String?,
+        resourceBundle: Bundle
+    ) -> some View {
+        NavigationView {
+            AboutView(
+                content: content,
+                appName: appName,
+                version: version,
+                copyright: copyright,
+                licenseResourceName: licenseResourceName,
+                acknowledgementsResourceName: acknowledgementsResourceName,
+                resourceBundle: resourceBundle
+            )
+            .navigationTitle(
+                NSLocalizedString(
+                    "About.Title",
+                    bundle: Bundle.resourceBundle,
+                    comment: "About Window Title"
+                )
+            )
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(
+                        NSLocalizedString(
+                            "About.Close",
+                            bundle: Bundle.resourceBundle,
+                            comment: "Close button"
+                        )
+                    ) {
+                        isPresented.wrappedValue = false
+                    }
+                }
+            }
+            #endif
+        }
+    }
+
     @available(macOS 15.0, iOS 18.0, *)
     public extension View {
         /**
@@ -28,40 +75,16 @@ import SwiftUI
             resourceBundle: Bundle = .main
         ) -> some View {
             sheet(isPresented: isPresented) {
-                NavigationView {
-                    AboutView(
-                        content: content,
-                        appName: appName,
-                        version: version,
-                        copyright: copyright,
-                        licenseResourceName: licenseResourceName,
-                        acknowledgementsResourceName: acknowledgementsResourceName,
-                        resourceBundle: resourceBundle
-                    )
-                    .navigationTitle(
-                        NSLocalizedString(
-                            "About.Title",
-                            bundle: Bundle.resourceBundle,
-                            comment: "About Window Title"
-                        )
-                    )
-                    #if os(iOS)
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button(
-                                NSLocalizedString(
-                                    "About.Close",
-                                    bundle: Bundle.resourceBundle,
-                                    comment: "Close button"
-                                )
-                            ) {
-                                isPresented.wrappedValue = false
-                            }
-                        }
-                    }
-                    #endif
-                }
+                aboutSheetNavigationContent(
+                    isPresented: isPresented,
+                    content: content,
+                    appName: appName,
+                    version: version,
+                    copyright: copyright,
+                    licenseResourceName: licenseResourceName,
+                    acknowledgementsResourceName: acknowledgementsResourceName,
+                    resourceBundle: resourceBundle
+                )
             }
         }
 

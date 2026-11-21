@@ -152,6 +152,7 @@
    * `project.yml` が存在する場合、`xcodegen generate` で Xcode プロジェクトを生成します。
    * **検証**: 生成されたスキーム・ファイル (`S2JAboutWindow-iOS.xcscheme`) の存在と内容を確認します。
    * **テストターゲット**: `S2JAboutWindowTests-iOS` は `ViewInspector` に依存し、`AboutViewSnapshotTests` / `__Snapshots__` をソースから除外。スナップショットは macOS の `swift test` のみ。
+   * **ViewInspector 前提 (v3.0.7)**: `aboutSheet` は `View` エクステンションに直接 `.sheet` を付与する実装。`AboutSheetInspectorTests` (`inspect().color().sheet()` → `AboutView`) が CI で成功することを要件とする。カスタム `ViewModifier` 内の `.sheet` は検出されず `test-ios` が失敗する。
 
 10. **シミュレーター・ランタイムとデバイスの選択 (フォールバック付き)**
     * 優先順位に従って、利用可能な iOS シミュレーター・ランタイムとデバイスを選択します。
@@ -235,7 +236,7 @@
 
 #### 2.2.3. 期待される結果 `{@spec_cicd:s2-2-3}`
 
-* iOS/iPadOS 向けユニットテスト: すべて成功します。
+* iOS/iPadOS 向けユニットテスト: すべて成功します (含む `AboutSheetInspectorTests.testAboutSheetEmbedsAboutView`)。
 * テスト・カバレッジ: Codecov に正常にアップロードされます (失敗しても CI は継続)。
 * 診断情報: アーティファクトとして保存されます。
 
@@ -421,7 +422,7 @@
 | `npm run lint:swift` | 上記を直列実行 |
 | `swift test` | macOS: XCTest + Snapshot (`AboutViewSnapshotTests`)。参照画像の更新は初回失敗後に `__Snapshots__/` をコミット |
 
-**iOS テスト** (`test-ios` ジョブ): `xcodegen` 後に `xcodebuild test` でテストバンドルを実行。`project.yml` の `S2JAboutWindowTests-iOS` は ViewInspector に依存し、`AboutSheetInspectorTests` を含む。スナップショット (`AboutViewSnapshotTests`) は macOS の `swift test` のみ (iOS ターゲットからソース除外)。
+**iOS テスト** (`test-ios` ジョブ): `xcodegen` 後に `xcodebuild test` でテストバンドルを実行。`project.yml` の `S2JAboutWindowTests-iOS` は ViewInspector に依存し、`AboutSheetInspectorTests` を含む。スナップショット (`AboutViewSnapshotTests`) は macOS の `swift test` のみ (iOS ターゲットからソース除外)。ライブラリ側は `aboutSheet` を View 直下 `.sheet` で実装し、ViewInspector が sheet を走査できる構造を維持する (v3.0.7)。
 
 ## 4. テスト・カバレッジ `{@spec_cicd:s4}`
 

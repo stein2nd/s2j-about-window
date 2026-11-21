@@ -24,7 +24,7 @@
 
         func testAboutSheetEmbedsAboutView() throws {
             let host = Host()
-            let sheet = try host.inspect().sheet()
+            let sheet = try host.inspect().color().sheet()
             _ = try sheet.find(AboutView.self)
         }
     }
