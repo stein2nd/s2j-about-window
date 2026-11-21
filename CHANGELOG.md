@@ -2,6 +2,10 @@
 
 ## unreleased
 
+### Fixed
+
+* macOS `test-macos`: スナップショット参照 PNG を macos-26 で記録、CI 外は `XCTSkip`。`update-snapshots` ワークフローを追加
+
 ## 3.0.6 - 2026-11-21
 
 ### Added

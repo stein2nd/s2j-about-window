@@ -387,8 +387,8 @@ aboutWindow.showAboutWindow(
 **実装状況**: ✅ **基本完了** — XCTest / Swift Testing / Snapshot (macOS) / ViewInspector (iOS) を実装。`LegalTextView` 専用 Snapshot と `NSWindow` 全体は Backlog。
 
 **UI テスト環境**:
-* macOS: `AboutViewSnapshotTests` が `NSHostingView` 経由で `AboutView` / `MarkdownView` を画像比較 (`precision: 0.98`)。`withSnapshotTesting(record: .missing)` で参照 PNG 未存在時に記録。SwiftUI を直接 `.image(layout:)` せず、各テストメソッド内で `assertSnapshot` を呼ぶ (ヘルパー経由だとスナップショット名が衝突しうる)。
-* ローカル `swift test` (macOS): 画像スナップショットは **二件** (`AboutView` / `MarkdownView`) と `AboutViewTests` — `AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
+* macOS: `AboutViewSnapshotTests` が `NSHostingView` 経由で `AboutView` / `MarkdownView` を画像比較 (`perceptualPrecision: 0.98`)。参照 PNG は **macos-26** の `update-snapshots` ワークフローで記録 (SnapshotTesting の「参照 OS と一致」推奨に従う)。CI (`CI=true`) では `record: .never`。
+* ローカル `swift test` (macOS): スナップショット 2件は OS 差分のため **XCTSkip** (`FORCE_SNAPSHOT_TESTS=1` で強制実行)。`AboutSheetInspectorTests` は `#if os(iOS)` のためコンパイルのみ。
 * iPadOS: `AboutSheetInspectorTests` が ViewInspector で `aboutSheet` 内の `AboutView` を検証 (CI `test-ios` / XcodeGen iOS テストバンドル)。
 * macOS `NSWindow` 全体のスナップショットは Backlog (View スナップショットで代替)。
 * `AboutViewTests` にあった Snapshot 用プレースホルダは削除済み (正本は `AboutViewSnapshotTests`)。

@@ -11,10 +11,22 @@ import XCTest
 @MainActor
 final class AboutViewSnapshotTests: XCTestCase {
     #if os(macOS)
+        /// 参照 PNG は macos-26 CI で記録 (`update-snapshots` ワークフロー)。
         private static let imageSnapshot = Snapshotting<NSView, NSImage>.image(
             precision: 0.99,
             perceptualPrecision: 0.98
         )
+
+        private func skipSnapshotsUnlessCI() throws {
+            if ProcessInfo.processInfo.environment["CI"] != "true",
+               ProcessInfo.processInfo.environment["FORCE_SNAPSHOT_TESTS"] != "1"
+            {
+                throw XCTSkip(
+                    "画像スナップショットは GitHub Actions (macos-26) で検証。"
+                    + " ローカルは FORCE_SNAPSHOT_TESTS=1。"
+                )
+            }
+        }
 
         private func snapshotHostingView<Content: View>(
             rootView: Content,
@@ -48,7 +60,10 @@ final class AboutViewSnapshotTests: XCTestCase {
         }
     }
 
-    func testAboutViewSnapshot_light() {
+    func testAboutViewSnapshot_light() throws {
+        #if os(macOS)
+            try skipSnapshotsUnlessCI()
+        #endif
         let view = AboutView(
             content: "# Snapshot App\n\nStable **markdown** for regression.",
             appName: "Snapshot App",
@@ -67,7 +82,10 @@ final class AboutViewSnapshotTests: XCTestCase {
         #endif
     }
 
-    func testMarkdownViewSnapshot_light() {
+    func testMarkdownViewSnapshot_light() throws {
+        #if os(macOS)
+            try skipSnapshotsUnlessCI()
+        #endif
         let view = MarkdownView(content: """
         # About This App
 
