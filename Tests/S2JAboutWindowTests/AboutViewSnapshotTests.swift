@@ -23,7 +23,7 @@ final class AboutViewSnapshotTests: XCTestCase {
             {
                 throw XCTSkip(
                     "画像スナップショットは GitHub Actions (macos-26) で検証。"
-                    + " ローカルは FORCE_SNAPSHOT_TESTS=1。"
+                        + " ローカルは FORCE_SNAPSHOT_TESTS=1。"
                 )
             }
         }

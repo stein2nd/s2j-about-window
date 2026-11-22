@@ -21,7 +21,7 @@ Sources/S2JAboutWindow/
 ├── MarkdownView.swift  # Textual `StructuredText` による Markdown 描画 (About / Acknowledgements)
 ├── LegalTextView.swift # バンドル License 等のプレーン長文表示・シート — [legal_text_spec.md](./legal_text_spec.md)
 ├── LegalTextLoader.swift # ホスト Bundle からのリーガルテキスト読み込み
-├── Extensions.swift    # iPadOS: aboutSheet (.sheet 直接) / aboutPopover、aboutSheetNavigationContent
+├── Extensions.swift    # iPadOS: aboutSheet (.sheet 直接) / aboutPopover、aboutSheetNavigationChrome
 ├── PreviewContent.swift # `#if DEBUG` — リポジトリ `Preview Content/` の Markdown を Canvas 用に読み込み
 └── Resources/          # リソース (AboutDefault.md、Localizable.strings、Assets.xcassets)
 
@@ -34,7 +34,7 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
 | **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリケーション名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
 | **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
 | **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、バンドル Acknowledgements `.md` は `.legalDocument` コンテキストで `.gitHub` + `overflowMode(.wrap)`。`ScrollView` + `.textual.textSelection(.enabled)`。 |
-| **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。`aboutSheet` はエクステンション内で `.sheet` を直接付与し、シート本体は private `aboutSheetNavigationContent` (`NavigationView` + `AboutView` + iOS 閉じるボタン)。`aboutPopover` は `.popover` + 400×500で `AboutView` を表示。 |
+| **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。`aboutSheet` はエクステンション内で `.sheet` を直接付与し、シート本体は private `aboutSheetNavigationChrome(isPresented:about:)` (`NavigationView` + `about` クロージャの `AboutView` + iOS 閉じるボタン。SwiftLint 引数上限に対応 v3.0.9)。`aboutPopover` は `.popover` + 400×500で `AboutView` を表示。 |
 | **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示。`LegalTextDocumentSheet` が About からのシートを担当し、Acknowledgements `.md` は `MarkdownView` に委譲。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
 | **PreviewContent.swift** | `#if DEBUG` のみ。`AboutView_Previews` / `MarkdownView_Previews` から利用。Periphery は `.periphery.yml` で Preview を保持。 |

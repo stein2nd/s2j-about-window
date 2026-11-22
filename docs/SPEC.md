@@ -241,7 +241,7 @@
 * ホスト・アプリケーションは、macOS アプリケーション (または iPadOS アプリケーション) を想定します。
     * macOS の場合は、「独立ウィンドウ / パネル (App の About)」として「About ウィンドウ」をポップアップし、ウィンドウを閉じると自動でインスタンスを破棄します。(✅100% 実装完了 - `AboutWindow` クラスで実装)
     * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。(✅100% 実装完了 - `Extensions.swift` で `aboutSheet`/`aboutPopover` を実装)
-        * `aboutSheet` は `View` エクステンション内で SwiftUI `.sheet` を直接適用する (`aboutPopover` の `.popover` と同パターン)。シート内 UI は private `aboutSheetNavigationContent` に集約。(✅100% 実装完了 — v3.0.7で ViewInspector 向けに整理)
+        * `aboutSheet` は `View` エクステンション内で SwiftUI `.sheet` を直接適用する (`aboutPopover` の `.popover` と同パターン)。シート内 UI は private `aboutSheetNavigationChrome` に集約。(✅100% 実装完了 — v3.0.7で ViewInspector 向けに整理)
         * 例: `AboutView(content: aboutContent)` を `sheet(isPresented:)` から呼び出す。(✅100% 実装完了)
 
 ### 4.1. プラットフォーム固有 API 利用方針 `{@spec:s4-1}`
@@ -325,7 +325,7 @@
 * `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
 * `MarkdownView.swift` : Textual `StructuredText`、About `.default` / リーガル `.md` は `.gitHub` + 折り返し (✅100% 実装完了)
 * `LegalTextLoader.swift` / `LegalTextView.swift` : バンドル長文と About フッター連携 (✅100% 実装完了)
-* `Extensions.swift` : iPadOS 向け `aboutSheet` / `aboutPopover`。`aboutSheet` は View 直下 `.sheet` + `aboutSheetNavigationContent` (ViewInspector / CI `test-ios` 向け。v3.0.7) (✅100% 実装完了)
+* `Extensions.swift` : iPadOS 向け `aboutSheet` / `aboutPopover`。`aboutSheet` は View 直下 `.sheet` + `aboutSheetNavigationChrome` (ViewInspector / CI `test-ios` 向け。v3.0.7〜3.0.9) (✅100% 実装完了)
 * `PreviewContent.swift` : `#if DEBUG` のみ。`SRCROOT` またはリポジトリ相対パスから `Preview Content/*.md` を読み込み (✅100% 実装完了)
 * `Preview Content/AboutPreview.md` / `MarkdownPreview.md` : Canvas 用サンプル本文 (✅100% 実装完了)
 * `Resources/AboutDefault.md` : デフォルト Markdown コンテンツ (✅100% 実装完了)
@@ -458,7 +458,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * 詳細: [legal_text_spec.md](./legal_text_spec.md)。
   * **Extensions.swift**:
     * iPadOS 向け `aboutSheet()` / `aboutPopover()` 拡張機能。
-    * `aboutSheet()`: `View` エクステンション内で `sheet(isPresented:)` を直接適用。シート本体は private `aboutSheetNavigationContent` (`NavigationView` + `AboutView` + iOS 閉じるツールバー)。カスタム `ViewModifier` で `.sheet` を包む方式は採用しない (ViewInspector 制約。v3.0.7)。
+    * `aboutSheet()`: `View` エクステンション内で `sheet(isPresented:)` を直接適用。シート本体は private `aboutSheetNavigationChrome(isPresented:about:)` (`NavigationView` + クロージャで渡した `AboutView` + iOS 閉じるツールバー)。カスタム `ViewModifier` で `.sheet` を包む方式は採用しない (ViewInspector 制約。v3.0.7)。ヘルパーは引数過多を避けるため `AboutView` をクロージャで受け取る (SwiftLint `function_parameter_count`。v3.0.9)。
     * `aboutPopover()`: 400x500px の固定サイズで表示します。
 * プラットフォーム対応
   * **macOS 対応**:

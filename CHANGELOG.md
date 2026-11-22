@@ -2,6 +2,19 @@
 
 ## unreleased
 
+## 3.0.9 - 2026-11-22
+
+### Fixed
+
+* iOS `aboutSheet` (`Extensions.swift`) — シート UI を `aboutSheetNavigationChrome(isPresented:about:)` に整理。`AboutView` をクロージャで渡し SwiftLint `function_parameter_count` を満たす (View 直下 `.sheet` / ViewInspector 挙動は不変)
+* ローカル品質ゲート — `Extensions.swift` / `AboutViewSnapshotTests.swift` を SwiftFormat 準拠に整形
+
+### Changed
+
+* docs (`SPEC.md`, `architecture.md`, `status.md`) — `aboutSheetNavigationChrome` と v3.0.9の整理を仕様に反映
+* `README.md` の `Package.swift` 依存指定を v3.0.9に更新
+* `package.json` / `package-lock.json`: 3.0.9に更新
+
 ## 3.0.8 - 2026-11-22
 
 ### Fixed

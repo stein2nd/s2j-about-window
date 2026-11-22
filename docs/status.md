@@ -7,7 +7,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.8** |
+| リリース (npm / ドキュメント基準) | **3.0.9** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -169,6 +169,7 @@
 | 3.0.5 | `Preview Content/`、Canvas プレビュー、開発体験チェックリスト100% |
 | 3.0.6 | Snapshot / ViewInspector 初版、`Package.swift` テスト依存、仕様同期 |
 | 3.0.7 | `macos-26` スナップショット CI 修正、`project.yml` に ViewInspector / SnapshotTesting、`test-ios` 修復、`aboutSheet` の View 直下 `.sheet` 化 (ViewInspector) |
+| 3.0.9 | `aboutSheetNavigationChrome` 整理、ローカル `npm run lint:swift` (SwiftLint / SwiftFormat) 通過 |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 

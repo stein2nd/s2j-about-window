@@ -6,49 +6,34 @@ import SwiftUI
      * iPadOS向けのExtensions
      * @return Extensions
      */
-    @ViewBuilder
-    private func aboutSheetNavigationContent(
+    private func aboutSheetNavigationChrome(
         isPresented: Binding<Bool>,
-        content: String,
-        appName: String?,
-        version: String?,
-        copyright: String?,
-        licenseResourceName: String?,
-        acknowledgementsResourceName: String?,
-        resourceBundle: Bundle
+        about: () -> AboutView
     ) -> some View {
         NavigationView {
-            AboutView(
-                content: content,
-                appName: appName,
-                version: version,
-                copyright: copyright,
-                licenseResourceName: licenseResourceName,
-                acknowledgementsResourceName: acknowledgementsResourceName,
-                resourceBundle: resourceBundle
-            )
-            .navigationTitle(
-                NSLocalizedString(
-                    "About.Title",
-                    bundle: Bundle.resourceBundle,
-                    comment: "About Window Title"
+            about()
+                .navigationTitle(
+                    NSLocalizedString(
+                        "About.Title",
+                        bundle: Bundle.resourceBundle,
+                        comment: "About Window Title"
+                    )
                 )
-            )
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(
-                        NSLocalizedString(
-                            "About.Close",
-                            bundle: Bundle.resourceBundle,
-                            comment: "Close button"
-                        )
-                    ) {
-                        isPresented.wrappedValue = false
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(
+                            NSLocalizedString(
+                                "About.Close",
+                                bundle: Bundle.resourceBundle,
+                                comment: "Close button"
+                            )
+                        ) {
+                            isPresented.wrappedValue = false
+                        }
                     }
                 }
-            }
             #endif
         }
     }
@@ -75,16 +60,17 @@ import SwiftUI
             resourceBundle: Bundle = .main
         ) -> some View {
             sheet(isPresented: isPresented) {
-                aboutSheetNavigationContent(
-                    isPresented: isPresented,
-                    content: content,
-                    appName: appName,
-                    version: version,
-                    copyright: copyright,
-                    licenseResourceName: licenseResourceName,
-                    acknowledgementsResourceName: acknowledgementsResourceName,
-                    resourceBundle: resourceBundle
-                )
+                aboutSheetNavigationChrome(isPresented: isPresented) {
+                    AboutView(
+                        content: content,
+                        appName: appName,
+                        version: version,
+                        copyright: copyright,
+                        licenseResourceName: licenseResourceName,
+                        acknowledgementsResourceName: acknowledgementsResourceName,
+                        resourceBundle: resourceBundle
+                    )
+                }
             }
         }
 
