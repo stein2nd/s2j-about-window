@@ -2,6 +2,22 @@
 
 ## unreleased
 
+## 3.0.10 - 2026-11-22
+
+### Added
+
+* `AboutContentView` / `AboutContentFormat` — About 本文の Markdown / JSON (整形) / RTF 表示 (`.automatic` は推定、不正 JSON は Markdown にフォールバック)
+* 公開 `AboutContentType` (`automatic` / `markdown` / `json` / `rtf`) と `effective(for:requested:)`
+* `AboutView` / `AboutWindow` / `aboutSheet` / `aboutPopover` の `contentType` 引数 (デフォルト `.automatic`)
+* `AboutViewModel.effectiveContentType` — 実効の表示形式
+* `AboutContentFormatTests` (Swift Testing)
+
+### Changed
+
+* docs (`SPEC.md`, `architecture.md`, `status.md`, `legal_text_spec.md`) — Should コンテンツ形式と `AboutContentType` / `contentType` を反映
+* `README.md` — API Reference と `Package.swift` 依存指定を v3.0.10に更新
+* `package.json` / `package-lock.json`: 3.0.10に更新
+
 ## 3.0.9 - 2026-11-22
 
 ### Fixed

@@ -32,6 +32,7 @@ import SwiftUI
          * デフォルトでは、Bundle.main.displayName、Bundle.main.version、Bundle.main.copyrightを使用します。
          *
          * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+         * @param contentType: 本文の表示形式 (デフォルト `.automatic`)
          * @param appName: アプリ名
          * @param version: バージョン
          * @param copyright: 著作権情報
@@ -41,6 +42,7 @@ import SwiftUI
          */
         public init(
             content: String,
+            contentType: AboutContentType = .automatic,
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
@@ -50,6 +52,7 @@ import SwiftUI
         ) {
             _viewModel = StateObject(wrappedValue: AboutViewModel(
                 content: content,
+                contentType: contentType,
                 appName: appName,
                 version: version,
                 copyright: copyright
@@ -73,7 +76,7 @@ import SwiftUI
                 appInfoView
 
                 // コンテンツ表示
-                MarkdownView(content: viewModel.content)
+                AboutContentView(content: viewModel.content, contentType: viewModel.contentType)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
 

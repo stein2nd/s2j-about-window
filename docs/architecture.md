@@ -19,6 +19,7 @@ Sources/S2JAboutWindow/
 ├── AboutView.swift     # SwiftUI ビュー (共通): アイコン・アプリケーション情報・MarkdownView のレイアウト
 ├── AboutViewModel.swift # ViewModel: コンテンツ・appName/version/copyright、Bundle 拡張
 ├── MarkdownView.swift  # Textual `StructuredText` による Markdown 描画 (About / Acknowledgements)
+├── AboutContentView.swift # About 本文: Markdown / JSON (整形) / RTF の自動判別と表示
 ├── LegalTextView.swift # バンドル License 等のプレーン長文表示・シート — [legal_text_spec.md](./legal_text_spec.md)
 ├── LegalTextLoader.swift # ホスト Bundle からのリーガルテキスト読み込み
 ├── Extensions.swift    # iPadOS: aboutSheet (.sheet 直接) / aboutPopover、aboutSheetNavigationChrome
@@ -31,9 +32,10 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
 | ファイル | 責務 |
 | --- | --- |
 | **AboutWindow.swift** | macOS 専用。`NSWindow` の生成・表示・閉じる、`NSHostingController` で `AboutView` をホスト、`NSWindowDelegate` でライフサイクル管理。 |
-| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・アプリケーション名・バージョン・著作権・`MarkdownView` を配置。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
-| **AboutViewModel.swift** | 共通。`content` / `appName` / `version` / `copyright` の保持、`Bundle` エクステンション (`displayName` / `version` / `copyright`)、`loadDefaultContent()`。 |
+| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・メタデータ・`AboutContentView` で本文。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
+| **AboutViewModel.swift** | 共通。`content` / `contentType` / `effectiveContentType`、`appName` / `version` / `copyright`、`Bundle` エクステンション、`loadDefaultContent()`。 |
 | **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、バンドル Acknowledgements `.md` は `.legalDocument` コンテキストで `.gitHub` + `overflowMode(.wrap)`。`ScrollView` + `.textual.textSelection(.enabled)`。 |
+| **AboutContentView.swift** | 共通。`AboutView` 本文。公開 `AboutContentType` と `AboutContentFormat` で Markdown / JSON / RTF を表示 (`.automatic` は推定)。 |
 | **Extensions.swift** | iPadOS 専用。`View` エクステンションで `aboutSheet` / `aboutPopover` を提供。`aboutSheet` はエクステンション内で `.sheet` を直接付与し、シート本体は private `aboutSheetNavigationChrome(isPresented:about:)` (`NavigationView` + `about` クロージャの `AboutView` + iOS 閉じるボタン。SwiftLint 引数上限に対応 v3.0.9)。`aboutPopover` は `.popover` + 400×500で `AboutView` を表示。 |
 | **LegalTextView.swift** | 共通。プレーン長文の等幅スクロール表示。`LegalTextDocumentSheet` が About からのシートを担当し、Acknowledgements `.md` は `MarkdownView` に委譲。 |
 | **LegalTextLoader.swift** | 共通。`LegalTextKind` / `LegalTextContent` とバンドルリソース探索。I/O アダプタ。 |
@@ -47,13 +49,14 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
     * `aboutSheet` / `aboutPopover`。`aboutSheet` の `.sheet` は **カスタム `ViewModifier` に包まず** `View` エクステンションに直接付与する (ViewInspector / CI `test-ios` の `AboutSheetInspectorTests` がホストチェーン上の `.sheet` を要求するため。v3.0.7)。
     * `NavigationView` + 閉じるボタン、`UIImage(named: "AppIcon")`、`Color(UIColor.systemBackground)`。
 * **共通**:
-    * `AboutView`、`AboutViewModel`、`MarkdownView`、`LegalTextView` / `LegalTextLoader`、`Bundle.resourceBundle`、リソース読み込み。
+    * `AboutView`、`AboutViewModel`、`AboutContentView` / `AboutContentType`、`MarkdownView`、`LegalTextView` / `LegalTextLoader`、`Bundle.resourceBundle`、リソース読み込み。
 
 ## テスト・プレビュー `{@architecture:s-h004}`
 
 * ユニットテスト:
-    * `AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。旧 Snapshot プレースホルダは `AboutViewSnapshotTests` へ集約。
+    * `AboutViewTests.swift` (XCTest: AboutViewModel、MarkdownView、AboutView、AboutWindow)。旧 Snapshot プレースホルダは `AboutViewSnapshotTests` に集約。
     * `LegalTextLoaderTests.swift` (Swift Testing: ローダー・拡張子探索・`usesMarkdownRendering`)。
+    * `AboutContentFormatTests.swift` (Swift Testing: `AboutContentType` / JSON / RTF)。
     * テストリソース: `Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
 * Snapshot / UI テスト:
     * `AboutViewSnapshotTests.swift` — [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)。macOS: `NSHostingView` + `.image(precision: 0.98)`。参照 PNG は `__Snapshots__/AboutViewSnapshotTests/` (2件)。CI `test-macos` (`CI=true`) で比較、記録は `update-snapshots` (macos-26)。

@@ -42,7 +42,7 @@ UI 語彙は [UX_VOCABULARY.md](https://github.com/stein2nd/xcode-common-specs/b
 | LEG-01 | **Must** | ホスト `Bundle` 内の License リソースを読み込み、About からアプリケーション内のみで全文表示できる。 |
 | LEG-02 | **Should** | `acknowledgementsResourceName` (または同等) が指定されたとき、同パターンで第二文書を表示できる。未指定なら Acknowledgements 用 UI は **非表示**。 |
 | LEG-03 | **Must** | 表示は縦スクロール可能とし、テキスト選択を有効にする ([UI_VIEWPORT.md](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/UI_VIEWPORT.md) の Content Integrity)。 |
-| LEG-04 | **Must** | `AboutView` / `aboutSheet` / `aboutPopover` / macOS `AboutWindow.showAboutWindow` で、**同じオプション引数** により License / Acknowledgements を有効化できる。 |
+| LEG-04 | **Must** | `AboutView` / `aboutSheet` / `aboutPopover` / macOS `AboutWindow.showAboutWindow` で、**同じオプション引数** により License / Acknowledgements を有効化できる (`contentType` は本文形式のみ。リーガル引数は従来どおり並列で指定)。 |
 | LEG-05 | **Should** | License 用ボタンラベルは macOS 慣習の **「License…」** (省略記号付き)。Acknowledgements は **「Acknowledgements」** (シートタイトルとそろえる)。 |
 | LEG-06 | **Should** | Acknowledgements のリソースが `.md` のとき、シート内で `MarkdownView` を使う (§6)。 |
 
@@ -57,7 +57,7 @@ UI 語彙は [UX_VOCABULARY.md](https://github.com/stein2nd/xcode-common-specs/b
 ## 3. 設計方針 (COMMON_SPEC との整合) `{@legal_text_spec:s3}`
 
 * **責務分離**: ファイル I/O はアダプタ (`LegalTextLoader`)。プレーン長文は `LegalTextView`、Acknowledgements `.md` は `MarkdownView`。About へのボタン配置は `AboutView`。
-* **MVVM**: 既存の [architecture.md](./architecture.md) に従い、`AboutViewModel` はメタデータと About 本文のみ。シートの `isPresented` とロード結果は `AboutView` の `@State` で持つ (ViewModel を肥大化しない)。
+* **MVVM**: 既存の [architecture.md](./architecture.md) に従い、`AboutViewModel` はメタデータ、About 本文文字列、`contentType` のみ。シートの `isPresented` とロード結果は `AboutView` の `@State` で持つ (ViewModel を肥大化しない)。
 * **1ファイル1型**: `LegalTextView.swift`、`LegalTextLoader.swift` (短い場合は loader を View ファイルに `internal` 同居可。公開は View / Loader / 型のみ)。
 * **プラットフォーム**: macOS / iOS とも長文は **`.sheet`** ([UX_VOCABULARY](https://github.com/stein2nd/xcode-common-specs/blob/main/docs/UX_VOCABULARY.md))。macOS `AboutWindow` (`NSHostingController`) 上も同じ。`minWidth` / `minHeight` で macOS のシートを広めにする。**補助 `NSWindow` は Backlog** ([SPEC.md](./SPEC.md) §11)。
 
@@ -148,7 +148,7 @@ flowchart TD
     H --> I[LegalTextLoader.load on sheet .task]
 ```
 
-ボタン配置: About 本文 `MarkdownView` の **下**、著作権表示の上または下 (macOS About パネルに近い **フッター行**)。複数ボタンは `HStack` で **中央寄せ**。
+ボタン配置: About 本文 (`AboutContentView` / 従来は Markdown 相当) の **下**、著作権表示の上または下 (macOS About パネルに近い **フッター行**)。複数ボタンは `HStack` で **中央寄せ**。
 
 ## 5. UI 仕様 `{@legal_text_spec:s5}`
 

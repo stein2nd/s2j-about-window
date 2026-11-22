@@ -25,12 +25,14 @@ import SwiftUI
             /**
              * macOS向けのAbout Windowを表示
              * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+             * @param contentType: 本文の表示形式 (デフォルト `.automatic`)
              * @param appName: アプリ名
              * @param version: バージョン
              * @param copyright: 著作権情報
              */
             public func showAboutWindow(
                 content: String,
+                contentType: AboutContentType = .automatic,
                 appName: String? = nil,
                 version: String? = nil,
                 copyright: String? = nil,
@@ -48,6 +50,7 @@ import SwiftUI
                     let hostingController = NSHostingController(
                         rootView: AboutView(
                             content: content,
+                            contentType: contentType,
                             appName: appName,
                             version: version,
                             copyright: copyright,

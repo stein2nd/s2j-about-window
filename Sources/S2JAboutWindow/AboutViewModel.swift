@@ -14,6 +14,16 @@ import SwiftUI
         @Published public var content: String
 
         /**
+         * @var contentType: 本文の表示形式
+         */
+        public let contentType: AboutContentType
+
+        /// 実際に適用される本文形式 (`contentType` が `.automatic` のときは推定結果)。
+        public var effectiveContentType: AboutContentType {
+            AboutContentType.effective(for: content, requested: contentType)
+        }
+
+        /**
          * @var appName: アプリ名
          */
         @Published public var appName: String
@@ -40,11 +50,13 @@ import SwiftUI
          */
         public init(
             content: String,
+            contentType: AboutContentType = .automatic,
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil
         ) {
             self.content = content
+            self.contentType = contentType
             self.appName = appName ?? Bundle.main.displayName ?? "App"
             self.version = version ?? Bundle.main.version
             self.copyright = copyright ?? Bundle.main.copyright

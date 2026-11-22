@@ -44,6 +44,7 @@ import SwiftUI
          * iPadOS向けのSheet表示用のAboutView
          * @param isPresented: 表示状態
          * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+         * @param contentType: 本文の表示形式 (デフォルト `.automatic`)
          * @param appName: アプリ名
          * @param version: バージョン
          * @param copyright: 著作権情報
@@ -52,6 +53,7 @@ import SwiftUI
         func aboutSheet(
             isPresented: Binding<Bool>,
             content: String,
+            contentType: AboutContentType = .automatic,
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
@@ -63,6 +65,7 @@ import SwiftUI
                 aboutSheetNavigationChrome(isPresented: isPresented) {
                     AboutView(
                         content: content,
+                        contentType: contentType,
                         appName: appName,
                         version: version,
                         copyright: copyright,
@@ -78,6 +81,7 @@ import SwiftUI
          * iPadOS向けのPopover表示用のAboutView
          * @param isPresented: 表示状態
          * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
+         * @param contentType: 本文の表示形式 (デフォルト `.automatic`)
          * @param appName: アプリ名
          * @param version: バージョン
          * @param copyright: 著作権情報
@@ -86,6 +90,7 @@ import SwiftUI
         func aboutPopover(
             isPresented: Binding<Bool>,
             content: String,
+            contentType: AboutContentType = .automatic,
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
@@ -96,6 +101,7 @@ import SwiftUI
             popover(isPresented: isPresented) {
                 AboutView(
                     content: content,
+                    contentType: contentType,
                     appName: appName,
                     version: version,
                     copyright: copyright,

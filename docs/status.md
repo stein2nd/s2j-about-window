@@ -7,7 +7,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.9** |
+| リリース (npm / ドキュメント基準) | **3.0.10** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -49,9 +49,9 @@
 | バンドルリーガル表示 | 100% | 2.0.13〜3.0.1、ホスト実証済み |
 | CI/CD | 100% | `swift-test.yml`、`docs-lint.yml` |
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift` |
-| コンテンツ形式 (JSON/RTF) | 33% | Markdown のみ |
+| コンテンツ形式 (JSON/RTF) | 100% | Markdown + JSON 整形 / RTF 表示 (`AboutContentView`) |
 | テスト・品質保証 | 85% | XCTest + Snapshot + Swift Testing (iOS: ViewInspector) |
-| **全体 (概算)** | **約88%** | コアとリーガルは完了 |
+| **全体 (概算)** | **約91%** | コア、リーガル、Should コンテンツは完了 |
 
 **完了条件列:** 100% 到達用チェックリスト。`[x]` = 満たし済み、`[ ]` = 未。各§のアンカーが正本。実装％は当該§の `[x]` 数 ÷ 全項目数 (仕様行・[§ゲート外](#status-gates)を除く)。
 
@@ -65,12 +65,12 @@
 | プラットフォーム・ローカライズ | 実装済み | 100 | [§プラットフォーム](#status-platform) (4/4) |
 | CI ・ユニットテスト | 実装済み | 100 | [§CI・単体](#status-quality-unit) (6/6) |
 | Snapshot / UI テスト | 実装済み | 100 | [§Snapshot と UI](#status-quality-ui) (2/2) |
-| コンテンツ形式 (Should) | 部分 | 33 | [§Should コンテンツ](#status-should-content) (1/3) |
+| コンテンツ形式 (Should) | 実装済み | 100 | [§Should コンテンツ](#status-should-content) (4/4) |
 | 開発体験 (Preview 等) | 実装済み | 100 | [§開発体験](#status-devx) (1/1) |
 
 **Must 範囲 (上表の先頭5行):** **100%** — SPM ライブラリとしてホストに組込み可能な水準。
 
-**全体 (Should と Snapshot 含む):** チェックリスト **34項目中32項目** ≒ **約94%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
+**全体 (Should と Snapshot 含む):** チェックリスト **35項目中35項目** = **100%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
 
 ## 100% 完了条件チェックリスト `{@status:s100}`
 
@@ -89,7 +89,7 @@
 正本: [SPEC.md](./SPEC.md) §2・§4
 
 * [x] macOS `AboutWindow` (`NSWindow` + 公開 API)
-* [x] 共通 `AboutView` / `AboutViewModel` (メタデータ・ Markdown 本文)
+* [x] 共通 `AboutView` / `AboutViewModel` (メタデータ・ `AboutContentView` 本文・ `contentType`)
 * [x] `MarkdownView` (Textual `StructuredText`、About `.default`)
 * [x] iPadOS `aboutSheet` / `aboutPopover` ([architecture.md](./architecture.md))
 * [x] リソース `AboutDefault.md` と `Bundle.module` 読み込み
@@ -132,13 +132,14 @@
 * [x] SnapshotTesting 統合と About 画面のスナップショット (`AboutViewSnapshotTests`、`__Snapshots__/AboutViewSnapshotTests/*.png` 2件、macOS は `NSHostingView`。参照記録: `update-snapshots` / macos-26、比較: `test-macos`。ローカル `swift test` は `XCTSkip`)
 * [x] iPadOS `.sheet` の UI 検証 (`AboutSheetInspectorTests` + ViewInspector — `aboutSheet` は View 直下 `.sheet`、`inspect().color().sheet()`。`test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。ローカル macOS `swift test` では未実行)
 
-### Should コンテンツ形式 `{@status:s-should}`
+### Should コンテンツ形式 {#status-should-content} `{@status:s-should}`
 
-正本: [SPEC.md](./SPEC.md) §2 (Should)、§11.2
+正本: [SPEC.md](./SPEC.md) §2.1.3 (Should)、[architecture.md](./architecture.md) (`AboutContentView`)
 
-* [x] Markdown コンテンツ表示 (Textual)
-* [ ] JSON オブジェクト形式のパース・表示
-* [ ] RTF ドキュメント形式の表示
+* [x] Markdown コンテンツ表示 (Textual `MarkdownView`)
+* [x] JSON オブジェクト形式のパース・表示 (`AboutContentFormat` — 整形 JSON、`.automatic` で無効時は Markdown にフォールバック)
+* [x] RTF ドキュメント形式の表示 (`NSAttributedString` / `AttributedString`、本文は `AboutContentView`)
+* [x] 明示的 `AboutContentType` (`automatic` / `markdown` / `json` / `rtf`) — `AboutView` / `AboutWindow` / `aboutSheet` / `aboutPopover`
 
 ### 開発体験 {#status-devx} `{@status:s-h015}`
 
@@ -154,7 +155,7 @@
 | G2 | 見出しタグ `<a id>` の自動挿入 (v0.2) | [specs.md](./specs.md) `{@specs:heading-tags-anchors}` |
 | G3 | カスタムテーマ・アニメーション・外部翻訳 API | [SPEC.md](./SPEC.md) §11.3 |
 
-**補足:** スナップショット表の **約88%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストの **約94%** は上記§の機械的な `[x]` 比率。
+**補足:** スナップショット表の **約91%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストは上記 `[x]` 比率で **100%** (`Should` コンテンツ形式含む)。
 
 ## 直近マイルストーン `{@status:s-h017}`
 
@@ -170,6 +171,7 @@
 | 3.0.6 | Snapshot / ViewInspector 初版、`Package.swift` テスト依存、仕様同期 |
 | 3.0.7 | `macos-26` スナップショット CI 修正、`project.yml` に ViewInspector / SnapshotTesting、`test-ios` 修復、`aboutSheet` の View 直下 `.sheet` 化 (ViewInspector) |
 | 3.0.9 | `aboutSheetNavigationChrome` 整理、ローカル `npm run lint:swift` (SwiftLint / SwiftFormat) 通過 |
+| 3.0.10 | Should コンテンツ JSON/RTF、`AboutContentType` / `contentType` API、`AboutContentFormatTests` |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 
@@ -178,7 +180,7 @@
 | 項目 | 状態 | メモ |
 | --- | --- | --- |
 | SnapshotTesting / UI テスト | 済 | `AboutViewSnapshotTests` / `AboutSheetInspectorTests` |
-| JSON / RTF コンテンツ | 未 | Should、Markdown で代替可 |
+| JSON / RTF コンテンツ | 済 | v3.0.10 `AboutContentView` / `AboutContentType` |
 | 見出しタグ: リンク用 `<a id>` 自動化 | 検討 | 規約 v0.2 ([specs.md](./specs.md) `{@specs:heading-tags-anchors}`) |
 | macOS 補助 `NSWindow` で License | Backlog | 初版は `.sheet` 統一 |
 

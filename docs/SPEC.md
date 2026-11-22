@@ -59,8 +59,9 @@
 * **説明**: ホスト・アプリケーションから渡されたコンテンツ (ライセンス情報、その他の説明文など) を表示します。
 * **詳細**:
   * Markdown 記法で記述されたテキスト情報を表示します (**Must** - 実装済み)。
-  * JSON オブジェクト形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加します)。
-  * RTF ドキュメント形式のコンテンツを表示します (**Should** - 未実装、Backlog に追加します)。
+  * JSON オブジェクト形式のコンテンツを表示します (**Should** — 実装済み: `AboutContentView` / `AboutContentFormat`。整形表示、`.automatic` でパース失敗時は Markdown にフォールバック)。
+  * RTF ドキュメント形式のコンテンツを表示します (**Should** — 実装済み: RTF 文字列を `AttributedString` で表示)。
+  * 公開 `AboutContentType` と `contentType` 引数 (**Should** — デフォルト `.automatic`。`AboutContentType.effective(for:requested:)` / `AboutViewModel.effectiveContentType`)。
   * コンテンツはスクロール可能で、テキスト選択が可能です。
 
 #### 2.1.4. ローカライゼーション対応機能 `{@spec:s2-1-4}`
@@ -236,8 +237,8 @@
 * ホスト・アプリケーションからは、下記のいずれかの手段で、「About ウィンドウ」への表示内容が渡されます。
     * Markdown 記法で記述されたテキスト情報 (✅100% 実装完了 - Textual `StructuredText` / `MarkdownView`)
     * バンドル同梱 License / Acknowledgements (✅100% 実装完了 - `LegalTextLoader` / シート表示。仕様: [legal_text_spec.md](./legal_text_spec.md))
-    * JSON オブジェクト (⚠️ 未実装 - Backlog に追加)
-    * RTF ドキュメント (⚠️ 未実装 - Backlog に追加)
+    * JSON オブジェクト (✅ Should 実装完了 - `AboutContentFormat`)
+    * RTF ドキュメント (✅ Should 実装完了 - `AboutContentFormat`)
 * ホスト・アプリケーションは、macOS アプリケーション (または iPadOS アプリケーション) を想定します。
     * macOS の場合は、「独立ウィンドウ / パネル (App の About)」として「About ウィンドウ」をポップアップし、ウィンドウを閉じると自動でインスタンスを破棄します。(✅100% 実装完了 - `AboutWindow` クラスで実装)
     * iPadOS の場合は、`.sheet` または `.popover` モーダルで同じ `AboutView(content:)` を表示できるようにします。(✅100% 実装完了 - `Extensions.swift` で `aboutSheet`/`aboutPopover` を実装)
@@ -283,6 +284,7 @@
 │　├─ AboutView.swift  # SwiftUI view (共通) (✅100% 実装完了)
 │　├─ AboutViewModel.swift  # ViewModel (app metadata、markdown) (✅100% 実装完了)
 │　├─ MarkdownView.swift  # Textual StructuredText (✅100% 実装完了)
+│　├─ AboutContentView.swift  # About 本文 Markdown / JSON / RTF、`AboutContentType` (✅100% 実装完了)
 │　├─ LegalTextLoader.swift  # バンドル License / Acknowledgements 読込 (✅100% 実装完了)
 │　├─ LegalTextView.swift  # プレーン長文 + シート (✅100% 実装完了)
 │　├─ Extensions.swift  # iPadOS 向け拡張 (✅100% 実装完了)
@@ -299,6 +301,7 @@
 │　├─ AboutViewTests.swift (✅ XCTest)
 │　├─ AboutViewSnapshotTests.swift (✅ SnapshotTesting / 参照画像あり)
 │　├─ AboutSheetInspectorTests.swift (✅ iOS: ViewInspector + `aboutSheet`)
+│　├─ AboutContentFormatTests.swift (✅ Swift Testing: JSON / RTF / `AboutContentType`)
 │　├─ LegalTextLoaderTests.swift (✅ Swift Testing)
 │　├─ Resources/  # ローダー用フィクスチャ (.txt / .md)
 │　└─ __Snapshots__/AboutViewSnapshotTests/  # 参照 PNG (`testAboutViewSnapshot_light` 等)
@@ -322,7 +325,8 @@
     * `S2JAboutWindow-iOS`: iOS 専用スキーム (iOS ターゲットのみ)
 * `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)
 * `AboutView.swift` : SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合 (✅100% 実装完了)
-* `AboutViewModel.swift` : ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張 (✅100% 実装完了)
+* `AboutViewModel.swift` : ViewModel、`content` / `contentType` / `effectiveContentType`、メタデータ、Bundle 拡張 (✅100% 実装完了)
+* `AboutContentView.swift` : `AboutContentType` / `AboutContentFormat`、About 本文の Markdown / JSON / RTF (✅100% 実装完了)
 * `MarkdownView.swift` : Textual `StructuredText`、About `.default` / リーガル `.md` は `.gitHub` + 折り返し (✅100% 実装完了)
 * `LegalTextLoader.swift` / `LegalTextView.swift` : バンドル長文と About フッター連携 (✅100% 実装完了)
 * `Extensions.swift` : iPadOS 向け `aboutSheet` / `aboutPopover`。`aboutSheet` は View 直下 `.sheet` + `aboutSheetNavigationChrome` (ViewInspector / CI `test-ios` 向け。v3.0.7〜3.0.9) (✅100% 実装完了)
@@ -357,6 +361,7 @@
 let aboutWindow = AboutWindow()
 aboutWindow.showAboutWindow(
     content: "Your content",
+    contentType: .automatic, // または .markdown / .json / .rtf
     appName: "App",
     version: "1.0.0",
     copyright: "© 2024 Your Company"
@@ -369,7 +374,8 @@ aboutWindow.showAboutWindow(
 // Sheet として表示
 .aboutSheet(
     isPresented: $showAbout,
-    content: "Your content",
+    content: #"{"build":42}"#,
+    contentType: .json,
     appName: "App",
     version: "1.0.0",
     copyright: "© 2024 Your Company"
@@ -436,7 +442,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * タイトルバーの閉じるボタン (×) でウィンドウを閉じることができます。
     * `licenseResourceName` / `acknowledgementsResourceName` によるリーガル文書シート連携。
   * **AboutView.swift**:
-    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合です。
+    * SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、`AboutContentView` による本文表示です。
     * `@StateObject` を使用して `AboutViewModel` を管理します。
     * アプリケーション・アイコン: 64x64、角丸矩形 (`RoundedRectangle(cornerRadius: 12)`)。
     * アプリケーション情報: アプリケーション名 (`.title2`、`.bold`)、バージョン (`.subheadline`)、著作権 (`.caption`)。
@@ -445,7 +451,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * Xcode Preview 対応 (`AboutView_Previews` — `PreviewContent.markdown(named: "AboutPreview")`)。
   * **AboutViewModel.swift**:
     * ViewModel、コンテンツ管理、アプリケーション・メタデータ管理、Bundle 拡張機能。
-    * `@Published` プロパティで `content`、`appName`、`version`、`copyright` を管理します。
+    * `@Published` の `content`、`public let contentType`、`effectiveContentType` と `appName` / `version` / `copyright` を管理します。
     * `loadDefaultContent()` メソッドでデフォルトコンテンツを読み込みます。
     * Bundle 拡張: `displayName`、`version`、`copyright` プロパティを追加します。
   * **MarkdownView.swift**:
@@ -496,6 +502,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * コンテンツ形式サポート
   * **Markdown 形式のコンテンツサポート**:
     * `MarkdownView.swift` (Textual) で実装完了。GFM 表・コードフェンス (リーガル文書は折り返し) を Acknowledgements 向けにサポート。
+  * **JSON / RTF (Should)**:
+    * `AboutContentView.swift` / `AboutContentFormat` — JSON は整形表示、RTF は `AttributedString`、`.automatic` で判別不能時は Markdown (✅実装完了)。
+    * 公開 `AboutContentType` — `AboutView` / `AboutWindow` / `aboutSheet` / `aboutPopover` の `contentType` 引数 (デフォルト `.automatic`)。
   * **バンドルリーガルテキスト**:
     * `LegalTextLoader` / About フッター / シート表示 — 実装完了 (2.0.13〜3.0.1)。
 * 開発体験 (Xcode Preview)
@@ -515,17 +524,13 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
     * ✅ `AboutWindow` の作成・表示・閉じるテスト (macOS)。
   * **AboutViewSnapshotTests.swift** (XCTest + SnapshotTesting): **macOS のみ** (`swift test` / `test-macos`)。`testAboutViewSnapshot_light` / `testMarkdownViewSnapshot_light`、参照 `__Snapshots__/AboutViewSnapshotTests/*.png`。
   * **LegalTextLoaderTests.swift** (Swift Testing): ローダー・拡張子探索・`usesMarkdownRendering` — ✅ 実装済み。
+  * **AboutContentFormatTests.swift** (Swift Testing): JSON / RTF 判別と整形 — ✅ 実装済み。
   * **AboutSheetInspectorTests.swift** (iOS / XCTest + ViewInspector): `aboutSheet` 内の `AboutView` — ✅ 実装済み (`test-ios` / XcodeGen。`project.yml` で ViewInspector をリンク)。`Color.clear.aboutSheet(...)` ホストで `inspect().color().sheet()` → `find(AboutView.self)`。
 
 ### 10.3. 未実装機能 `{@spec:s10-3}`
 
 以下の機能は仕様に記載されていますが、まだ実装されていません。
 
-* コンテンツ形式サポート
-  * **JSON オブジェクト形式のコンテンツサポート**:
-    * Markdown のみ対応、JSON 形式のパース・表示機能は未実装。
-  * **RTF ドキュメント形式のコンテンツサポート**:
-    * RTF 形式のパース・表示機能は未実装。
 * テスト・品質保証
   * **UI テスト・スナップショットテスト**:
     * macOS `NSWindow` 単体の Snapshot は未実装 (View スナップショットは完了)。
@@ -545,18 +550,18 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | リソース・ローカライゼーション | 100% | 英語・日本語ローカライゼーション、デフォルトコンテンツ実装完了、`Bundle.module` 経由で適切に読み込み |
 | UI/UX 機能 | 100% | macOS と iPadOS の両方でダークモード・アプリケーション・アイコン自動取得を実装完了 |
 | CI/CD | 100% | GitHub Actions ワークフローとローカル・テストスクリプトの実装完了 (詳細は [SPEC_CICD.md](./SPEC_CICD.md) を参照) |
-| コンテンツ形式サポート | 33% | Markdown のみ対応 (JSON、RTF は未実装、コメントやドキュメントには記載されているが実装されていない) |
+| コンテンツ形式サポート | 100% | Markdown + JSON 整形 + RTF (`AboutContentView`) |
 | テスト・品質保証 | 85% | XCTest + Snapshot (`AboutViewSnapshotTests`) + Swift Testing + iOS ViewInspector。`NSWindow` スナップショットは Backlog |
 | バンドルリーガル表示 | 100% | Issue #17完了 ([legal_text_spec.md](./legal_text_spec.md)) |
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift`、詳細は [status.md](./status.md) §開発体験 |
 
-**全体実装の完了率**: **約90%** (コア・リーガル・ Canvas ・ 基本 Snapshot は完了。JSON/RTF、`NSWindow` スナップショットが残り)
+**全体実装の完了率**: **約92%** (コア、リーガル、Should コンテンツ、Canvas、基本 Snapshot は完了。`NSWindow` スナップショットが残り)
 * コア機能 (About Window の基本機能) は、100% 実装完了
   * macOS での動作は完全に実装済み。
   * iPadOS での動作も完全に実装済み (プラットフォーム固有 API を適切に使用)。
 * プラットフォーム対応は、100% 実装完了 (macOS と iPadOS の両方で完全実装)。
 * CI/CD は、100% 実装完了・テスト成功 (GitHub Actions ワークフローとローカル・テストスクリプトの実装完了、GitHub Actions「Swift Test」ワークフローが正常に動作し、すべてのテストが成功)。
-* 主要な拡張機能 (JSON/RTF サポート) は未実装です。Markdown サポートにより基本的な用途には対応可能です。
+* JSON / RTF (Should) は `AboutContentView` で実装済み。高度な JSON スキーマ専用 UI などは Backlog。
 * テストコードについて: XCTest ・ Snapshot ・ ViewInspector (iOS) を実装済み。`LegalTextView` / `NSWindow` の追加スナップショットは Backlog。
 
 ### 10.5. 品質評価 `{@spec:s10-5}`
@@ -615,6 +620,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 * **Preview Content** — `Preview Content/`、`DEVELOPMENT_ASSET_PATHS`、`PreviewContent.swift` (v3.0.5)。
 * **Snapshot / UI テスト (初版)** — `AboutViewSnapshotTests`、`AboutSheetInspectorTests`、テスト依存 (`swift-snapshot-testing` / ViewInspector)。`NSWindow` スナップショットは未。
 * **CI テスト安定化 (v3.0.7)** — `macos-26` 向けスナップショット再記録、`update-snapshots` 終了コード許容、`project.yml` で `test-ios` に ViewInspector を配線 (iOS からスナップショットテスト除外)。`aboutSheet` を View 直下 `.sheet` に変更し `AboutSheetInspectorTests` を安定化。
+* **Should コンテンツ形式 (JSON / RTF / `AboutContentType`)** — `AboutContentView` / `AboutContentFormat`、`AboutContentFormatTests` (v3.0.10)。
 
 ### 11.1. 短期での改善予定 (1-3ヵ月) `{@spec:s11-1}`
 
@@ -628,14 +634,9 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 機能拡張を目的とした改善を実施します。
 
-* **JSON オブジェクト形式のコンテンツサポート**
-  * JSON 形式のパース・表示機能を実装します。
-  * `AboutViewModel` での JSON コンテンツ処理を追加します。
-  * Markdown と同様に `AboutView` で表示可能にします。
-* **RTF ドキュメント形式のコンテンツサポート**
-  * RTF 形式のパース・表示機能を実装します。
-  * `NSAttributedString` を利用した RTF レンダリングを実装します。
-  * Markdown、JSON と同様に `AboutView` で表示可能にします。
+* **コンテンツ形式の拡張**
+  * JSON スキーマに沿った構造化 UI (表形式キー表示など)。
+  * HTML インラインなど Markdown 以外のリッチ本文 (現行 Should は Markdown / 整形 JSON / RTF 文字列)。
 
 ### 11.3. 長期での改善予定 (6ヵ月以上) `{@spec:s11-3}`
 

@@ -72,7 +72,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.9")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.10")
 ]
 ```
 
@@ -276,6 +276,21 @@ About ウィンドウは、ダークモード対応を含め、アプリケー�
 
 ## API Reference
 
+### AboutContentType
+
+```swift
+public enum AboutContentType {
+    case automatic  // 先頭・構造から Markdown / JSON / RTF を推定
+    case markdown
+    case json
+    case rtf
+
+    public static func effective(for content: String, requested: AboutContentType = .automatic) -> AboutContentType
+}
+```
+
+`AboutViewModel.effectiveContentType` は `.automatic` 時の推定結果を返します。
+
 ### AboutWindow (macOS)
 
 ```swift
@@ -283,9 +298,10 @@ public class AboutWindow {
     public init()
     public func showAboutWindow(
         content: String,
-        appName: String?,
-        version: String?,
-        copyright: String?,
+        contentType: AboutContentType = .automatic,
+        appName: String? = nil,
+        version: String? = nil,
+        copyright: String? = nil,
         licenseResourceName: String? = nil,
         acknowledgementsResourceName: String? = nil,
         resourceBundle: Bundle = .main
@@ -300,6 +316,7 @@ public class AboutWindow {
 public struct AboutView: View {
     public init(
         content: String,
+        contentType: AboutContentType = .automatic,
         appName: String? = nil,
         version: String? = nil,
         copyright: String? = nil,
@@ -328,6 +345,7 @@ public struct LegalTextView: View { /* plain scrollable text */ }
 func aboutSheet(
     isPresented: Binding<Bool>,
     content: String,
+    contentType: AboutContentType = .automatic,
     appName: String? = nil,
     version: String? = nil,
     copyright: String? = nil,
