@@ -21,25 +21,27 @@ S2J About Window は、macOS および iPadOS アプリケーション向けの�
 ## Features
 
 <!-- 
-* **Cross-platform**: Works on both macOS (12+) and iPadOS (17+)
-* **SwiftUI Native**: Built entirely with SwiftUI for modern UI
-* **Customizable Content**: Support for Markdown, JSON, and RTF content
-* **Localized**: Built-in support for multiple languages (English, Japanese)
-* **Dark Mode**: Full dark mode support
-* **Easy Integration**: Simple API for host applications
+* **Cross-platform**: macOS v15.0+ / iOS v18.0+. macOS uses `AboutWindow` (`NSWindow`), while iPadOS uses `aboutSheet` / `aboutPopover`
+* **SwiftUI Native**: `AboutView` / `AboutViewModel`, Markdown via Textual, and `AboutContentView` for the body text
+* **Content Formats**: Markdown (Textual), JSON (formatted display), RTF (`AttributedString`). Public `AboutContentType` (`.automatic` / `.markdown` / `.json` / `.rtf`)
+* **Bundled License / Acknowledgments**: `licenseResourceName` / `acknowledgementsResourceName`; `.md` files use `MarkdownView` (GFM tables and code wrapping)
+* **Localization**: English and Japanese (`Localizable.strings`; default `AboutDefault.md`)
+* **Dark Mode**: Adapts to the system background color
+* **Quality**: XCTest / Swift Testing, macOS snapshots, and ViewInspector for iOS (`aboutSheet`). CI: GitHub Actions `Swift Test` / `Lint Docs`
  -->
 
-* **クロス・プラットフォーム**: macOS (v15.0以降) と iOS (v18.0以降) の両方で動作
-* **SwiftUI ネイティブ**: モダン UI を実現する SwiftUI 完全構築
-* **カスタマイズ可能なコンテンツ**: Markdown、JSON、RTF コンテンツに対応
-* **ローカライズ対応**: 複数言語 (英語、日本語) の組込みサポート
-* **ダークモード**: 完全なダークモード対応
-* **簡単な統合**: ホスト・アプリケーション向けのシンプルな API
+* **クロス・プラットフォーム**: macOS v15.0+ / iOS v18.0+。macOS は `AboutWindow` (`NSWindow`)、iPadOS は `aboutSheet` / `aboutPopover`
+* **SwiftUI ネイティブ**: `AboutView` / `AboutViewModel`、Textual による Markdown、本文は `AboutContentView`
+* **コンテンツ形式**: Markdown (Textual)、JSON (整形表示)、RTF (`AttributedString`)。公開 `AboutContentType` (`.automatic` / `.markdown` / `.json` / `.rtf`)
+* **バンドル License / Acknowledgements**: `licenseResourceName` / `acknowledgementsResourceName`、`.md` は `MarkdownView` (GFM 表・コード折り返し)
+* **ローカライズ**: 英語・日本語 (`Localizable.strings`、デフォルト `AboutDefault.md`)
+* **ダークモード**: システム背景色に追従
+* **品質**: XCTest / Swift Testing、macOS スナップショット、iOS は ViewInspector (`aboutSheet`)。CI: GitHub Actions `Swift Test` / `Lint Docs`
 
 ## License
 
 <!-- 
-This project is licensed under the GPL 3.0+ License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL v3.0 or later. For details, please refer to the [LICENSE](LICENSE) file.
  -->
 
 本プロジェクトは GPL v3.0以降ライセンスの下で提供されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
@@ -83,9 +85,9 @@ Or add it through Xcode:
 あるいは Xcode から追加します。
 
 <!-- 
-1. File → Add Package Dependencies
+1. File → Add Package Dependency
 2. Enter the repository URL: `https://github.com/stein2nd/s2j-about-window.git`
-3. Choose the version and add to your target
+3. Select a version and add it to the target
  -->
 
 1. ファイル → パッケージ依存関係を追加
@@ -109,25 +111,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         aboutWindow.showAboutWindow(
             content: """
             # My App
-            
+
             This is a sample about window content.
-            
-            ## Features
-            - Feature 1
-            - Feature 2
-            - Feature 3
             """,
+            contentType: .automatic,
             appName: "My App",
             version: "1.0.0",
             copyright: "© 2024 My Company",
-            licenseResourceName: "LICENSE"
+            licenseResourceName: "LICENSE",
+            acknowledgementsResourceName: "ACKNOWLEDGEMENTS.md"
         )
     }
 }
 ```
 
 <!-- 
-Add `LICENSE` (or `LICENSE.txt`) to the app target's **Copy Bundle Resources**. The About window shows a **License…** button that opens a sheet with the full text (offline).
+Add `LICENSE` (or `LICENSE.txt`) to the application target's **Copy Bundle Resources**. A **License…** button will appear in the “About” section, and you can view the full text offline in a sheet.
  -->
 
 アプリケーションターゲットの **Copy Bundle Resources** に `LICENSE` (または `LICENSE.txt`) を追加します。About に **License…** ボタンが表示され、シートで全文をオフライン閲覧できます。
@@ -157,7 +156,8 @@ struct ContentView: View {
         }
         .aboutSheet(
             isPresented: $showAbout,
-            content: "Your about content here",
+            content: "# My App\n\nAbout text in Markdown.",
+            contentType: .automatic,
             appName: "My App",
             version: "1.0.0",
             copyright: "© 2024 My Company"
@@ -171,17 +171,37 @@ struct ContentView: View {
 ```swift
 .aboutPopover(
     isPresented: $showAbout,
-    content: "Your about content here"
+    content: "Your about content here",
+    contentType: .automatic,
+    appName: "My App"
 )
 ```
 
 ## Content Formats
 
 <!-- 
-The library supports multiple content formats:
+`AboutContentView` displays the main text. The `contentType` options are as follows:
+
+| `AboutContentType` | Behavior |
+| --- | --- |
+| `.automatic` (default) | Inferred as Markdown, JSON, or RTF based on the header and structure. Invalid JSON is displayed as Markdown |
+| `.markdown` | Always Textual (`MarkdownView`) |
+| `.json` | Formatted using `JSONSerialization` (monospace). If parsing fails, the raw string is displayed in monospace |
+| `.rtf` | Displays RTF as an `AttributedString`. If parsing fails, it falls back to Markdown |
+
+You can check the detection result using `AboutContentType.effective(for:requested:)` or `AboutViewModel.effectiveContentType`.
  -->
 
-ライブラリは、複数のコンテンツ形式をサポートしています。
+`AboutContentView` が本文を表示します。`contentType` は次のとおりです。
+
+| `AboutContentType` | 挙動 |
+| --- | --- |
+| `.automatic` (デフォルト) | 先頭・構造から Markdown / JSON / RTF を推定。不正 JSON は Markdown として表示 |
+| `.markdown` | 常に Textual (`MarkdownView`) |
+| `.json` | `JSONSerialization` で整形 (等幅)。パース失敗時は生文字列を等幅表示 |
+| `.rtf` | RTF を `AttributedString` で表示。パース失敗時は Markdown にフォールバック |
+
+推定結果は `AboutContentType.effective(for:requested:)` または `AboutViewModel.effectiveContentType` で確認できます。
 
 ### Markdown
 
@@ -200,14 +220,14 @@ This is **bold** and *italic* text.
 ```
 
 <!-- 
-`MarkdownView` renders Markdown using the [Textual](https://github.com/gonzalezreal/textual) library (`StructuredText`). About body text uses the default style; bundled **Acknowledgements** (`.md`) uses the GitHub-style preset, including **GFM tables** and fenced code blocks (for example onot-generated OSS notices).
+`MarkdownView` renders using [Textual](https://github.com/gonzalezreal/textual) `StructuredText`. The main text uses `.default`, while the bundled **Acknowledgements** (`.md`) uses GitHub-style formatting (**GFM tables**, fenced code, and line breaks in long `` ```text ``).
 
-**Not recommended:** Remote images (`![](https://...)`) in offline Acknowledgements — Textual may fetch them over the network. Prefer text-only notices in the app bundle.
+**Deprecated:** Remote images (`![](https://...)`) in the Acknowledgements, which are intended for offline use — Textual may attempt to fetch them over the network. We recommend using text-only links within the application bundle.
 
-**Not supported / discouraged:** mermaid and other diagram DSLs, embedded HTML, and content meant for arbitrary web rendering.
+**Not supported or deprecated:** Mermaid and other diagramming DSLs, embedded HTML, and any content intended for web rendering.
  -->
 
-`MarkdownView` は [Textual](https://github.com/gonzalezreal/textual) ライブラリ (`StructuredText`) を使用して Markdown をレンダリングします。About 本文デフォルトのスタイルが適用されています; バンドルされている **Acknowledgements** (`.md`) には、**GFM テーブル** やフェンス付きコードブロック (例: onot で生成された OSS 通知) を含む GitHub スタイルのプリセットが使用されています。長い `` ```text `` ブロック (ライセンス全文) はシート幅で折り返します。
+`MarkdownView` は [Textual](https://github.com/gonzalezreal/textual) の `StructuredText` でレンダリングします。About 本文は `.default`、バンドル **Acknowledgements** (`.md`) は GitHub 風スタイル (**GFM 表**、フェンス付きコード、長い `` ```text `` の折り返し) です。
 
 **非推奨:** オフライン想定の Acknowledgements でのリモート画像 (`![](https://...)`) — Textual がネットワーク経由でそれらを取得しようとする可能性があります。アプリケーションバンドル内では、テキストのみの通知の使用を推奨します。
 
@@ -216,27 +236,22 @@ This is **bold** and *italic* text.
 ### JSON
 
 ```swift
-let content = """
-{
-  "title": "About This App",
-  "description": "This is a sample app",
-  "features": ["Feature 1", "Feature 2"]
-}
-"""
+let metadata = #"{"name":"My App","version":"1.0.0"}"#
+AboutView(content: metadata, contentType: .json)
+// Even when set to “.automatic,” if the line starts with { or [, it is formatted and displayed as JSON.
 ```
 
 ### RTF
 
-<!-- 
-RTF content is automatically parsed and displayed.
- -->
-
-RTF コンテンツは、自動的に解析され表示されます。
+```swift
+let rtf = "{\\rtf1\\ansi\\b About\\b0\\line Sample text}"
+AboutView(content: rtf, contentType: .rtf)
+```
 
 ## Localization
 
 <!-- 
-The library includes built-in localization for:
+The library includes built-in localization features for the following languages.
  -->
 
 ライブラリには、以下の言語のローカライズ機能が組み込まれています。
@@ -245,7 +260,7 @@ The library includes built-in localization for:
 * Japanese (ja)
 
 <!-- 
-You can add your own localizations by providing `Localizable.strings` files in your app bundle.
+You can add your own localization by including a `Localizable.strings` file in the application bundle.
  -->
 
 アプリケーション・バンドルに `Localizable.strings` ファイルを追加することで、独自のローカライズを追加できます。
@@ -255,7 +270,7 @@ You can add your own localizations by providing `Localizable.strings` files in y
 ### Default Content
 
 <!-- 
-You can provide default content by including an `AboutDefault.md` file in your app bundle:
+You can provide default content by including an `AboutDefault.md` file in the application bundle.
  -->
 
 アプリケーション・バンドルに `AboutDefault.md` ファイルを含めることで、デフォルト・コンテンツを提供できます。
@@ -269,7 +284,7 @@ Your default about content here.
 ### Styling
 
 <!-- 
-The About Window automatically adapts to your app's appearance, including dark mode support.
+The “About” window automatically adapts to the application's appearance, including support for dark mode.
  -->
 
 About ウィンドウは、ダークモード対応を含め、アプリケーションの見た目に自動的に適応します。
@@ -280,7 +295,7 @@ About ウィンドウは、ダークモード対応を含め、アプリケー�
 
 ```swift
 public enum AboutContentType {
-    case automatic  // 先頭・構造から Markdown / JSON / RTF を推定
+    case automatic  // Infer Markdown / JSON / RTF from the Header and Structure
     case markdown
     case json
     case rtf
@@ -288,6 +303,10 @@ public enum AboutContentType {
     public static func effective(for content: String, requested: AboutContentType = .automatic) -> AboutContentType
 }
 ```
+
+<!-- 
+`AboutViewModel.effectiveContentType` returns the result of the estimation when set to `.automatic`.
+ -->
 
 `AboutViewModel.effectiveContentType` は `.automatic` 時の推定結果を返します。
 
@@ -361,161 +380,219 @@ func aboutPopover(/* same optional legal-text parameters */) -> some View
 ## Testing
 
 <!-- 
-The library includes comprehensive tests:
+| Type | Test | Execution |
+| --- | --- | --- |
+| Unit | `AboutViewTests` (XCTest) | `swift test` (macOS) |
+| Loader | `LegalTextLoaderTests` (Swift Testing) | Same as above |
+| Content Format | `AboutContentFormatTests` (Swift Testing) | Same as above |
+| Snapshot | `AboutViewSnapshotTests` | CI `test-macos` (locally, `XCTSkip` is used by default; forced with `FORCE_SNAPSHOT_TESTS=1`) |
+| iOS UI | `AboutSheetInspectorTests` (ViewInspector) | CI `test-ios` (`xcodegen` → `S2JAboutWindowTests-iOS`) |
  -->
 
-ライブラリには、包括的なテストが含まれています。
+| 種別 | テスト | 実行 |
+| --- | --- | --- |
+| ユニット | `AboutViewTests` (XCTest) | `swift test` (macOS) |
+| ローダー | `LegalTextLoaderTests` (Swift Testing) | 同上 |
+| 本文形式 | `AboutContentFormatTests` (Swift Testing) | 同上 |
+| スナップショット | `AboutViewSnapshotTests` | CI `test-macos` (ローカルは原則 `XCTSkip`、`FORCE_SNAPSHOT_TESTS=1` で強制) |
+| iOS UI | `AboutSheetInspectorTests` (ViewInspector) | CI `test-ios` (`xcodegen` → `S2JAboutWindowTests-iOS`) |
 
 ```zsh
 swift test
-```
-
-<!-- 
-For UI testing with snapshots:
- -->
-
-スナップショットを用いた UI テストの場合。`AboutViewSnapshotTests` が [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) で参照画像と比較します。
-
-```zsh
 swift test --enable-code-coverage
 ```
 
-参照 PNG は **macos-26** 上の [`update-snapshots`](.github/workflows/update-snapshots.yml) ワークフローで記録し、コミットします。ローカル `swift test` では macOS 差分のためスナップショットはスキップされ、**CI の `test-macos` で比較**されます。手元で比較する場合は `FORCE_SNAPSHOT_TESTS=1 swift test --filter AboutViewSnapshotTests` を使い、必要なら `SNAPSHOT_TESTING_RECORD=all` で再記録してください。iOS の `aboutSheet` 検証は ViewInspector (`AboutSheetInspectorTests`) で、CI の `test-ios` (`xcodegen` 後、`project.yml` の `S2JAboutWindowTests-iOS`) で実行します。`aboutSheet` は `View` エクステンションに直接 `.sheet` を付与する実装であり、テストは `inspect().color().sheet()` で sheet を走査します (カスタム `ViewModifier` 内の `.sheet` は ViewInspector で検出されません)。
+<!-- 
+See the snapshot reference. PNGs are recorded in [`update-snapshots`](.github/workflows/update-snapshots.yml) for **macos-26**. To re-record them, consider setting `SNAPSHOT_TESTING_RECORD=all`.
+ -->
+
+スナップショット参照 PNG は **macos-26** の [`update-snapshots`](.github/workflows/update-snapshots.yml) で記録します。再記録は `SNAPSHOT_TESTING_RECORD=all` を検討してください。
+
+<!-- 
+Quality gate (recommended before committing):
+ -->
+
+品質ゲート (コミット前推奨):
+
+```zsh
+npm run lint:docs    # Markdown
+npm run lint:swift   # SwiftLint / SwiftFormat / Periphery (xcodegen 含む)
+```
 
 ### Local Testing Before Commit
 
 <!-- 
-Before committing, you can run the same tests that CI/CD will run:
+Before committing, you can run the same tests locally as in CI/CD:
  -->
 
 コミット前に、CI/CD と同じテストをローカルで実行できます:
 
 ```zsh
-# 直接実行
+# Execute Directly
 ./scripts/test-local.sh
 
-# npm スクリプトから実行
+# Run from an npm script
 npm run test:local
 ```
 
-このスクリプトは以下を実行します:
-- macOS テストの実行
-- Xcode プロジェクトの生成とテスト (`project.yml` が存在する場合):
-  - `xcodegen generate` で Xcode プロジェクトを生成
-  - プラットフォーム専用スキームの自動選択 (macOS テスト時は `S2JAboutWindow-macOS`、iOS テスト時は `S2JAboutWindow-iOS`)
-  - 各プラットフォームのテストを独立して実行
-- iOS シミュレーターの確認と起動:
-  - 利用可能なシミュレーターを自動検出
-  - デバイス ID を UUID 形式で正しく抽出
-  - すでに起動済みの場合はスキップ、未起動の場合は自動起動
-- iOS テストの実行を試行 (Xcode が利用可能な場合)
-- テスト失敗時の有用なエラー・メッセージの表示
+<!-- 
+This script performs the following actions:
+* Runs macOS tests
+* Generates an Xcode project and runs tests (if `project.yml` exists):
+  * Generates an Xcode project using `xcodegen generate`
+  * Automatically selects the platform-specific scheme (`S2JAboutWindow-macOS` for macOS tests and `S2JAboutWindow-iOS` for iOS tests)
+  * Runs tests for each platform independently 
+* Checks for and launches the iOS simulator:
+  * Automatically detects available simulators
+  * Correctly extracts the device ID in UUID format
+  * Skips if already running; automatically launches if not
+* Attempts to run iOS tests (if Xcode is available)
+* Displays helpful error messages when tests fail
+ -->
+
+このスクリプトは、以下を実行します:
+* macOS テストの実行
+* Xcode プロジェクトの生成とテスト (`project.yml` が存在する場合):
+  * `xcodegen generate` で Xcode プロジェクトを生成
+  * プラットフォーム専用スキームの自動選択 (macOS テスト時は `S2JAboutWindow-macOS`、iOS テスト時は `S2JAboutWindow-iOS`)
+  * 各プラットフォームのテストを独立して実行
+* iOS シミュレーターの確認と起動:
+  * 利用可能なシミュレーターを自動検出
+  * デバイス ID を UUID 形式で正しく抽出
+  * すでに起動済みの場合はスキップ、未起動の場合は自動起動
+* iOS テストの実行を試行 (Xcode が利用可能な場合)
+* テスト失敗時の有用なエラー・メッセージの表示
+
+<!-- 
+This script is versatile and can be used in other Swift Package Manager projects as well.
+ -->
 
 このスクリプトは汎用的で、他の Swift Package Manager プロジェクトでも使用できます。
 
-### カスタマイズ方法
+### How to Customize
 
-**優先順位**: は、下記の順番です。
+<!-- 
+**Priority**: The order is as follows.
+ -->
+
+**優先順位**: 下記の順番です。
+
+<!-- 
+1. Command-line arguments
+2. Auto-detection (from Package.swift)
+3. Environment variables
+4. Default values
+ -->
+
 1. コマンドライン引数
 2. 自動検出 (Package.swift から)
 3. 環境変数
 4. デフォルト値
 
-#### コマンドライン引数で指定
+#### Specified via command-line arguments
 
 ```zsh
-# npm スクリプトから引数を渡す
+# Passing Arguments from an npm Script
 npm run test:local -- --skip-ios
 npm run test:local -- --scheme-name MyApp --ios-device "iPhone 15"
 
-# 直接実行
+# Execute Directly
 ./scripts/test-local.sh --skip-ios
 ./scripts/test-local.sh --scheme-name MyApp --ios-device "iPhone 15" --ios-version "16.0"
 ```
 
-利用可能なオプション:
-- `-s, --scheme-name <name>`: Xcode スキーム名
-- `-d, --ios-device <device>`: iOS/iPadOS シミュレーターデバイス名
-- `-v, --ios-version <version>`: iOS/iPadOS 最小バージョン
-- `--skip-ios`: iOS/iPadOS テストをスキップ
-- `--enable-xcode-project`: Xcode プロジェクト生成とテストを有効化
-- `--xcode-project-name <name>`: Xcode プロジェクト名
-- `--xcodegen-auto-install`: `xcodegen` を自動インストール
-- `-h, --help`: ヘルプを表示
+<!-- 
+Available options:
+ -->
 
-#### 環境変数で指定
+利用可能なオプション:
+
+<!-- 
+* `-s, --scheme-name <name>`: Xcode scheme name
+* `-d, --ios-device <device>`: iOS/iPadOS simulator device name
+* `-v, --ios-version <version>`: Minimum iOS/iPadOS version
+* `--skip-ios`: Skip iOS/iPadOS tests
+* `--enable-xcode-project`: Enable Xcode project generation and testing
+* `--xcode-project-name <name>`: Xcode project name
+* `--xcodegen-auto-install`: Automatically install `xcodegen`
+* `-h, --help`: Display help
+ -->
+
+* `-s, --scheme-name <name>`: Xcode スキーム名
+* `-d, --ios-device <device>`: iOS/iPadOS シミュレーターデバイス名
+* `-v, --ios-version <version>`: iOS/iPadOS 最小バージョン
+* `--skip-ios`: iOS/iPadOS テストをスキップ
+* `--enable-xcode-project`: Xcode プロジェクト生成とテストを有効化
+* `--xcode-project-name <name>`: Xcode プロジェクト名
+* `--xcodegen-auto-install`: `xcodegen` を自動インストール
+* `-h, --help`: ヘルプを表示
+
+#### Specify via an environment variable
 
 ```zsh
-# 環境変数でカスタマイズ (引数と自動検出が優先されます)
+# Customize via Environment Variables (Arguments and auto-detection take precedence)
 SCHEME_NAME="MyPackage" IOS_DEVICE="iPhone 15" IOS_VERSION="16.0" ./scripts/test-local.sh
 ```
 
+<!-- 
+Available environment variables:
+ -->
+
 利用可能な環境変数:
-- `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
-- `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
-- `IOS_VERSION`: iOS 最小バージョン (デフォルト: "17.0")
-- `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
-- `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効にする場合は "true"
-- `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
-- `XCODEGEN_AUTO_INSTALL`: `xcodegen` を自動インストールする場合は "true"
+
+<!-- 
+* `SCHEME_NAME`: Xcode scheme name (default: automatically detected from `Package.swift`)
+* `IOS_DEVICE`: iOS simulator or device name (default: “iPad Pro”)
+* `IOS_VERSION`: Minimum iOS version (default: “17.0”)
+* `SKIP_IOS_TESTS`: Set to “true” to skip iOS tests
+* `ENABLE_XCODE_PROJECT`: Set to “true” to enable Xcode project generation and testing
+* `XCODE_PROJECT_NAME`: Xcode project name (default: automatically detected)
+* `XCODEGEN_AUTO_INSTALL`: Set to “true” to automatically install `xcodegen`
+ -->
+
+* `SCHEME_NAME`: Xcode スキーム名 (デフォルト: Package.swift から自動検出)
+* `IOS_DEVICE`: iOS シミュレーター・デバイス名 (デフォルト: "iPad Pro")
+* `IOS_VERSION`: iOS 最小バージョン (デフォルト: "17.0")
+* `SKIP_IOS_TESTS`: iOS テストをスキップする場合は "true"
+* `ENABLE_XCODE_PROJECT`: Xcode プロジェクト生成とテストを有効にする場合は "true"
+* `XCODE_PROJECT_NAME`: Xcode プロジェクト名 (デフォルト: 自動検出)
+* `XCODEGEN_AUTO_INSTALL`: `xcodegen` を自動インストールする場合は "true"
 
 ## Development
 
 ### Project Structure
 
 <!-- 
-The project follows a standard Swift Package Manager structure:
+This project follows the standard Swift Package Manager structure.
  -->
 
 このプロジェクトは標準的な Swift Package Manager の構造に従っています。
 
 <!-- 
-* `Sources/` - Source code
-* `Tests/` - Test files
-* `Package.swift` - Package configuration
+* `Sources/S2JAboutWindow/` — `AboutWindow` / `AboutView` / `AboutContentView` / `MarkdownView` / `LegalText*` / `Extensions.swift`, and others
+* `Tests/S2JAboutWindowTests/` — Tests for the items in the table above, `__Snapshots__/` (macOS only)
+* `Preview Content/` — Markdown for Xcode Canvas (not included in the release)
+* `Package.swift` — SPM (Textual; for SnapshotTesting and ViewInspector testing)
+* `project.yml` — XcodeGen (`npm run xcode:generate`; for ViewInspector iOS testing)
  -->
 
-* `Sources/` - ソースコード
-* `Tests/` - テストファイル
-* `Preview Content/` - Xcode Canvas 用 Markdown (`AboutPreview.md`、`MarkdownPreview.md`)。配布ターゲットには含めません
-* `Package.swift` - パッケージ設定
-* `project.yml` - XcodeGen (`npm run xcode:generate` → `DEVELOPMENT_ASSET_PATHS` で Preview と連携)
+* `Sources/S2JAboutWindow/` — `AboutWindow` / `AboutView` / `AboutContentView` / `MarkdownView` / `LegalText*` / `Extensions.swift` ほか
+* `Tests/S2JAboutWindowTests/` — 上表のテスト、`__Snapshots__/` (macOS のみ)
+* `Preview Content/` — Xcode Canvas 用 Markdown (配布外)
+* `Package.swift` — SPM (Textual; テスト用 SnapshotTesting / ViewInspector)
+* `project.yml` — XcodeGen (`npm run xcode:generate`、iOS テスト用 ViewInspector)
 
 ### Setting Up Development Environment
 
 <!-- 
-To set up the development environment for this project:
+To set up the development environment for this project, follow the steps below.
  -->
 
 このプロジェクトの開発環境をセットアップするには、以下の手順を実行してください。
 
 <!-- 
 1. Clone the repository:
-
-   ```zsh
-   git clone https://github.com/stein2nd/s2j-about-window.git
-   cd s2j-about-window
-   ```
-
-2. Open the project in Xcode:
-
-   ```zsh
-   open Package.swift
-   ```
-
-3. Build the project:
-
-   ```zsh
-   swift build
-   ```
-
-4. Run tests:
-
-   ```zsh
-   swift test
-   ```
  -->
-
 1. リポジトリをクローンします:
 
    ```zsh
@@ -523,12 +600,18 @@ To set up the development environment for this project:
    cd s2j-about-window
    ```
 
+<!-- 
+2. Open the project in Xcode:
+ -->
 2. Xcode でプロジェクトを開きます:
 
    ```zsh
    open Package.swift
    ```
 
+<!-- 
+To use the previews for `AboutView` and `MarkdownView` in SwiftUI **Canvas**, generate the project using XcodeGen and then open it.
+ -->
    SwiftUI **Canvas** で `AboutView` / `MarkdownView` のプレビューを使う場合は、XcodeGen でプロジェクトを生成してから開きます。
 
    ```zsh
@@ -536,14 +619,23 @@ To set up the development environment for this project:
    open s2j-about-window.xcodeproj
    ```
 
+<!-- 
+The preview text is located in `Preview Content/*.md` in the root directory of the repository (loaded by `PreviewContent.swift`).
+ -->
    プレビュー本文はリポジトリ直下の `Preview Content/*.md` です (`PreviewContent.swift` が読み込み)。
 
+<!-- 
+3. Build the project:
+ -->
 3. プロジェクトをビルドします:
 
    ```zsh
    swift build
    ```
 
+<!-- 
+4. Run the test:
+ -->
 4. テストを実行します:
 
    ```zsh
@@ -552,24 +644,24 @@ To set up the development environment for this project:
 
 ### Building and Testing
 
-<!-- 
-To build the project, use:
- -->
-
-プロジェクトをビルドするには、以下のコマンドを実行してください。
-
 ```zsh
+# SPM
 swift build
+swift test --enable-code-coverage
+
+# Local Execution Similar to CI (macOS + iOS, if desired)
+npm run test:local
+# iOS を含める例: npm run test:local:iOSfull
+
+# Sample macOS App (After XcodeGen)
+npm run lint:build
 ```
+
 <!-- 
-To run tests with code coverage:
+Testing on the iOS Simulator requires the `xcodegen`-generated project and the `S2JAboutWindow-iOS` scheme. For details, see [docs/SPEC_CICD.md](docs/SPEC_CICD.md) and `npm run test:local -- --help`.
  -->
 
-コード・カバレッジ付きでテストを実行するには、以下のコマンドを実行してください。
-
-```zsh
-swift test --enable-code-coverage
-```
+iOS シミュレーター上のテストは `xcodegen` 生成プロジェクトと `S2JAboutWindow-iOS` スキームが必要です。詳細は [docs/SPEC_CICD.md](docs/SPEC_CICD.md) と `npm run test:local -- --help` を参照してください。
 
 ## Contributing
 
