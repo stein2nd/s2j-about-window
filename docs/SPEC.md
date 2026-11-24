@@ -316,13 +316,19 @@
   * **テスト用 SPM** (ライブラリ製品には非同梱): `SnapshotTesting` / `ViewInspector`。`Package.swift` の `S2JAboutWindowTests` と同系統のバージョン要件。
   * **ターゲット構成**:
     * `S2JAboutWindow-macOS`: macOS 向けフレームワーク
-    * `S2JAboutWindow-iOS`: iOS 向けフレームワーク
+    * `S2JAboutWindow-iOS`: iOS 向けフレームワーク (署名: `CODE_SIGNING_ALLOWED: NO` — シミュレーター/ローカル向け)
     * `S2JAboutWindowTests-macOS`: macOS 向けテストバンドル (`SnapshotTesting` にリンク。`AboutViewSnapshotTests` を含む)
-    * `S2JAboutWindowTests-iOS`: iOS 向けテストバンドル (`ViewInspector` にリンク。`AboutViewSnapshotTests` と `__Snapshots__` はソース除外。署名: `CODE_SIGN_STYLE: Automatic`、`DEVELOPMENT_TEAM: ""`)
+    * `S2JAboutWindowTests-iOS`: iOS 向けテストバンドル (`ViewInspector` にリンク。`AboutViewSnapshotTests` と `__Snapshots__` はソース除外。署名: `CODE_SIGNING_ALLOWED: NO`)
   * **スキーム構成**:
     * `S2JAboutWindow`: 統合スキーム (macOS + iOS)
     * `S2JAboutWindow-macOS`: macOS 専用スキーム (macOS ターゲットのみ)
     * `S2JAboutWindow-iOS`: iOS 専用スキーム (iOS ターゲットのみ)
+  * **開発用 Xcode プロジェクト (署名・シミュレーター)**:
+    * 配布の正本は **SPM** (`Package.swift`)。`project.yml` は Canvas、`ViewInspector` / スナップショット、`SampleApp` 用で、**ホストアプリへの組込みを想定しない**。
+    * ローカル、CI のデフォルトは **シミュレーター/My Mac** でのビルド・テスト。`project.yml` に `DEVELOPMENT_TEAM` は書かない ([s2j-source-list](https://github.com/stein2nd/s2j-source-list) の `project.yml` と同型)。
+    * iOS フレームワーク、iOS テストは `CODE_SIGNING_ALLOWED: NO` (実機配布、Archive 向けではない)。
+    * macOS ターゲットも Team 未設定のため、Xcode Signing は **Don't Code Sign** に見えるのが正常。CI、`npm run lint:build` は `CODE_SIGNING_ALLOWED=NO` でビルド ([SPEC_CICD.md](./SPEC_CICD.md))。
+    * `SampleApp` は `CODE_SIGN_STYLE: Automatic` のみ (Team なし)。macOS 上の手動確認用。**実機インストール・署名付き Archive はホストアプリ側** の責務。
 * `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)
 * `AboutView.swift` : SwiftUI ビュー、アプリケーション・アイコン表示、アプリケーション情報表示、MarkdownView 統合 (✅100% 実装完了)
 * `AboutViewModel.swift` : ViewModel、`content` / `contentType` / `effectiveContentType`、メタデータ、Bundle 拡張 (✅100% 実装完了)
@@ -680,7 +686,7 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 | 項目 | 推奨値 | 理由 |
 | --- | --- | --- |
 | Product Name | `s2j-about-window` | `SPEC.md` のプロダクト名と一致 |
-| Team | Apple ID に応じて設定 | コード署名のため |
+| Team | **ホストアプリ** 配布時に Apple ID で設定。本リポジトリの `project.yml` には書かない (開発用 Xcode はシミュレーター/署名なし。§4.3参照) |
 | Organization Identifier | `com.s2j` | ドメイン逆引き規則、一貫性確保 |
 | Interface | SwiftUI | SwiftUI ベースを前提 |
 | Language | Swift (Swift v6.3) | Xcode v26.5に同梱される Swift バージョン (Objective-C は不要) |

@@ -68,7 +68,21 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
     * `AboutView_Previews`、`MarkdownView_Previews` を `#if DEBUG` で提供。
     * リポジトリ直下 `Preview Content/` (`AboutPreview.md` / `MarkdownPreview.md`) を `PreviewContent.swift` が読み込み。XcodeGen は `DEVELOPMENT_ASSET_PATHS` を設定。
 
-## 関連ドキュメント `{@architecture:s-h005}`
+## 開発用 Xcode プロジェクト (XcodeGen) `{@architecture:s-xcode-xcodegen}`
+
+Swift Package 本体 (`Sources/`) に加え、`npm run xcode:generate` が `project.yml` から `.xcodeproj` を生成します。
+
+| パス | 役割 |
+| --- | --- |
+| `project.yml` | `S2JAboutWindow-macOS` / `iOS` フレームワーク、プラットフォーム別ユニットテスト、`SampleApp` (macOS)。iOS 側は `CODE_SIGNING_ALLOWED: NO`。 |
+| `SampleApp.swift` | macOS の最小デモ。Canvas 以外の手動確認。 |
+| `Preview Content/` | SPM 配布外。Canvas 用 Markdown。 |
+
+**署名方針 (シミュレーター運用)**: `DEVELOPMENT_TEAM` をリポジトリに載せない。Xcode の Signing で自動オフ、Team なし、**Don't Code Sign** は想定どおり。iOS テストはスキーム **`S2JAboutWindow-iOS`** と **iOS Simulator**、macOS は **`swift test`** または `S2JAboutWindow-macOS` / `SampleApp`。**配布署名はホストアプリ** (Cozy Brew 等) が担う。S2J シリーズの [s2j-source-list](https://github.com/stein2nd/s2j-source-list) も `project.yml` 上は同型 (`S2JSourceList-iOS` / `Tests-iOS` に `CODE_SIGNING_ALLOWED: NO`)。
+
+詳細: [SPEC.md](./SPEC.md) §4.3、[SPEC_CICD.md](./SPEC_CICD.md) §3.7。
+
+## 関連ドキュメント `{@architecture:s-h006}`
 
 * 仕様の入口:
     * [specs.md](./specs.md)

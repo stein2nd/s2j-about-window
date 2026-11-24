@@ -112,7 +112,7 @@
 
 ### プラットフォーム・ローカライズ `{@status:s-h011}`
 
-* [x] 最小 OS ([overview.md](./overview.md))、`@available`、CI シミュレータ
+* [x] 最小 OS ([overview.md](./overview.md))、`@available`、CI シミュレーター
 * [x] `en` / `ja` / `Base` の `Localizable.strings`
 * [x] `#if os` 方針どおり macOS / iOS の責務分離 ([architecture.md](./architecture.md))
 * [x] `SampleApp` (macOS) と XcodeGen `project.yml`
@@ -216,5 +216,5 @@
 ## 関連 `{@status:s-h021}`
 
 * 仕様の入口: [specs.md](./specs.md)
-* Issue #17検討記録 (アーカイブ的): [docs_mod/status.md](../docs_mod/status.md)
-* Issue #18検討記録: [docs_mod/about_header_status.md](../docs_mod/about_header_status.md)
+* Issue `#17` 検討記録 (アーカイブ的): [docs_mod/status.md](../docs_mod/status.md)
+* Issue `#18` 検討記録: [docs_mod/about_header_status.md](../docs_mod/about_header_status.md)

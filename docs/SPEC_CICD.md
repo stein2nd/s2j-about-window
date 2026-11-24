@@ -385,6 +385,7 @@
 
 * `xcodegen generate` で Xcode プロジェクトを生成します。
 * `project.yml` の `DEVELOPMENT_ASSET_PATHS` により、リポジトリ直下 `Preview Content/` が開発ビルドにのみ同梱されます (SwiftUI Canvas 用。詳細は [architecture.md](./architecture.md))。
+* **コード署名**: 開発用 `.xcodeproj` は **シミュレーター/署名なし** 運用。`xcodebuild` は `CODE_SIGNING_ALLOWED=NO` を付与 (`npm run lint:build` 含む)。iOS ターゲットは `project.yml` で `CODE_SIGNING_ALLOWED: NO`。正本は [SPEC.md](./SPEC.md) §4.3。
 * **プラットフォーム専用スキームの自動選択**:
   * macOS テスト実行時: `S2JAboutWindow-macOS` スキームが存在する場合は自動選択します (macOS ターゲットのみをビルド・テスト)。
   * iOS テスト実行時: `S2JAboutWindow-iOS` スキームが存在する場合は自動選択します (iOS ターゲットのみをビルド・テスト)。
