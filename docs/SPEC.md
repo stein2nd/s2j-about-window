@@ -634,6 +634,8 @@ CI/CD に関する詳細な仕様は、[SPEC_CICD.md](./SPEC_CICD.md) を参照�
 
 機能拡張を目的とした改善を実施します。
 
+* **About ヘッダーパネル** ([#18](https://github.com/stein2nd/s2j-about-window/issues/18)・仕様確定)
+  * [about_header_panel_spec.md](./about_header_panel_spec.md) — `AboutHeaderOptions` / `classicHorizontal`、ビルド番号、`primaryLink` (フェーズ1→3、opt-in)。
 * **コンテンツ形式の拡張**
   * JSON スキーマに沿った構造化 UI (表形式キー表示など)。
   * HTML インラインなど Markdown 以外のリッチ本文 (現行 Should は Markdown / 整形 JSON / RTF 文字列)。

@@ -57,6 +57,7 @@ import SwiftUI
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
+            headerOptions: AboutHeaderOptions = .default,
             licenseResourceName: String? = nil,
             acknowledgementsResourceName: String? = nil,
             resourceBundle: Bundle = .main
@@ -69,6 +70,7 @@ import SwiftUI
                         appName: appName,
                         version: version,
                         copyright: copyright,
+                        headerOptions: headerOptions,
                         licenseResourceName: licenseResourceName,
                         acknowledgementsResourceName: acknowledgementsResourceName,
                         resourceBundle: resourceBundle
@@ -94,22 +96,25 @@ import SwiftUI
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
+            headerOptions: AboutHeaderOptions = .default,
             licenseResourceName: String? = nil,
             acknowledgementsResourceName: String? = nil,
             resourceBundle: Bundle = .main
         ) -> some View {
-            popover(isPresented: isPresented) {
+            let popoverWidth: CGFloat = headerOptions.style == .classicHorizontal ? 480 : 400
+            return popover(isPresented: isPresented) {
                 AboutView(
                     content: content,
                     contentType: contentType,
                     appName: appName,
                     version: version,
                     copyright: copyright,
+                    headerOptions: headerOptions,
                     licenseResourceName: licenseResourceName,
                     acknowledgementsResourceName: acknowledgementsResourceName,
                     resourceBundle: resourceBundle
                 )
-                .frame(width: 400, height: 500)
+                .frame(width: popoverWidth, height: 500)
             }
         }
     }

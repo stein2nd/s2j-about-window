@@ -14,6 +14,7 @@
 | [localization_spec.md](./localization_spec.md) | ローカライズ (キー一覧、`Bundle.module`、`AboutDefault.md`) (※将来分離時) |
 | [platform_spec.md](./platform_spec.md) | プラットフォーム別挙動 (macOS / iPadOS) (※将来分離時) |
 | [legal_text_spec.md](./legal_text_spec.md) | バンドル同梱 License / Acknowledgements 表示 ([Issue #17](https://github.com/stein2nd/s2j-about-window/issues/17) 完了・2.0.13〜3.0.1) |
+| [about_header_panel_spec.md](./about_header_panel_spec.md) | About ヘッダーパネル (`classicHorizontal` / build / `primaryLink`) — [Issue #18](https://github.com/stein2nd/s2j-about-window/issues/18) 完了・3.0.11 |
 | [SPEC_CICD.md](./SPEC_CICD.md) | CI/CD 仕様 (ワークフロー・ローカルテスト・カバレッジ) |
 | [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md) | 仕様の細分化方針とベター・プラクティス |
 | [status.md](./status.md) | **実装状況の入口** (カテゴリー別スナップショット・短期 Backlog) |
@@ -86,4 +87,5 @@
 * **Snapshot / ViewInspector テスト** → [architecture.md](./architecture.md) テスト・プレビュー、[status.md](./status.md#status-quality-ui)
 * **仕様をどう分割するかの方針** → [SPEC_STRUCTURE.md](./SPEC_STRUCTURE.md)
 * **License / Acknowledgements をバンドルから表示** → [legal_text_spec.md](./legal_text_spec.md) (`` `{@legal_text_spec:s1}` `` 付近)
+* **About ヘッダー (classic / build / primary link)** → [about_header_panel_spec.md](./about_header_panel_spec.md) (`` `{@about_header_panel_spec:s1}` `` 付近)
 * **仕様見出しのタグの付け方** → 本ファイル `` `{@specs:heading-tags}` `` (リンクは `` `{@specs:heading-tags-anchors}` ``)

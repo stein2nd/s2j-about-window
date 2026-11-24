@@ -5,6 +5,7 @@
 "About.NoDescription" = "説明が利用できません";
 "About.Copyright" = "著作権";
 "About.Version" = "バージョン";
+"About.SupportIdentifier.Prefix" = "識別子:";
 "About.License.Button" = "ライセンス…";
 "About.Acknowledgements.Button" = "謝辞";
 "About.LegalText.Title.License" = "ライセンス";

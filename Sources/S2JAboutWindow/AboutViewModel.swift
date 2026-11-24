@@ -38,6 +38,11 @@ import SwiftUI
          */
         @Published public var copyright: String?
 
+        /// `CFBundleVersion` (マーケティング版とは別)。
+        public var buildNumber: String? {
+            Bundle.main.buildNumber
+        }
+
         /**
          * コンストラクタ
          * 表示するコンテンツ（Markdown、JSON、RTF）、アプリ名、バージョン、著作権情報を指定してAboutViewModelを初期化
@@ -98,6 +103,10 @@ import SwiftUI
          */
         var version: String? {
             object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        }
+
+        var buildNumber: String? {
+            object(forInfoDictionaryKey: "CFBundleVersion") as? String
         }
 
         /**

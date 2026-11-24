@@ -2,6 +2,26 @@
 
 ## unreleased
 
+## 3.0.11 - 2026-11-24
+
+### Added
+
+* Issue `#18` — `AboutHeaderStyle` / `AboutHeaderOptions` (`classicHorizontal`、ビルド番号、`primaryLink`、accessory 画像、`supportIdentifier`)
+* `AboutView` / `AboutWindow.showAboutWindow` / `aboutSheet` / `aboutPopover` の `headerOptions` 引数 (デフォルト `.default` で後方互換)
+* `AboutWindow.showAboutWindow` の `contentSize` で host が初期ウィンドウサイズを指定可能
+* `AboutViewModel.buildNumber` / `Bundle.buildNumber` (`CFBundleVersion`)
+* ローカライズキー `About.SupportIdentifier.Prefix` (en / ja / Base)
+* `AboutHeaderOptionsTests` (Swift Testing)、`testAboutViewClassicHorizontalSnapshot_light` 参照 PNG
+
+### Changed
+
+* `AboutView` — バージョン行を `About.Version` ローカライズ + 任意ビルド表示、iOS compact 時は classic を縦にフォールバック、下段アクションの狭幅縦積み
+* `README.md` — API Reference に `AboutHeaderOptions` / `headerOptions`、`Package.swift` の `from: "3.0.11"`
+* 仕様 — `docs/about_header_panel_spec.md` を `docs_mod/` から確定版に移行 (`docs/specs.md` / `docs/SPEC.md` §11.2 / `docs_mod/` 索引、`scripts/apply-heading-tags.py` の `TARGETS` 追加)
+* docs — `docs/status.md` に Issue `#18` 完了条件チェックリスト (10/10)、`docs/architecture.md` に `AboutHeaderOptions.swift` を追記
+* Snapshot — `AboutView` デフォルト表示の参照画像をバージョン行変更に合わせて更新 (classic 用 PNG を追加)
+* `package.json` / `package-lock.json`: 3.0.11
+
 ## 3.0.10 - 2026-11-22
 
 ### Added

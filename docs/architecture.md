@@ -16,7 +16,8 @@
 ```
 Sources/S2JAboutWindow/
 ├── AboutWindow.swift   # macOS: NSWindow 管理、showAboutWindow/closeWindow の public API、NSWindowDelegate
-├── AboutView.swift     # SwiftUI ビュー (共通): アイコン・アプリケーション情報・MarkdownView のレイアウト
+├── AboutHeaderOptions.swift # 公開 `AboutHeaderStyle` / `AboutHeaderOptions`、バージョン行フォーマット
+├── AboutView.swift     # SwiftUI ビュー (共通): ヘッダー (`vertical` / `classicHorizontal`)、本文、下段アクション
 ├── AboutViewModel.swift # ViewModel: コンテンツ・appName/version/copyright、Bundle 拡張
 ├── MarkdownView.swift  # Textual `StructuredText` による Markdown 描画 (About / Acknowledgements)
 ├── AboutContentView.swift # About 本文: Markdown / JSON (整形) / RTF の自動判別と表示
@@ -32,7 +33,8 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
 | ファイル | 責務 |
 | --- | --- |
 | **AboutWindow.swift** | macOS 専用。`NSWindow` の生成・表示・閉じる、`NSHostingController` で `AboutView` をホスト、`NSWindowDelegate` でライフサイクル管理。 |
-| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。アイコン・メタデータ・`AboutContentView` で本文。プラットフォーム別の背景色・アイコン取得は `#if os` で分岐。 |
+| **AboutHeaderOptions.swift** | 共通。About ヘッダーの opt-in 設定 (`style`、`showBuildNumber`、`primaryLink` 等)。 |
+| **AboutView.swift** | 共通。`AboutViewModel` を `@StateObject` で保持。`headerOptions` で縦積み / classic 横レイアウト、ビルド番号、プライマリリンク、下段縦積みフォールバック。iOS は `horizontalSizeClass == .compact` で classic を縦にフォールバック。 |
 | **AboutViewModel.swift** | 共通。`content` / `contentType` / `effectiveContentType`、`appName` / `version` / `copyright`、`Bundle` エクステンション、`loadDefaultContent()`。 |
 | **MarkdownView.swift** | 共通。[Textual](https://github.com/gonzalezreal/textual) `StructuredText`。About は `.default`、バンドル Acknowledgements `.md` は `.legalDocument` コンテキストで `.gitHub` + `overflowMode(.wrap)`。`ScrollView` + `.textual.textSelection(.enabled)`。 |
 | **AboutContentView.swift** | 共通。`AboutView` 本文。公開 `AboutContentType` と `AboutContentFormat` で Markdown / JSON / RTF を表示 (`.automatic` は推定)。 |
@@ -59,7 +61,7 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
     * `AboutContentFormatTests.swift` (Swift Testing: `AboutContentType` / JSON / RTF)。
     * テストリソース: `Resources/` (`FixtureLicense*.txt`、`FixtureAcknowledgements.md` など)。
 * Snapshot / UI テスト:
-    * `AboutViewSnapshotTests.swift` — [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)。macOS: `NSHostingView` + `.image(precision: 0.98)`。参照 PNG は `__Snapshots__/AboutViewSnapshotTests/` (2件)。CI `test-macos` (`CI=true`) で比較、記録は `update-snapshots` (macos-26)。
+    * `AboutViewSnapshotTests.swift` — [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing)。macOS: `NSHostingView` + `.image(precision: 0.98)`。参照 PNG は `__Snapshots__/AboutViewSnapshotTests/` (3件、`classicHorizontal` 含む)。CI `test-macos` (`CI=true`) で比較、記録は `update-snapshots` (macos-26)。
     * `AboutSheetInspectorTests.swift` — `#if os(iOS)`。ホスト `Color.clear.aboutSheet(...)` に対し `inspect().color().sheet()` → `find(AboutView.self)` (`test-ios` / XcodeGen `S2JAboutWindowTests-iOS`)。カスタム `ViewModifier` 内の `.sheet` は ViewInspector で検出されない。
     * テスト依存 (`swift-snapshot-testing` 1.18+、`ViewInspector` 0.10+): `Package.swift` の `S2JAboutWindowTests` と、`project.yml` のプラットフォーム別テストターゲット (macOS: Snapshot、iOS: ViewInspector。iOS ターゲットは `AboutViewSnapshotTests` / `__Snapshots__` をコンパイル対象から除外)。
 * Xcode Preview:
@@ -76,3 +78,5 @@ Preview Content/        # リポジトリ直下 (SPM 配布外)。`AboutPreview.
     * [SPEC.md](./SPEC.md)
 * License / Acknowledgements:
     * [legal_text_spec.md](./legal_text_spec.md)
+* About ヘッダーパネル (classic / build / primary link):
+    * [about_header_panel_spec.md](./about_header_panel_spec.md)

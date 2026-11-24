@@ -74,7 +74,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.10")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.11")
 ]
 ```
 
@@ -310,6 +310,27 @@ public enum AboutContentType {
 
 `AboutViewModel.effectiveContentType` は `.automatic` 時の推定結果を返します。
 
+### AboutHeaderOptions
+
+```swift
+public enum AboutHeaderStyle { case vertical, classicHorizontal }
+
+public struct AboutHeaderOptions: Sendable {
+    public var style: AboutHeaderStyle
+    public var iconSideLength: CGFloat?
+    public var showBuildNumber: Bool
+    public var buildNumberOverride: String?
+    public var supportIdentifier: String?
+    public var headerAccessoryImageName: String?
+    public var accessoryBundle: Bundle
+    public var primaryLinkTitle: String?
+    public var primaryLinkURL: URL?
+    public static let `default` = AboutHeaderOptions()
+}
+```
+
+仕様: [about_header_panel_spec.md](docs/about_header_panel_spec.md)。デフォルト `.default` は従来の縦レイアウトのままです。
+
 ### AboutWindow (macOS)
 
 ```swift
@@ -321,9 +342,11 @@ public class AboutWindow {
         appName: String? = nil,
         version: String? = nil,
         copyright: String? = nil,
+        headerOptions: AboutHeaderOptions = .default,
         licenseResourceName: String? = nil,
         acknowledgementsResourceName: String? = nil,
-        resourceBundle: Bundle = .main
+        resourceBundle: Bundle = .main,
+        contentSize: CGSize? = nil
     )
     public func closeWindow()
 }
@@ -339,6 +362,7 @@ public struct AboutView: View {
         appName: String? = nil,
         version: String? = nil,
         copyright: String? = nil,
+        headerOptions: AboutHeaderOptions = .default,
         licenseResourceName: String? = nil,
         acknowledgementsResourceName: String? = nil,
         resourceBundle: Bundle = .main
@@ -368,13 +392,14 @@ func aboutSheet(
     appName: String? = nil,
     version: String? = nil,
     copyright: String? = nil,
+    headerOptions: AboutHeaderOptions = .default,
     licenseResourceName: String? = nil,
     acknowledgementsResourceName: String? = nil,
     resourceBundle: Bundle = .main
 ) -> some View
 
 // iPadOS Popover
-func aboutPopover(/* same optional legal-text parameters */) -> some View
+func aboutPopover(/* same optional legal-text / headerOptions parameters */) -> some View
 ```
 
 ## Testing
@@ -394,6 +419,7 @@ func aboutPopover(/* same optional legal-text parameters */) -> some View
 | ユニット | `AboutViewTests` (XCTest) | `swift test` (macOS) |
 | ローダー | `LegalTextLoaderTests` (Swift Testing) | 同上 |
 | 本文形式 | `AboutContentFormatTests` (Swift Testing) | 同上 |
+| ヘッダー | `AboutHeaderOptionsTests` (Swift Testing) | 同上 |
 | スナップショット | `AboutViewSnapshotTests` | CI `test-macos` (ローカルは原則 `XCTSkip`、`FORCE_SNAPSHOT_TESTS=1` で強制) |
 | iOS UI | `AboutSheetInspectorTests` (ViewInspector) | CI `test-ios` (`xcodegen` → `S2JAboutWindowTests-iOS`) |
 

@@ -24,6 +24,7 @@ TARGETS = [
     "docs/SPEC_CICD.md",
     "docs/SPEC_STRUCTURE.md",
     "docs/legal_text_spec.md",
+    "docs/about_header_panel_spec.md",
     "docs/architecture.md",
     "docs/overview.md",
     "docs/specs.md",

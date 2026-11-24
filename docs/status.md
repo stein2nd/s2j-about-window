@@ -1,13 +1,13 @@
 # S2J About Window - 実装状況
 
-最終更新: 2026-11-22
+最終更新: 2026-11-24
 
 ## 概要 `{@status:s-h001}`
 
 | 項目 | 内容 |
 | --- | --- |
 | パッケージ | [s2j-about-window](https://github.com/stein2nd/s2j-about-window) (Swift Package) |
-| リリース (npm / ドキュメント基準) | **3.0.10** |
+| リリース (npm / ドキュメント基準) | **3.0.11** |
 | SPM 最小 OS | [overview.md](./overview.md) (Package.swift 準拠) |
 | 主依存 (Markdown) | [Textual](https://github.com/gonzalezreal/textual) 0.5.0+ |
 
@@ -33,6 +33,7 @@
 | 実装状況の詳細 | [SPEC.md](./SPEC.md) §10 (`{@spec:s10}`) |
 | Backlog | [SPEC.md](./SPEC.md) §11 (`{@spec:s11}`) |
 | バンドル License / Acknowledgements | [legal_text_spec.md](./legal_text_spec.md) (Issue [#17](https://github.com/stein2nd/s2j-about-window/issues/17) 完了) |
+| About ヘッダーパネル (classic / build / primary link) | [about_header_panel_spec.md](./about_header_panel_spec.md) (Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) 完了・3.0.11) |
 | CI / ローカルテスト | [SPEC_CICD.md](./SPEC_CICD.md) |
 | コード構成 | [architecture.md](./architecture.md) |
 
@@ -51,7 +52,8 @@
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift` |
 | コンテンツ形式 (JSON/RTF) | 100% | Markdown + JSON 整形 / RTF 表示 (`AboutContentView`) |
 | テスト・品質保証 | 85% | XCTest + Snapshot + Swift Testing (iOS: ViewInspector) |
-| **全体 (概算)** | **約91%** | コア、リーガル、Should コンテンツは完了 |
+| About ヘッダーパネル (Issue #18) | 100% | `AboutHeaderOptions` / classic / build / `primaryLink` |
+| **全体 (概算)** | **約96%** | Issue `#18` 実装込み (ホスト実証は任意) |
 
 **完了条件列:** 100% 到達用チェックリスト。`[x]` = 満たし済み、`[ ]` = 未。各§のアンカーが正本。実装％は当該§の `[x]` 数 ÷ 全項目数 (仕様行・[§ゲート外](#status-gates)を除く)。
 
@@ -67,10 +69,11 @@
 | Snapshot / UI テスト | 実装済み | 100 | [§Snapshot と UI](#status-quality-ui) (2/2) |
 | コンテンツ形式 (Should) | 実装済み | 100 | [§Should コンテンツ](#status-should-content) (4/4) |
 | 開発体験 (Preview 等) | 実装済み | 100 | [§開発体験](#status-devx) (1/1) |
+| About ヘッダーパネル (Issue #18) | 実装済み | 100 | [§About ヘッダー](#status-about-header) (10/10) |
 
 **Must 範囲 (上表の先頭5行):** **100%** — SPM ライブラリとしてホストに組込み可能な水準。
 
-**全体 (Should と Snapshot 含む):** チェックリスト **35項目中35項目** = **100%** (下表と [SPEC.md](./SPEC.md) §11に対応)。
+**全体 (Should、Snapshot、Issue `#18` 含む):** チェックリスト **45項目中45項目** = **100%** (下表)。
 
 ## 100% 完了条件チェックリスト `{@status:s100}`
 
@@ -125,14 +128,14 @@
 * [x] `npm run lint:docs` が `docs/**/*.md` を対象
 * [x] `npm run lint:swift` (SwiftLint / SwiftFormat / Periphery)
 
-### Snapshot と UI テスト {#status-quality-ui} `{@status:s-snapshot-ui}`
+### Snapshot と UI テスト {#status-quality-ui} `{@status:s-snapshot-ui-status-quality-ui}`
 
 正本: [SPEC.md](./SPEC.md) §11.0、`Package.swift` / `project.yml` (テスト依存のみ)
 
 * [x] SnapshotTesting 統合と About 画面のスナップショット (`AboutViewSnapshotTests`、`__Snapshots__/AboutViewSnapshotTests/*.png` 2件、macOS は `NSHostingView`。参照記録: `update-snapshots` / macos-26、比較: `test-macos`。ローカル `swift test` は `XCTSkip`)
 * [x] iPadOS `.sheet` の UI 検証 (`AboutSheetInspectorTests` + ViewInspector — `aboutSheet` は View 直下 `.sheet`、`inspect().color().sheet()`。`test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。ローカル macOS `swift test` では未実行)
 
-### Should コンテンツ形式 {#status-should-content} `{@status:s-should}`
+### Should コンテンツ形式 {#status-should-content} `{@status:s-should-status-should-content}`
 
 正本: [SPEC.md](./SPEC.md) §2.1.3 (Should)、[architecture.md](./architecture.md) (`AboutContentView`)
 
@@ -141,11 +144,26 @@
 * [x] RTF ドキュメント形式の表示 (`NSAttributedString` / `AttributedString`、本文は `AboutContentView`)
 * [x] 明示的 `AboutContentType` (`automatic` / `markdown` / `json` / `rtf`) — `AboutView` / `AboutWindow` / `aboutSheet` / `aboutPopover`
 
-### 開発体験 {#status-devx} `{@status:s-h015}`
+### 開発体験 {#status-devx} `{@status:s-status-devx}`
 
 * [x] Xcode Preview 用 `Preview Content` ディレクトリ (`AboutPreview.md` / `MarkdownPreview.md`、`PreviewContent.swift`、`project.yml` の `DEVELOPMENT_ASSET_PATHS`)
 
-## ゲート外・任意 `{@status:s-h016}`
+### About ヘッダーパネル (Issue #18) {#status-about-header} `{@status:s-about-issue-status-about-header}`
+
+正本: [about_header_panel_spec.md](./about_header_panel_spec.md)、Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18)
+
+* [x] 仕様確定 (`docs/about_header_panel_spec.md` 正本、`docs_mod/about_header_status.md` 移行済み)
+* [x] `AboutHeaderOptions` / `AboutHeaderStyle` と `AboutView` / `AboutWindow` / `aboutSheet` / `aboutPopover` への `headerOptions` 配線 (デフォルトは現行 `vertical` 互換、AHP-01 / AHP-08)
+* [x] ビルド番号表示 (`showBuildNumber`、`CFBundleVersion`、任意上書き) — フェーズ1
+* [x] `classicHorizontal` レイアウトと `iconSideLength` (vertical: 64 / classic: 128) — フェーズ2
+* [x] `primaryLink`、accessory 画像、`supportIdentifier` — フェーズ3 (AHP-05〜07)
+* [x] 下段 License / Ack / `primaryLink` の狭幅 **縦積み** フォールバック (§8 #1)
+* [x] iOS: iPad で横余裕時は classic 可、iPhone 等は `.vertical` (§8 #3)
+* [x] macOS: host が `AboutWindow` / `showAboutWindow` の初期サイズ等を調整可能 (§8 #4)
+* [x] アクセシビリティ: メタ行の VoiceOver 読み上げ、各コントロールのラベル (AHP-09、AHP-NF-02)
+* [x] テスト・受け入れ: 既存テスト、Snapshot が `headerOptions: .default` で緑、classic/build の Snapshot が1件以上、build 文字列ユニット (`AboutHeaderOptionsTests`)
+
+## ゲート外・任意 `{@status:s-h017}`
 
 **100% 分母外** (未完了でも `Must` 100% は維持)。
 
@@ -155,9 +173,9 @@
 | G2 | 見出しタグ `<a id>` の自動挿入 (v0.2) | [specs.md](./specs.md) `{@specs:heading-tags-anchors}` |
 | G3 | カスタムテーマ・アニメーション・外部翻訳 API | [SPEC.md](./SPEC.md) §11.3 |
 
-**補足:** スナップショット表の **約91%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー加重。本チェックリストは上記 `[x]` 比率で **100%** (`Should` コンテンツ形式含む)。
+**補足:** スナップショット表の **約96%** は [SPEC.md](./SPEC.md) §10.4のカテゴリー要約に Issue `#18` を反映。本チェックリストは上記 `[x]` 比率で **100%**。
 
-## 直近マイルストーン `{@status:s-h017}`
+## 直近マイルストーン `{@status:s-h018}`
 
 | 時期 | 内容 |
 | --- | --- |
@@ -172,6 +190,7 @@
 | 3.0.7 | `macos-26` スナップショット CI 修正、`project.yml` に ViewInspector / SnapshotTesting、`test-ios` 修復、`aboutSheet` の View 直下 `.sheet` 化 (ViewInspector) |
 | 3.0.9 | `aboutSheetNavigationChrome` 整理、ローカル `npm run lint:swift` (SwiftLint / SwiftFormat) 通過 |
 | 3.0.10 | Should コンテンツ JSON/RTF、`AboutContentType` / `contentType` API、`AboutContentFormatTests` |
+| 3.0.11 | Issue #18 `AboutHeaderOptions` / classic ヘッダー、ビルド番号、`primaryLink` |
 
 ## 進行中・短期 Backlog `{@status:s-backlog}`
 
@@ -181,10 +200,11 @@
 | --- | --- | --- |
 | SnapshotTesting / UI テスト | 済 | `AboutViewSnapshotTests` / `AboutSheetInspectorTests` |
 | JSON / RTF コンテンツ | 済 | v3.0.10 `AboutContentView` / `AboutContentType` |
+| About ヘッダーパネル (classic / build / primary link) | 済 | Issue `#18` — `AboutHeaderOptions`、classic Snapshot |
 | 見出しタグ: リンク用 `<a id>` 自動化 | 検討 | 規約 v0.2 ([specs.md](./specs.md) `{@specs:heading-tags-anchors}`) |
 | macOS 補助 `NSWindow` で License | Backlog | 初版は `.sheet` 統一 |
 
-## 検証・運用 `{@status:s-h019}`
+## 検証・運用 `{@status:s-h020}`
 
 | 手段 | コマンド / 場所 |
 | --- | --- |
@@ -193,7 +213,8 @@
 | ドキュメント lint | `npm run lint:docs` |
 | 見出しタグ付与 | `npm run docs:heading-tags` |
 
-## 関連 `{@status:s-h020}`
+## 関連 `{@status:s-h021}`
 
 * 仕様の入口: [specs.md](./specs.md)
 * Issue #17検討記録 (アーカイブ的): [docs_mod/status.md](../docs_mod/status.md)
+* Issue #18検討記録: [docs_mod/about_header_status.md](../docs_mod/about_header_status.md)

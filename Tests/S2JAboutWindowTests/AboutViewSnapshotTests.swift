@@ -82,6 +82,35 @@ final class AboutViewSnapshotTests: XCTestCase {
         #endif
     }
 
+    func testAboutViewClassicHorizontalSnapshot_light() throws {
+        #if os(macOS)
+            try skipSnapshotsUnlessCI()
+        #endif
+        let view = AboutView(
+            content: "# Classic\n\nHorizontal header regression.",
+            appName: "Classic App",
+            version: "1.0.23",
+            copyright: "© 2024 Classic Co.",
+            headerOptions: AboutHeaderOptions(
+                style: .classicHorizontal,
+                showBuildNumber: true,
+                buildNumberOverride: "4",
+                primaryLinkTitle: "Website",
+                primaryLinkURL: URL(string: "https://example.com")
+            )
+        )
+
+        #if os(macOS)
+            let hosting = snapshotHostingView(rootView: view, width: 480, height: 520)
+            assertSnapshot(of: hosting, as: Self.imageSnapshot)
+        #elseif os(iOS)
+            assertSnapshot(
+                of: view,
+                as: .image(layout: .fixed(width: 480, height: 520), precision: 0.98)
+            )
+        #endif
+    }
+
     func testMarkdownViewSnapshot_light() throws {
         #if os(macOS)
             try skipSnapshotsUnlessCI()

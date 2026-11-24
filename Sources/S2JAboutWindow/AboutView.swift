@@ -9,43 +9,40 @@ import SwiftUI
         import UIKit
     #endif
 
+    private struct FooterLayoutWidthKey: PreferenceKey {
+        static let defaultValue: CGFloat = 400
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+            value = nextValue()
+        }
+    }
+
     /**
      * AboutView
      * @return AboutView
      */
     @available(macOS 15.0, iOS 18.0, *)
     public struct AboutView: View {
-        /**
-         * AboutViewModel のインスタンス
-         */
         @StateObject private var viewModel: AboutViewModel
 
+        private let headerOptions: AboutHeaderOptions
         private let licenseResourceName: String?
         private let acknowledgementsResourceName: String?
         private let resourceBundle: Bundle
 
         @State private var presentedLegalKind: LegalTextKind?
+        @State private var footerUsesVerticalStack = false
 
-        /**
-         * コンストラクタ
-         * 表示するコンテンツ（Markdown、JSON、RTF）、アプリ名、バージョン、著作権情報を指定してAboutViewModelを初期化
-         * デフォルトでは、Bundle.main.displayName、Bundle.main.version、Bundle.main.copyrightを使用します。
-         *
-         * @param content: 表示するコンテンツ（Markdown、JSON、RTF）
-         * @param contentType: 本文の表示形式 (デフォルト `.automatic`)
-         * @param appName: アプリ名
-         * @param version: バージョン
-         * @param copyright: 著作権情報
-         * @param licenseResourceName: ホストバンドル内の License リソース名
-         * @param acknowledgementsResourceName: ホストバンドル内の Acknowledgements リソース名
-         * @param resourceBundle: リーガルテキストを含むバンドル (通常は `.main`)
-         */
+        #if os(iOS)
+            @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+        #endif
+
         public init(
             content: String,
             contentType: AboutContentType = .automatic,
             appName: String? = nil,
             version: String? = nil,
             copyright: String? = nil,
+            headerOptions: AboutHeaderOptions = .default,
             licenseResourceName: String? = nil,
             acknowledgementsResourceName: String? = nil,
             resourceBundle: Bundle = .main
@@ -57,36 +54,26 @@ import SwiftUI
                 version: version,
                 copyright: copyright
             ))
+            self.headerOptions = headerOptions
             self.licenseResourceName = licenseResourceName
             self.acknowledgementsResourceName = acknowledgementsResourceName
             self.resourceBundle = resourceBundle
         }
 
-        /**
-         * AboutView の本体
-         * アプリアイコン、アプリ情報、コンテンツ表示、スペーサーを配置します。
-         * デフォルトでは、400x500のサイズで、ウィンドウ背景色を使用します。
-         */
         public var body: some View {
             VStack(spacing: 20) {
-                // アプリアイコン
-                appIconView
+                headerSection
 
-                // アプリ情報
-                appInfoView
-
-                // コンテンツ表示
                 AboutContentView(content: viewModel.content, contentType: viewModel.contentType)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
 
-                legalDocumentButtons
+                actionButtonsFooter
 
-                // スペーサー
                 Spacer()
             }
             .padding()
-            .frame(minWidth: 400, minHeight: 500)
+            .frame(minWidth: minimumContentWidth, minHeight: 500)
             .background(backgroundColor)
             .sheet(item: $presentedLegalKind) { kind in
                 LegalTextDocumentSheet(
@@ -97,27 +84,100 @@ import SwiftUI
             }
         }
 
+        private var minimumContentWidth: CGFloat {
+            effectiveHeaderStyle == .classicHorizontal ? 480 : 400
+        }
+
+        private var effectiveHeaderStyle: AboutHeaderStyle {
+            #if os(iOS)
+                if headerOptions.style == .classicHorizontal, horizontalSizeClass == .compact {
+                    return .vertical
+                }
+            #endif
+            return headerOptions.style
+        }
+
         @ViewBuilder
-        private var legalDocumentButtons: some View {
-            if licenseResourceName != nil || acknowledgementsResourceName != nil {
-                HStack(spacing: 16) {
-                    if let licenseResourceName {
-                        Button(licenseButtonTitle) {
-                            presentedLegalKind = .license
+        private var headerSection: some View {
+            switch effectiveHeaderStyle {
+            case .vertical:
+                VStack(spacing: 20) {
+                    appIconView
+                    appMetaColumn(alignment: .center)
+                }
+            case .classicHorizontal:
+                HStack(alignment: .top, spacing: 16) {
+                    appIconView
+                    appMetaColumn(alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+
+        @ViewBuilder
+        private var actionButtonsFooter: some View {
+            if hasActionButtons {
+                Group {
+                    if footerUsesVerticalStack {
+                        VStack(spacing: 8) {
+                            actionButtons
                         }
-                        .accessibilityIdentifier("about.license.button")
-                        .disabled(licenseResourceName.isEmpty)
-                    }
-                    if let acknowledgementsResourceName {
-                        Button(acknowledgementsButtonTitle) {
-                            presentedLegalKind = .acknowledgements
+                    } else {
+                        HStack(spacing: 16) {
+                            actionButtons
                         }
-                        .accessibilityIdentifier("about.acknowledgements.button")
-                        .disabled(acknowledgementsResourceName.isEmpty)
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .background(
+                    GeometryReader { geometry in
+                        Color.clear
+                            .preference(key: FooterLayoutWidthKey.self, value: geometry.size.width)
+                    }
+                )
+                .onPreferenceChange(FooterLayoutWidthKey.self) { width in
+                    footerUsesVerticalStack = width < 420
+                }
             }
+        }
+
+        @ViewBuilder
+        private var actionButtons: some View {
+            if let primary = headerOptions.resolvedPrimaryLink {
+                Button(primary.title) {
+                    openURL(primary.url)
+                }
+                .accessibilityLabel(primary.title)
+                .accessibilityIdentifier("about.primaryLink.button")
+            }
+            if let licenseResourceName {
+                Button(licenseButtonTitle) {
+                    presentedLegalKind = .license
+                }
+                .accessibilityIdentifier("about.license.button")
+                .disabled(licenseResourceName.isEmpty)
+            }
+            if let acknowledgementsResourceName {
+                Button(acknowledgementsButtonTitle) {
+                    presentedLegalKind = .acknowledgements
+                }
+                .accessibilityIdentifier("about.acknowledgements.button")
+                .disabled(acknowledgementsResourceName.isEmpty)
+            }
+        }
+
+        private var hasActionButtons: Bool {
+            headerOptions.resolvedPrimaryLink != nil
+                || licenseResourceName != nil
+                || acknowledgementsResourceName != nil
+        }
+
+        private func openURL(_ url: URL) {
+            #if os(macOS)
+                NSWorkspace.shared.open(url)
+            #elseif os(iOS)
+                UIApplication.shared.open(url)
+            #endif
         }
 
         private func resourceName(for kind: LegalTextKind) -> String {
@@ -145,41 +205,35 @@ import SwiftUI
             )
         }
 
-        /**
-         * アプリアイコンを表示
-         * デフォルトでは、64x64のサイズで、角丸矩形で表示します。
-         */
-        @ViewBuilder
-        private var appIconView: some View {
-            #if os(macOS)
-                if let icon = NSApplication.shared.applicationIconImage {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .frame(width: 64, height: 64)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray)
-                        .frame(width: 64, height: 64)
-                }
-            #elseif os(iOS)
-                if let icon = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon-60x60") {
-                    Image(uiImage: icon)
-                        .resizable()
-                        .frame(width: 64, height: 64)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                } else {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.gray)
-                        .frame(width: 64, height: 64)
-                }
-            #endif
+        private var iconSideLength: CGFloat {
+            headerOptions.iconSideLength ?? (effectiveHeaderStyle == .classicHorizontal ? 128 : 64)
         }
 
-        /**
-         * 背景色を取得
-         * プラットフォームに応じて適切な背景色を返します。
-         */
+        private var appIconView: some View {
+            Group {
+                #if os(macOS)
+                    if let icon = NSApplication.shared.applicationIconImage {
+                        Image(nsImage: icon)
+                            .resizable()
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray)
+                    }
+                #elseif os(iOS)
+                    if let icon = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon-60x60") {
+                        Image(uiImage: icon)
+                            .resizable()
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.gray)
+                    }
+                #endif
+            }
+            .frame(width: iconSideLength, height: iconSideLength)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .accessibilityLabel(viewModel.appName)
+        }
+
         private var backgroundColor: Color {
             #if os(macOS)
                 Color(NSColor.windowBackgroundColor)
@@ -190,51 +244,114 @@ import SwiftUI
             #endif
         }
 
-        /**
-         * アプリ情報を表示
-         * アプリ名、バージョン、著作権情報を表示します。
-         * デフォルトでは、フォントサイズがtitle2、フォントウェイトがbold、グレーで表示します。
-         * バージョン、著作権情報は、サブヘッダーで表示します。
-         */
-        private var appInfoView: some View {
-            VStack(spacing: 8) {
+        private func appMetaColumn(alignment: HorizontalAlignment) -> some View {
+            VStack(alignment: alignment, spacing: 8) {
                 Text(viewModel.appName)
                     .font(.title2)
                     .fontWeight(.bold)
+                    .multilineTextAlignment(alignment == .center ? .center : .leading)
 
-                if let version = viewModel.version {
-                    Text("Version \(version)")
+                if let versionLine = versionDisplayLine {
+                    Text(versionLine)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(alignment == .center ? .center : .leading)
+                        .accessibilityLabel(versionLine)
                 }
+
+                accessoryImageView
 
                 if let copyright = viewModel.copyright {
                     Text(copyright)
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(alignment == .center ? .center : .leading)
+                        .accessibilityLabel(copyright)
                 }
+
+                if let identifier = headerOptions.supportIdentifier, !identifier.isEmpty {
+                    Text(supportIdentifierLine(identifier))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(alignment == .center ? .center : .leading)
+                        .accessibilityLabel(supportIdentifierLine(identifier))
+                }
+            }
+        }
+
+        private var versionDisplayLine: String? {
+            let versionLabel = NSLocalizedString(
+                "About.Version",
+                bundle: Bundle.resourceBundle,
+                comment: "Version prefix"
+            )
+            return AboutVersionDisplay.formattedLine(
+                marketingVersion: viewModel.version,
+                showBuildNumber: headerOptions.showBuildNumber,
+                buildNumber: viewModel.buildNumber,
+                buildNumberOverride: headerOptions.buildNumberOverride,
+                versionLabel: versionLabel
+            )
+        }
+
+        private func supportIdentifierLine(_ value: String) -> String {
+            let prefix = NSLocalizedString(
+                "About.SupportIdentifier.Prefix",
+                bundle: Bundle.resourceBundle,
+                comment: "Support identifier label"
+            )
+            return "\(prefix) \(value)"
+        }
+
+        @ViewBuilder
+        private var accessoryImageView: some View {
+            if let name = headerOptions.headerAccessoryImageName, !name.isEmpty {
+                #if os(macOS)
+                    if let image = headerOptions.accessoryBundle.image(forResource: name) {
+                        Image(nsImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 32)
+                            .accessibilityHidden(true)
+                    }
+                #elseif os(iOS)
+                    if let image = UIImage(named: name, in: headerOptions.accessoryBundle, compatibleWith: nil) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 32)
+                            .accessibilityHidden(true)
+                    }
+                #endif
             }
         }
     }
 
     #if DEBUG
-        /**
-         * AboutView_Previews
-         * @return AboutView_Previews
-         */
         @available(macOS 15.0, iOS 18.0, *)
         struct AboutView_Previews: PreviewProvider {
-            /**
-             * AboutViewのプレビュー
-             * デフォルトでは、# About This App、Sample App、1.0.0、© 2024 Sample Companyを表示します。
-             */
             static var previews: some View {
-                AboutView(
-                    content: PreviewContent.markdown(named: "AboutPreview"),
-                    appName: "Sample App",
-                    version: "1.0.0",
-                    copyright: "© 2024 Sample Company"
-                )
+                Group {
+                    AboutView(
+                        content: PreviewContent.markdown(named: "AboutPreview"),
+                        appName: "Sample App",
+                        version: "1.0.0",
+                        copyright: "© 2024 Sample Company"
+                    )
+                    AboutView(
+                        content: PreviewContent.markdown(named: "AboutPreview"),
+                        appName: "Classic Sample",
+                        version: "1.0.23",
+                        copyright: "© 2024 Sample Company",
+                        headerOptions: AboutHeaderOptions(
+                            style: .classicHorizontal,
+                            showBuildNumber: true,
+                            buildNumberOverride: "4",
+                            primaryLinkTitle: "GitHub Repository",
+                            primaryLinkURL: URL(string: "https://github.com/stein2nd/s2j-about-window")
+                        )
+                    )
+                }
             }
         }
     #endif

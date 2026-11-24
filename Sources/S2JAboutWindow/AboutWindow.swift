@@ -36,9 +36,11 @@ import SwiftUI
                 appName: String? = nil,
                 version: String? = nil,
                 copyright: String? = nil,
+                headerOptions: AboutHeaderOptions = .default,
                 licenseResourceName: String? = nil,
                 acknowledgementsResourceName: String? = nil,
-                resourceBundle: Bundle = .main
+                resourceBundle: Bundle = .main,
+                contentSize: CGSize? = nil
             ) {
                 #if os(macOS)
                     /*
@@ -54,6 +56,7 @@ import SwiftUI
                             appName: appName,
                             version: version,
                             copyright: copyright,
+                            headerOptions: headerOptions,
                             licenseResourceName: licenseResourceName,
                             acknowledgementsResourceName: acknowledgementsResourceName,
                             resourceBundle: resourceBundle
@@ -67,8 +70,15 @@ import SwiftUI
                      *
                      * @var window: NSWindow
                      */
+                    let defaultSize = contentSize ?? CGSize(
+                        width: headerOptions.style == .classicHorizontal ? 480 : 400,
+                        height: 500
+                    )
                     let window = NSWindow(
-                        contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+                        contentRect: NSRect(
+                            origin: .zero,
+                            size: NSSize(width: defaultSize.width, height: defaultSize.height)
+                        ),
                         styleMask: [.titled, .closable, .miniaturizable],
                         backing: .buffered,
                         defer: false

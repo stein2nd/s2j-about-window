@@ -1,4 +1,4 @@
-# S2J About Window - Issue #17 — 検討状況
+# S2J About Window - Issue `#17` 検討状況
 
 ## 概要 `{@docs_mod_status:s-h001}`
 
@@ -12,10 +12,10 @@
 
 | フェーズ | 内容 | 状態 |
 | --- | --- | --- |
-| 仕様ドラフト | `docs_mod/` で API・UI・エラー・テストを定義 | **完了** |
+| 仕様ドラフト | `docs_mod/` で API、UI、エラー、テストを定義 | **完了** |
 | `docs/` 移行 | `docs/legal_text_spec.md` に採用 | **完了** |
-| レビュー | 利用側 (s2j-cozy-brew 等)・COMMON_SPEC 整合 | 随時 |
-| 実装 | フェーズ1 → 2 | **完了** (ローカル `swift test` 済) |
+| レビュー | 利用側 (s2j-cozy-brew 等)、COMMON_SPEC 整合 | 随時 |
+| 実装 | フェーズ1→2 | **完了** (ローカル `swift test` 済) |
 
 ## 決定事項 `{@docs_mod_status:s-h003}`
 
@@ -23,13 +23,13 @@
 | --- | --- | --- |
 | 1 | **公開型名** | 表示 `LegalTextView`、状態 `LegalTextContent`、種別 `LegalTextKind`、I/O `LegalTextLoader` (`static` のみの `enum`)。Issue 上の `LicenseView` / ドラフトの `BundledLegalTextView` は採用しない。 |
 | 2 | **macOS の提示方法** | macOS / iOS とも **`.sheet` に統一**。補助 `NSWindow` は初版では採用せず **Backlog**。macOS はシートの `minWidth` / `minHeight` で長文向けに広めにする。 |
-| 3 | **Acknowledgements の表示** | **文書の役割 + 拡張子** で分岐。License は常にプレーン (等幅 `LegalTextView`)。Acknowledgements は `.md` ならシート内 `MarkdownView`、それ以外はプレーン。`MarkdownView` のサポート範囲外 (mermaid 等) は [README](../README.md) の Markdown 制限と [legal_text_spec.md](../docs/legal_text_spec.md) §6.1 に明記。 |
+| 3 | **Acknowledgements の表示** | **文書の役割 + 拡張子** で分岐。License は常にプレーン (等幅 `LegalTextView`)。Acknowledgements は `.md` ならシート内 `MarkdownView`、それ以外はプレーン。`MarkdownView` のサポート範囲外 (mermaid 等) は [README](../README.md) の Markdown 制限と [legal_text_spec.md](../docs/legal_text_spec.md) §6.1に明記。 |
 | 4 | **テスト枠** | 新規テストは **Swift Testing** (`LegalTextLoader` 等)。既存 `AboutViewTests` (XCTest) は変更しない。Snapshot (`AboutViewSnapshotTests`) は macOS `swift test` / `test-macos` のみ。iOS `aboutSheet` (ViewInspector、`aboutSheet` は View 直下 `.sheet` 実装) は `test-ios` / `project.yml` の `S2JAboutWindowTests-iOS`。`LegalTextView` / `NSWindow` の Snapshot は Backlog。XCTest 全面移行は **別 Issue**。 |
 
 ## `docs/` 移行チェックリスト `{@docs_mod_status:s-docs}`
 
 - [x] 未決事項が解消または「フェーズ あとで」と明記されている
-- [x] 受け入れ条件が Issue #17 と一致 ([legal_text_spec.md](../docs/legal_text_spec.md) §10)
+- [x] 受け入れ条件が Issue #17と一致 ([legal_text_spec.md](../docs/legal_text_spec.md) §10)
 - [x] [architecture.md](../docs/architecture.md) のファイル一覧を更新
 - [x] [specs.md](../docs/specs.md) にリンク追加
 - [x] [SPEC.md](../docs/SPEC.md) Backlog の該当行を更新

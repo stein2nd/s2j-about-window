@@ -5,6 +5,7 @@
 "About.NoDescription" = "No description available";
 "About.Copyright" = "Copyright";
 "About.Version" = "Version";
+"About.SupportIdentifier.Prefix" = "Identifier:";
 "About.License.Button" = "License…";
 "About.Acknowledgements.Button" = "Acknowledgements";
 "About.LegalText.Title.License" = "License";

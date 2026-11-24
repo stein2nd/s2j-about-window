@@ -7,7 +7,9 @@
 | トピック | ドキュメント |
 | --- | --- |
 | Issue [#17](https://github.com/stein2nd/s2j-about-window/issues/17) — License / Acknowledgements | [legal_text_spec.md](../docs/legal_text_spec.md) |
-| 決定事項・移行チェックリスト | [status.md](./status.md) |
+| Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) — About ヘッダーパネル (classic / build / primary link) | [about_header_panel_spec.md](../docs/about_header_panel_spec.md) |
+| #18検討状況 | [about_header_status.md](./about_header_status.md) |
+| #17決定事項・移行チェックリスト | [status.md](./status.md) |
 
 ## 準拠仕様 `{@docs_mod_specs:s-h002}`
 
