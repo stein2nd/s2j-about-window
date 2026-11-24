@@ -164,7 +164,7 @@
 * [x] テスト・受け入れ: 既存テスト、Snapshot が `headerOptions: .default` で緑、classic/build の Snapshot が1件以上、build 文字列ユニット (`AboutHeaderOptionsTests`)
 * [x] ホスト受け入れ: [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) で About 表示確認 (3.0.11+、2026-11-24)
 
-**Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18):** Close 済み (ライブラリ実装 3.0.11、ホスト実証上記)。
+**Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18):** Close 済み (ライブラリ実装 v3.0.11、ホスト実証上記)。
 
 ## ゲート外・任意 `{@status:s-h017}`
 
