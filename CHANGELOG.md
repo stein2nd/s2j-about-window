@@ -2,6 +2,11 @@
 
 ## unreleased
 
+### Fixed
+
+* `AboutViewSnapshotTests` 参照 PNG を **macos-26** で再記録 (CI `test-macos` 不一致)
+* `Package.swift` テストターゲットから `__Snapshots__` を `exclude` (SPM の unhandled 警告)
+
 ## 3.0.11 - 2026-11-24
 
 ### Added

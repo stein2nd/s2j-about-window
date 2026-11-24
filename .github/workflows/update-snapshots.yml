@@ -50,6 +50,7 @@ jobs:
           SNAPSHOT_TESTING_RECORD=all swift test --filter AboutViewSnapshotTests
           test -f Tests/S2JAboutWindowTests/__Snapshots__/AboutViewSnapshotTests/testAboutViewSnapshot_light.1.png
           test -f Tests/S2JAboutWindowTests/__Snapshots__/AboutViewSnapshotTests/testMarkdownViewSnapshot_light.1.png
+          test -f Tests/S2JAboutWindowTests/__Snapshots__/AboutViewSnapshotTests/testAboutViewClassicHorizontalSnapshot_light.1.png
 
       - name: Upload reference PNGs
         uses: actions/upload-artifact@v6
