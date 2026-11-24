@@ -33,7 +33,7 @@
 | 実装状況の詳細 | [SPEC.md](./SPEC.md) §10 (`{@spec:s10}`) |
 | Backlog | [SPEC.md](./SPEC.md) §11 (`{@spec:s11}`) |
 | バンドル License / Acknowledgements | [legal_text_spec.md](./legal_text_spec.md) (Issue [#17](https://github.com/stein2nd/s2j-about-window/issues/17) 完了) |
-| About ヘッダーパネル (classic / build / primary link) | [about_header_panel_spec.md](./about_header_panel_spec.md) (Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) 完了・3.0.11) |
+| About ヘッダーパネル (classic / build / primary link) | [about_header_panel_spec.md](./about_header_panel_spec.md) (Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) 完了・3.0.11、[**Cozy Brew**](https://github.com/stein2nd/s2j-cozy-brew) ホスト実証済み) |
 | CI / ローカルテスト | [SPEC_CICD.md](./SPEC_CICD.md) |
 | コード構成 | [architecture.md](./architecture.md) |
 
@@ -52,8 +52,8 @@
 | 開発体験 (Xcode Preview) | 100% | `Preview Content/`、`PreviewContent.swift` |
 | コンテンツ形式 (JSON/RTF) | 100% | Markdown + JSON 整形 / RTF 表示 (`AboutContentView`) |
 | テスト・品質保証 | 85% | XCTest + Snapshot + Swift Testing (iOS: ViewInspector) |
-| About ヘッダーパネル (Issue #18) | 100% | `AboutHeaderOptions` / classic / build / `primaryLink` |
-| **全体 (概算)** | **約96%** | Issue `#18` 実装込み (ホスト実証は任意) |
+| About ヘッダーパネル (Issue #18) | 100% | `AboutHeaderOptions` / classic / build / `primaryLink`、Cozy Brew 実証済み |
+| **全体 (概算)** | **約96%** | Issue `#18` 実装・ホスト受け入れ完了 |
 
 **完了条件列:** 100% 到達用チェックリスト。`[x]` = 満たし済み、`[ ]` = 未。各§のアンカーが正本。実装％は当該§の `[x]` 数 ÷ 全項目数 (仕様行・[§ゲート外](#status-gates)を除く)。
 
@@ -69,11 +69,11 @@
 | Snapshot / UI テスト | 実装済み | 100 | [§Snapshot と UI](#status-quality-ui) (2/2) |
 | コンテンツ形式 (Should) | 実装済み | 100 | [§Should コンテンツ](#status-should-content) (4/4) |
 | 開発体験 (Preview 等) | 実装済み | 100 | [§開発体験](#status-devx) (1/1) |
-| About ヘッダーパネル (Issue #18) | 実装済み | 100 | [§About ヘッダー](#status-about-header) (10/10) |
+| About ヘッダーパネル (Issue #18) | 実装済み | 100 | [§About ヘッダー](#status-about-header) (11/11) |
 
 **Must 範囲 (上表の先頭5行):** **100%** — SPM ライブラリとしてホストに組込み可能な水準。
 
-**全体 (Should、Snapshot、Issue `#18` 含む):** チェックリスト **45項目中45項目** = **100%** (下表)。
+**全体 (Should、Snapshot、Issue `#18` 含む):** チェックリスト **46項目中46項目** = **100%** (下表)。
 
 ## 100% 完了条件チェックリスト `{@status:s100}`
 
@@ -162,6 +162,9 @@
 * [x] macOS: host が `AboutWindow` / `showAboutWindow` の初期サイズ等を調整可能 (§8 #4)
 * [x] アクセシビリティ: メタ行の VoiceOver 読み上げ、各コントロールのラベル (AHP-09、AHP-NF-02)
 * [x] テスト・受け入れ: 既存テスト、Snapshot が `headerOptions: .default` で緑、classic/build の Snapshot が1件以上、build 文字列ユニット (`AboutHeaderOptionsTests`)
+* [x] ホスト受け入れ: [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) で About 表示確認 (3.0.11+、2026-11-24)
+
+**Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18):** Close 済み (ライブラリ実装 3.0.11、ホスト実証上記)。
 
 ## ゲート外・任意 `{@status:s-h017}`
 
@@ -200,7 +203,7 @@
 | --- | --- | --- |
 | SnapshotTesting / UI テスト | 済 | `AboutViewSnapshotTests` / `AboutSheetInspectorTests` |
 | JSON / RTF コンテンツ | 済 | v3.0.10 `AboutContentView` / `AboutContentType` |
-| About ヘッダーパネル (classic / build / primary link) | 済 | Issue `#18` — `AboutHeaderOptions`、classic Snapshot |
+| About ヘッダーパネル (classic / build / primary link) | 済 | Issue `#18` Close — Cozy Brew ホスト実証 |
 | 見出しタグ: リンク用 `<a id>` 自動化 | 検討 | 規約 v0.2 ([specs.md](./specs.md) `{@specs:heading-tags-anchors}`) |
 | macOS 補助 `NSWindow` で License | Backlog | 初版は `.sheet` 統一 |
 

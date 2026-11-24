@@ -2,6 +2,10 @@
 
 ## unreleased
 
+### Changed
+
+* docs — Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) を Close。`docs/status.md` / `about_header_panel_spec.md` に [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) ホスト受け入れを記録
+
 ## 3.0.14 - 2026-11-24
 
 ### Fixed
