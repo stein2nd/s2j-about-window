@@ -2,10 +2,18 @@
 
 ## unreleased
 
+## 3.0.12 - 2026-11-24
+
 ### Fixed
 
-* `AboutViewSnapshotTests` 参照 PNG を **macos-26** で再記録 (CI `test-macos` 不一致)
-* `Package.swift` テストターゲットから `__Snapshots__` を `exclude` (SPM の unhandled 警告)
+* CI `test-macos` — `AboutViewSnapshotTests` 3件の参照 PNG を **macos-26** (`Update Snapshots` ワークフロー) で再記録 (ローカル記録との描画差分を解消し、Codecov アップロードまで復旧)
+* `update-snapshots.yml` — `testAboutViewClassicHorizontalSnapshot_light.1.png` の生成確認を追加
+* `Package.swift` — テストターゲット `exclude: ["__Snapshots__"]` (SPM の unhandled 警告)
+
+### Changed
+
+* `README.md` — `Package.swift` 依存指定を `from: "3.0.12"`
+* `package.json` / `package-lock.json`: 3.0.12
 
 ## 3.0.11 - 2026-11-24
 
