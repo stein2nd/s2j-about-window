@@ -1,6 +1,6 @@
 # S2J About Window — About ヘッダーパネル強化
 
-Issue: [#18](https://github.com/stein2nd/s2j-about-window/issues/18) (**完了** — 実装 3.0.11、ホスト受け入れ [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) で確認済み)
+Issue: [#18](https://github.com/stein2nd/s2j-about-window/issues/18) (**完了** — 実装 v3.0.11、ホスト受け入れ [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) で確認済み)
 
 **きっかけ:** 利用側 [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) の About UX 改善検討。参照 UI は DigiDNA **[iMazing](https://imazing.com/ja/backup-iphone-ipad)** の About パネル (大アイコン左・メタ情報右・下段にアクション)。  
 **現状実装:** `AboutView` は縦積み、アイコン64pt、`Version {short}` のみ、本文 Markdown、License / Acknowledgements ボタン ([`AboutView.swift`](../Sources/S2JAboutWindow/AboutView.swift))。
