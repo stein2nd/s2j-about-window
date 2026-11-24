@@ -2,6 +2,19 @@
 
 ## unreleased
 
+## 3.0.14 - 2026-11-24
+
+### Fixed
+
+* CI `Swift Test` — `build-release` 独立ジョブを廃止し `test-macos` に `swift build -c release` を統合。1実行あたり `macos-26` を最大2台に抑え、ランナー未取得キャンセルを回避
+
+### Changed
+
+* `.github/workflows/swift-test.yml` — `concurrency` (`cancel-in-progress`) で同一 ref の連続 push を抑止
+* `docs/SPEC_CICD.md`: 2ジョブ構成とリリースビルド統合を反映
+* `README.md` — `Package.swift` 依存指定を `from: "3.0.14"`
+* `package.json` / `package-lock.json`: 3.0.14
+
 ## 3.0.13 - 2026-11-24
 
 ### Fixed

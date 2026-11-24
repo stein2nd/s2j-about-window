@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+concurrency:
+  group: swift-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-macos:
     runs-on: macos-26
@@ -66,6 +70,16 @@ jobs:
         files: .build/coverage/coverage.xml
         flags: macos
         name: macos-coverage
+
+    # Release build: same job (max 2 macos-26 runners per workflow run; no 3rd job).
+    - name: Build release configuration
+      run: swift build -c release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: s2j-about-window-build
+        path: .build/release/
 
   test-ios:
     runs-on: macos-26
@@ -543,63 +557,3 @@ jobs:
           flags: ios
           name: ios-coverage
           fail_ci_if_error: false
-
-  build-release:
-    runs-on: macos-26
-    needs: [test-macos, test-ios]
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-
-    - name: Setup Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '26.5'
-
-    - name: Force-select Xcode app (26.5 -> 26.4.1 -> 26.3)
-      run: |
-        set -euo pipefail
-        CANDIDATES=(
-          "/Applications/Xcode_26.5.app/Contents/Developer"
-          "/Applications/Xcode_26.4.1.app/Contents/Developer"
-          "/Applications/Xcode_26.4.app/Contents/Developer"
-          "/Applications/Xcode_26.3.app/Contents/Developer"
-          "/Applications/Xcode_26.3.0.app/Contents/Developer"
-          "/Applications/Xcode.app/Contents/Developer"
-        )
-        SELECTED=""
-        for p in "${CANDIDATES[@]}"; do
-          if [ -d "$p" ]; then
-            SELECTED="$p"
-            break
-          fi
-        done
-        if [ -n "$SELECTED" ]; then
-          echo "Selecting Xcode at: $SELECTED"
-          sudo xcode-select -s "$SELECTED"
-          echo "DEVELOPER_DIR=$SELECTED" >> $GITHUB_ENV
-        else
-          echo "No preferred Xcode app path found among candidates."
-          exit 1
-        fi
-
-    - name: Verify Swift toolchain
-      run: |
-        set -euo pipefail
-        xcodebuild -version
-        swift --version
-        if swift --version | grep -q 'Swift version 6.2'; then
-          echo "Error: Swift 6.3+ is required (swift-tools-version: 6.3)."
-          exit 1
-        fi
-
-    - name: Build Universal Binary
-      run: |
-        swift build -c release
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v6
-      with:
-        name: s2j-about-window-build
-        path: .build/release/

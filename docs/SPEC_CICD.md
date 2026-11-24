@@ -37,11 +37,14 @@
 
 ### 1.4. ジョブ構成 `{@spec_cicd:s1-4}`
 
-`swift-test.yml` は、以下の3つのジョブで構成されています。
+`swift-test.yml` は **2ジョブ** (各 `macos-26`、並列実行) で構成しています。組織の同時ランナー上限 (例: 2台) を超えないため、リリースビルドは独立ジョブにしません。
 
-1. **`test-macos`**: macOS 向けテスト実行
-2. **`test-ios`**: iOS/iPadOS 向けテスト実行
-3. **`build-release`**: リリースビルド生成
+1. **`test-macos`**: macOS 向けユニットテスト、Codecov、続けて `swift build -c release` とビルド成果物のアップロード
+2. **`test-ios`**: iOS/iPadOS 向けテスト (Xcode プロジェクト経由) と診断アーティファクト
+
+**ワークフロー全体が成功**したときが品質ゲートです (`test-macos` のリリースビルドは `test-ios` 完了を待たず実行されます)。
+
+**`concurrency`**: 同一 ref の Swift Test は `cancel-in-progress` で直列化し、push 連打時のランナー奪い合いを抑えます。
 
 **補助ワークフロー** (同一リポジトリ、手動トリガー):
 
@@ -53,9 +56,9 @@
 
 #### 2.1.1. 概要 `{@spec_cicd:s2-1-1}`
 
-* **目的**: macOS プラットフォーム向けのユニットテストを実行し、テスト・カバレッジを収集します。
+* **目的**: macOS 向けユニットテストとカバレッジに加え、SPM の release 構成ビルドをスモーク実行し、成果物をアーティファクト保存します。
 * **実行環境**: `macos-26`
-* **依存関係**: なし (独立実行が可能)
+* **依存関係**: なし (`test-ios` と並列)
 
 #### 2.1.2. 実行ステップ `{@spec_cicd:s2-1-2}`
 
@@ -78,10 +81,17 @@
      * `flags`: `macos`
      * `name`: `macos-coverage`
 
+5. **Build release configuration**
+   * `swift build -c release` を実行します (旧 `build-release` ジョブの内容)。
+
+6. **Upload build artifacts**
+   * `actions/upload-artifact@v6` で `.build/release/` を **`s2j-about-window-build`** として保存します。
+
 #### 2.1.3. 期待される結果 `{@spec_cicd:s2-1-3}`
 
 * macOS 向けユニットテスト: すべて成功します。
 * テスト・カバレッジ: Codecov に正常にアップロードされます。
+* Release 構成: SPM が `release` でビルドし、成果物がアーティファクトに保存されます。
 
 ### 2.2. `test-ios` ジョブ `{@spec_cicd:s2-2}`
 
@@ -251,35 +261,10 @@
 * **詳細なログ記録**: すべてのステップでログを記録し、アーティファクトとして保存します。
 * **診断情報の常時アップロード**: テストが失敗しても診断情報をアップロードし、問題の特定を容易にします。
 
-### 2.3. `build-release` ジョブ `{@spec_cicd:s2-3}`
+### 2.3. リリースビルド (`test-macos` に統合) `{@spec_cicd:s2-3}`
 
-#### 2.3.1. 概要 `{@spec_cicd:s2-3-1}`
-
-* **目的**: リリース用の Universal Binary をビルドし、ビルド成果物をアーティファクトとして保存します。
-* **実行環境**: `macos-26`
-* **依存関係**: `test-macos` および `test-ios` ジョブが成功した後に実行されます (`needs: [test-macos, test-ios]`)
-
-#### 2.3.2. 実行ステップ `{@spec_cicd:s2-3-2}`
-
-1. **Checkout**
-   * `actions/checkout@v5` を使用してリポジトリをチェック・アウトします。
-
-2. **Setup Xcode**
-   * `maxim-lobanov/setup-xcode@v1` を使用して Xcode をセットアップします。
-   * **Xcode バージョン**: `test-macos` ジョブと同様 (ワークフローで固定／フォールバック)
-
-3. **Build Universal Binary**
-   * `swift build -c release` を実行して、リリース用の Universal Binary をビルドします。
-
-4. **Upload build artifacts**
-   * `actions/upload-artifact@v6` を使用して、ビルド成果物をアーティファクトとしてアップロードします。
-   * **アーティファクト名**: `s2j-about-window-build`
-   * **パス**: `.build/release/`
-
-#### 2.3.3. 期待される結果 `{@spec_cicd:s2-3-3}`
-
-* リリース用: Universal Binary が正常にビルドされます。
-* ビルド成果物: アーティファクトとして保存されます。
+旧 **`build-release`** 独立ジョブは廃止しました (3台目の `macos-26` 待ちで失敗しやすかったため)。  
+リリース用 `swift build -c release` とアーティファクト `s2j-about-window-build` は **`test-macos` のステップ5–6** を参照してください (§2.1.2)。
 
 ### 2.4. `lint-docs` ジョブ (`docs-lint.yml`) `{@spec_cicd:s2-4}`
 
@@ -478,13 +463,13 @@
 
 * **GitHub Actions ワークフロー**:
   * `swift-test.yml`: Swift Package のユニットテストおよび UI スナップショット・テストの自動実行 (✅100% 実装完了・テスト成功)
-  * `test-macos` ジョブ: macOS 向けテスト実行とカバレッジ収集
+  * `test-macos` ジョブ: macOS 向けテスト、カバレッジ、`swift build -c release` とビルドアーティファクト (✅2ジョブ構成)
   * `test-ios` ジョブ: iOS/iPadOS 向けテスト実行とカバレッジ収集
     * ランタイム・バージョンの抽出と SDK の自動的な検出機能 (✅実装完了)
     * デスティネーション構築の改善 (OS バージョンを指定せず、UDID のみを使用) (✅実装完了)
     * テスト実行の優先順位の最適化 (SDK を指定せずに実行を優先) (✅実装完了)
     * 診断情報の常時アップロード (`if: always()` を追加) (✅実装完了)
-  * `build-release` ジョブ: リリースビルド生成
+  * `concurrency`: 同一 ref の Swift Test 直列化 (`cancel-in-progress`)
   * `docs-lint.yml`: Markdown ドキュメントの表記揺れ検出 (✅100% 実装完了・テスト成功)
     * `lint-docs` ジョブ: ルート `npm ci` + `npm run lint:docs` (`@s2j/docs-linter`)
 * **ローカルテスト・スクリプト**:
@@ -510,7 +495,7 @@
 
 ### 8.2. 中期での改善予定 (3-6ヵ月) `{@spec_cicd:s8-2}`
 
-* **並列実行の最適化**: `test-macos` と `test-ios` ジョブを並列実行し、CI 時間を短縮します。
+* ~~**並列実行の最適化**~~: `test-macos` / `test-ios` の2ジョブ並列は実装済み (§1.4)。リリースビルドは `test-macos` に統合済み。
 * **キャッシュの活用**: Swift Package の依存関係をキャッシュし、ビルド時間を短縮します。
 
 ---
@@ -527,12 +512,15 @@ on:
     branches: [ main, develop ]
 ```
 
-### A.2. ジョブ依存関係 `{@spec_cicd:s-a-2}`
+### A.2. 同時実行の制御 `{@spec_cicd:s-a-2}`
 
 ```yaml
-build-release:
-  needs: [test-macos, test-ios]
+concurrency:
+  group: swift-test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 ```
+
+`test-macos` と `test-ios` は **依存関係なし** で並列。リリースビルドは `test-macos` 内のステップ (§2.1.2)。
 
 ### A.3. 環境変数 `{@spec_cicd:s-a-3}`
 
