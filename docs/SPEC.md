@@ -327,6 +327,7 @@
     * 配布の正本は **SPM** (`Package.swift`)。`project.yml` は Canvas、`ViewInspector` / スナップショット、`SampleApp` 用で、**ホストアプリへの組込みを想定しない**。
     * ローカル、CI のデフォルトは **シミュレーター/My Mac** でのビルド・テスト。`project.yml` に `DEVELOPMENT_TEAM` は書かない ([s2j-source-list](https://github.com/stein2nd/s2j-source-list) の `project.yml` と同型)。
     * iOS フレームワーク、iOS テストは `CODE_SIGNING_ALLOWED: NO` (実機配布、Archive 向けではない)。
+    * `PRODUCT_BUNDLE_IDENTIFIER` はプラットフォーム別 (`…-macOS` / `…-iOS`、テストも同様)。同一 ID を macOS、iOS で共有すると、Xcode の Signing タブが **macOS** 側に寄って表示されることがある (開発用 `.xcodeproj` のみ。SPM 製品の Bundle ID には影響しない)。
     * macOS ターゲットも Team 未設定のため、Xcode Signing は **Don't Code Sign** に見えるのが正常。CI、`npm run lint:build` は `CODE_SIGNING_ALLOWED=NO` でビルド ([SPEC_CICD.md](./SPEC_CICD.md))。
     * `SampleApp` は `CODE_SIGN_STYLE: Automatic` のみ (Team なし)。macOS 上の手動確認用。**実機インストール・署名付き Archive はホストアプリ側** の責務。
 * `AboutWindow.swift` : macOS 向け NSWindow 管理、showAboutWindow/closeWindow API、NSWindowDelegate 実装 (✅100% 実装完了)

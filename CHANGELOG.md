@@ -2,6 +2,20 @@
 
 ## unreleased
 
+## 3.0.13 - 2026-11-24
+
+### Fixed
+
+* `project.yml` — macOS / iOS で同一だった `PRODUCT_BUNDLE_IDENTIFIER` をプラットフォーム別 (`…-macOS` / `…-iOS`) に分離。Xcode で iOS ターゲットの Signing が **macOS** と表示される問題を解消 (`s2j-source-list` と同型)
+
+### Changed
+
+* docs — 開発用 XcodeGen プロジェクトの **シミュレータ／署名なし** 方針を `SPEC.md` §4.3 / `architecture.md` / `SPEC_CICD.md` に明記 (iOS `CODE_SIGNING_ALLOWED: NO` の記述を実装に同期)
+* `docs/SPEC.md` §4.3: 開発用 `.xcodeproj` の Bundle ID はプラットフォーム別である旨を追記
+* `project.yml` — iOS フレームワーク／テストに `CODE_SIGN_IDENTITY: ""`、`DEFINES_MODULE` / バージョン項目を追加 (`xcodegen generate` 再実行が必要)
+* `README.md` — `Package.swift` 依存指定を `from: "3.0.13"`
+* `package.json` / `package-lock.json`: 3.0.13
+
 ## 3.0.12 - 2026-11-24
 
 ### Fixed
