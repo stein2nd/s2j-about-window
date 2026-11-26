@@ -1,6 +1,6 @@
 # S2J About Window
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/)
 [![Xcode](https://img.shields.io/badge/Xcode-26.5-blue?logo=xcode&logoColor=white)](https://developer.apple.com/xcode/)
 [![Swift](https://img.shields.io/badge/Swift-6.3-blue?logo=Swift&logoColor=white)](https://www.swift.org)
 [![macOS](https://img.shields.io/badge/macOS-15.0+-blue?logo=apple&logoColor=white)](https://www.apple.com/macos/)
@@ -74,7 +74,7 @@ Add the following to your `Package.swift` file.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.14")
+    .package(url: "https://github.com/stein2nd/s2j-about-window.git", from: "3.0.15")
 ]
 ```
 

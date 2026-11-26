@@ -312,6 +312,8 @@
 
 * `Package.swift` : Swift Package 定義、Textual 依存、最小 OS macOS v15 / iOS v18、リソース設定。テストのみ `swift-snapshot-testing` / ViewInspector (✅100% 実装完了)
 * `project.yml` : XcodeGen 設定ファイル、macOS/iOS ターゲット定義、プラットフォーム専用スキーム定義 (✅100% 実装完了)
+  * **リソース**: ターゲット直下の `resources:` は使わず、`sources` で `buildPhase: resources` を指定 (XcodeGen v2.49+)。`SampleApp` の `SampleResources` 同梱を含む。
+  * **iOS 実行先**: スキーム `S2JAboutWindow-iOS` の実行先は Xcode で **iOS Simulator** を手動選択。CI、`scripts/test-local.sh` は [SPEC_CICD.md](./SPEC_CICD.md) の `xcodebuild -destination`。
   * **開発アセット**: `S2JAboutWindow-macOS` / `iOS` に `DEVELOPMENT_ASSET_PATHS: "Preview Content"` (Canvas 専用、リリースバイナリには含めない)。
   * **テスト用 SPM** (ライブラリ製品には非同梱): `SnapshotTesting` / `ViewInspector`。`Package.swift` の `S2JAboutWindowTests` と同系統のバージョン要件。
   * **ターゲット構成**:

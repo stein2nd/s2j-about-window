@@ -31,8 +31,9 @@ targets:
       - path: Sources/S2JAboutWindow
         excludes:
           - "**/*.md"
-    resources:
+          - "Resources/**"
       - path: Sources/S2JAboutWindow/Resources
+        buildPhase: resources
     dependencies:
       - package: Textual
         product: Textual
@@ -64,8 +65,9 @@ targets:
       - path: Sources/S2JAboutWindow
         excludes:
           - "**/*.md"
-    resources:
+          - "Resources/**"
       - path: Sources/S2JAboutWindow/Resources
+        buildPhase: resources
     dependencies:
       - package: Textual
         product: Textual
@@ -99,8 +101,11 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: Tests/S2JAboutWindowTests
-    resources:
+        excludes:
+          - Resources/**
+          - "**/__Snapshots__/**"
       - path: Tests/S2JAboutWindowTests/Resources
+        buildPhase: resources
     dependencies:
       - target: S2JAboutWindow-macOS
       - package: SnapshotTesting
@@ -131,9 +136,10 @@ targets:
       - path: Tests/S2JAboutWindowTests
         excludes:
           - AboutViewSnapshotTests.swift
+          - Resources/**
           - "**/__Snapshots__/**"
-    resources:
       - path: Tests/S2JAboutWindowTests/Resources
+        buildPhase: resources
     dependencies:
       - target: S2JAboutWindow-iOS
       - package: ViewInspector
@@ -165,8 +171,8 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: SampleApp.swift
-    resources:
       - path: SampleResources
+        buildPhase: resources
     settings:
       base:
         PRODUCT_NAME: SampleApp
@@ -218,11 +224,7 @@ schemes:
     test:
       targets:
         - S2JAboutWindowTests-iOS
-      destination:
-        platform: iOS Simulator
     run:
       config: Debug
-      destination:
-        platform: iOS Simulator
     archive:
       config: Release

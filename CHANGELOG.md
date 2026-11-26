@@ -2,9 +2,19 @@
 
 ## unreleased
 
+## 3.0.15 - 2026-11-26
+
+### Fixed
+
+* `project.yml` — リソースを `sources` + `buildPhase: resources` に移行し、無効だったターゲット `resources:` を削除 (XcodeGen v2.49の Unknown key 警告解消。`SampleApp` に `SampleResources` が同梱されるよう修正)
+
 ### Changed
 
-* docs — Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) を Close。`docs/status.md` / `about_header_panel_spec.md` に [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) ホスト受け入れを記録
+* `docs/SPEC.md` §4.3: XcodeGen リソース記述と iOS スキーム実行先の運用を明記
+* Issue [#18](https://github.com/stein2nd/s2j-about-window/issues/18) — GitHub 上 Close (About ヘッダーパネル: classic / build / `primaryLink`。実装 v3.0.11)
+* docs — [s2j-cozy-brew](https://github.com/stein2nd/s2j-cozy-brew) でのホスト表示確認を `docs/status.md` (受け入れ `[x]`、46項) と `about_header_panel_spec.md` に記録
+* `README.md` — `Package.swift` 依存指定を `from: "3.0.15"`
+* `package.json` / `package-lock.json`: 3.0.15
 
 ## 3.0.14 - 2026-11-24
 
